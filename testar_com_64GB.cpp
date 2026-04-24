@@ -81,24 +81,35 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
     FBTConfig config;
     
     // STRICT FIX: OpenFHE's evaluation tree order must be 1, 2, or 3.
-    config.order = 3; 
+    config.order = 1; 
     config.scaleTHI = 32;
-    config.PInput = BigInteger(4096); 
+    config.PInput = BigInteger(16); 
     config.POutput = BigInteger(16);
-    config.Q = BigInteger(1) << 48;
+    config.Q = BigInteger(1) << 40;
     config.Bigq = BigInteger(1) << 40;
     
-    config.numSlotsCKKS = 1024;
+    config.numSlotsCKKS = 1 << 10;
 
-    auto funcStep = [](int64_t x) -> int64_t {
-        return (x < 2048) ? 1 : 0; 
+    
+    std::function<int64_t(int64_t)> funcStep = [](int64_t x) -> int64_t {
+        // return (x < 2048) ? 1 : 0; 
+        // if (x < 16) { return -1; } else if (x == 2048) { return 0; } else return 1; 
+        // if (x < 0) { return -1; } else if (x == 0) { return 0; } else return 1; 
+        // return x;
+        // return -1 * x;
+        // int64_t y = x + 8;
+        // if (y < 8) { return -1 * 1; }
+        // if (y == 8) { return 0; }
+        // return 1; 
+        return std::tanh(x + 7);
     };
 
     config.coeffcomp = GetHermiteTrigCoefficients(funcStep, config.PInput.ConvertToInt(), config.order, config.scaleTHI);
+    std::cerr << "Hermite: " << config.coeffcomp << std::endl;
 
     // Standard cryptographic CKKS parameters to prevent modulus mismatch/noise overflow
-    uint32_t dcrtBits = 50;
-    uint32_t firstMod = 60;
+    uint32_t dcrtBits = config.Bigq.GetMSB() - 1;
+    uint32_t firstMod = config.Bigq.GetMSB() - 1;
     
     // Balanced Baby-Step Giant-Step tree budget compatible with order=3
     std::vector<uint32_t> lvlb = {3, 3}; 
@@ -108,7 +119,9 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
     parameters.SetSecretKeyDist(secretKeyDist);
     
     // OpenFHE will now dynamically choose a massive, secure Ring Dimension (e.g., 32768 or 65536)
-    parameters.SetSecurityLevel(HEStd_128_classic); 
+    // parameters.SetSecurityLevel(HEStd_128_classic); 
+    parameters.SetSecurityLevel(HEStd_NotSet); 
+    parameters.SetRingDim(1 << 11); 
     parameters.SetScalingModSize(dcrtBits);
     parameters.SetScalingTechnique(FIXEDMANUAL);
     parameters.SetFirstModSize(firstMod);
@@ -117,9 +130,10 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
 
     // Calculate exact depth required by FBT
     uint32_t depth = FHECKKSRNS::GetFBTDepth(lvlb, config.coeffcomp, config.PInput, config.order, secretKeyDist);
+    std::cout << "FBTDepth: " << depth << std::endl;
     
     // Request exact depth needed for the entire network: 2 (Layer 1) + FBT Depth + 2 (Layer 2)
-    parameters.SetMultiplicativeDepth(depth + 4);
+    parameters.SetMultiplicativeDepth(depth + 18);
 
     config.cc = GenCryptoContext(parameters);
     config.cc->Enable(PKE);
@@ -130,8 +144,7 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
 
     std::cout << "Generating keys (this will safely consume significant RAM)..." << std::endl;
     config.keyPair = config.cc->KeyGen();
-    config.cc->EvalMultKeyGen(config.keyPair.secretKey);
-    config.cc->EvalSumKeyGen(config.keyPair.secretKey);
+    std::cout << "After KeyGen" << std::endl;
 
     config.cc->EvalFBTSetup(
         config.coeffcomp, 
@@ -142,13 +155,15 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
         config.keyPair.publicKey, 
         {0, 0},           
         lvlb,             
-        config.scaleTHI, 
+        18, 
         0, 
         config.order
     );
 
     std::cout << "Generating FBT Evaluation Keys..." << std::endl;
     config.cc->EvalBootstrapKeyGen(config.keyPair.secretKey, config.numSlotsCKKS);
+    config.cc->EvalMultKeyGen(config.keyPair.secretKey);
+    config.cc->EvalSumKeyGen(config.keyPair.secretKey);
     std::cout << "FBT Environment Setup Complete." << std::endl;
 
     return config;
@@ -174,7 +189,8 @@ Ciphertext<DCRTPoly> compute_linear_layer(
         // Multiplication + Rescale consumes 1 multiplicative level
         auto ct_mult = config.cc->EvalMult(ct_input, pt_weights);
         auto ct_sum = config.cc->EvalSum(ct_mult, config.numSlotsCKKS); 
-        auto ct_rescaled = config.cc->Rescale(ct_sum);
+        config.cc->ModReduceInPlace(ct_sum);
+        auto ct_rescaled = ct_sum;
         
         std::vector<double> mask(config.numSlotsCKKS, 0.0);
         mask[i] = 1.0; 
@@ -182,7 +198,8 @@ Ciphertext<DCRTPoly> compute_linear_layer(
         
         // Masking + Rescale consumes 1 multiplicative level
         auto ct_masked = config.cc->EvalMult(ct_rescaled, pt_mask);
-        auto ct_neuron = config.cc->Rescale(ct_masked);
+        config.cc->ModReduceInPlace(ct_masked);
+        auto ct_neuron = ct_masked;
         
         std::vector<double> b_vec(config.numSlotsCKKS, 0.0);
         b_vec[i] = static_cast<double>(b[i]);
@@ -206,12 +223,33 @@ Ciphertext<DCRTPoly> apply_sign_activation_fbt(Ciphertext<DCRTPoly> ct_input, FB
     // Layer 1 consumes exactly 2 levels.
     // FBT consumes `depth` levels. 
     // Therefore, we tell EvalFBT to leave us with exactly 2 excess levels for Layer 2.
-    uint32_t excess_levels = 2; 
+    uint32_t excess_levels = 0; 
 
-    return config.cc->EvalFBT(
-        ct_input, config.coeffcomp, config.PInput.GetMSB() - 1, 
-        config.Bigq, config.scaleTHI, excess_levels, config.order
+    auto ep = SchemeletRLWEMP::GetElementParams(config.keyPair.secretKey, 37);
+    std::vector<int64_t> x = {
+        (config.PInput.ConvertToInt<int64_t>() / 2), (config.PInput.ConvertToInt<int64_t>() / 2) + 1, 0, 3, 16, 33, 64,
+        (config.PInput.ConvertToInt<int64_t>() - 1)};
+    x = Fill<int64_t>(x, config.numSlotsCKKS);
+    auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(x, BigInteger(1) << 60, config.PInput, config.keyPair.secretKey, ep);
+    SchemeletRLWEMP::ModSwitch(ctxtBFV, config.Q, BigInteger(1) << 60);
+    auto ct_image = SchemeletRLWEMP::ConvertRLWEToCKKS(*(config.cc), ctxtBFV, config.keyPair.publicKey, config.Bigq, config.numSlotsCKKS, 37);
+
+
+    auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_image, config.Q);
+    auto computed = SchemeletRLWEMP::DecryptCoeff(polys, config.Q, config.POutput, config.keyPair.secretKey, ep, config.numSlotsCKKS, config.numSlotsCKKS);
+    std::cout << "Before FBT: " << computed << std::endl;
+
+    Ciphertext<DCRTPoly> r = config.cc->EvalFBT(
+        ct_image, config.coeffcomp, config.PInput.GetMSB() - 1, 
+        ep->GetModulus(), config.scaleTHI, excess_levels, config.order
     );
+
+    auto polys1 = SchemeletRLWEMP::ConvertCKKSToRLWE(r, config.Q);
+    auto computed1 = SchemeletRLWEMP::DecryptCoeff(polys1, config.Q, config.POutput, config.keyPair.secretKey, ep, config.numSlotsCKKS, config.numSlotsCKKS);
+
+    // std::cout << computed[0] << std::endl;
+    std::cout << "After FBT: " << computed1 << std::endl;
+    return r;
 }
 
 // ====================================================================
@@ -243,16 +281,25 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::vector<double> real_image(784, 0.0);
+    std::vector<int64_t> real_image(784, 0);
     for(int i = 0; i < 784; ++i) {
-        double pixel = img_data[i] / 255.0; 
+        int64_t pixel = img_data[i]; 
         // Bipolar data representation
-        real_image[i] = (pixel > 0.5) ? 1.0 : -1.0; 
+        real_image[i] = (pixel > (int64_t)((255 / 2) + 0.5)) ? 1 : -1; 
     }
     stbi_image_free(img_data);
 
-    Plaintext pt_image = config.cc->MakeCKKSPackedPlaintext(real_image);
-    auto ct_image = config.cc->Encrypt(config.keyPair.publicKey, pt_image);
+    std::cout << "After Image Encode" << std::endl;
+
+    auto ep = SchemeletRLWEMP::GetElementParams(config.keyPair.secretKey, 36);
+    std::cout << "After EP" << std::endl;
+    auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(real_image, BigInteger(1) << 60, config.PInput, config.keyPair.secretKey, ep);
+    SchemeletRLWEMP::ModSwitch(ctxtBFV, config.Q, BigInteger(1) << 60);
+
+    auto ct_image = SchemeletRLWEMP::ConvertRLWEToCKKS(*(config.cc), ctxtBFV, config.keyPair.publicKey, config.Bigq, config.numSlotsCKKS, 36);
+
+    // Plaintext pt_image = config.cc->MakeCKKSPackedPlaintext(real_image);
+    // auto ct_image = config.cc->Encrypt(config.keyPair.publicKey, pt_image);
 
     std::cout << "Evaluating Layer 1..." << std::endl;
     auto ct_hidden_pre_act = compute_linear_layer(ct_image, W1, b1, config, 30);
@@ -263,11 +310,14 @@ int main(int argc, char* argv[]) {
     auto ct_scores = compute_linear_layer(ct_hidden_post_act, W2, b2, config, 10);
 
     std::cout << "Decrypting..." << std::endl;
-    Plaintext pt_result;
-    config.cc->Decrypt(config.keyPair.secretKey, ct_scores, &pt_result);
-    
-    pt_result->SetLength(10);
-    auto computed = pt_result->GetRealPackedValue();
+    auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_scores, config.Q);
+    auto computed = SchemeletRLWEMP::DecryptCoeff(polys, config.Q, config.POutput, config.keyPair.secretKey, ep, config.numSlotsCKKS, config.numSlotsCKKS);
+
+    // Plaintext pt_result;
+    // config.cc->Decrypt(config.keyPair.secretKey, ct_scores, &pt_result);
+    // 
+    // pt_result->SetLength(10);
+    // auto computed = pt_result->GetRealPackedValue();
 
     std::cout << "\n--- Final Class Scores ---" << std::endl;
     int predicted_digit = 0;

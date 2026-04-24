@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/horn/Downloads/dnn_crypto/main.cpp" "CMakeFiles/dinn_inference.dir/main.cpp.o" "gcc" "CMakeFiles/dinn_inference.dir/main.cpp.o.d"
+  "/home/zinho/git/DNN_FHE/testar_com_64GB.cpp" "CMakeFiles/dinn_inference.dir/testar_com_64GB.cpp.o" "gcc" "CMakeFiles/dinn_inference.dir/testar_com_64GB.cpp.o.d"
   "" "dinn_inference" "gcc" "CMakeFiles/dinn_inference.dir/link.d"
   )
 

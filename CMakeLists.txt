@@ -18,7 +18,7 @@ include_directories(${OpenFHE_INCLUDE}/schemelet)
 include_directories(${OpenFHE_INCLUDE}/third-party/include)
 
 # Create the executable
-add_executable(dinn_inference main.cpp)
+add_executable(dinn_inference testar_com_64GB.cpp)
 
 # Link OpenFHE libraries
 target_link_libraries(dinn_inference ${OpenFHE_LIBRARIES})

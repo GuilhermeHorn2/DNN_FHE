@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/dinn_inference.dir/link.d"
-  "CMakeFiles/dinn_inference.dir/main.cpp.o"
-  "CMakeFiles/dinn_inference.dir/main.cpp.o.d"
+  "CMakeFiles/dinn_inference.dir/testar_com_64GB.cpp.o"
+  "CMakeFiles/dinn_inference.dir/testar_com_64GB.cpp.o.d"
   "dinn_inference"
   "dinn_inference.pdb"
 )
