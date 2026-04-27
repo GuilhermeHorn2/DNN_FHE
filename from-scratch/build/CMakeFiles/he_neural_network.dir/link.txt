@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/he_neural_network.dir/link.d CMakeFiles/he_neural_network.dir/he_neural_network.cpp.o -o he_neural_network  -Wl,-rpath,/usr/local/lib /usr/local/lib/libOPENFHEpke.so.1.5.0 /usr/local/lib/libOPENFHEbinfhe.so.1.5.0 /usr/local/lib/libOPENFHEcore.so.1.5.0 -fopenmp -ldl
