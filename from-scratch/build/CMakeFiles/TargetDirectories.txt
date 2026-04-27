@@ -1,0 +1,3 @@
+/home/zinho/git/he-relu-nn/build/CMakeFiles/he_neural_network.dir
+/home/zinho/git/he-relu-nn/build/CMakeFiles/edit_cache.dir
+/home/zinho/git/he-relu-nn/build/CMakeFiles/rebuild_cache.dir
