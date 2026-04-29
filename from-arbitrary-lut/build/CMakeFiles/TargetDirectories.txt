@@ -1,0 +1,3 @@
+/home/zinho/git/DNN_FHE/from-arbitrary-lut/build/CMakeFiles/main.dir
+/home/zinho/git/DNN_FHE/from-arbitrary-lut/build/CMakeFiles/edit_cache.dir
+/home/zinho/git/DNN_FHE/from-arbitrary-lut/build/CMakeFiles/rebuild_cache.dir
