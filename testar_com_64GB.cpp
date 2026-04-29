@@ -81,7 +81,7 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
     FBTConfig config;
     
     // STRICT FIX: OpenFHE's evaluation tree order must be 1, 2, or 3.
-    config.order = 1; 
+    config.order = 1;
     config.scaleTHI = 32;
     config.PInput = BigInteger(16); 
     config.POutput = BigInteger(16);
@@ -95,13 +95,33 @@ FBTConfig setup_fbt_environment(uint32_t num_neurons) {
         // return (x < 2048) ? 1 : 0; 
         // if (x < 16) { return -1; } else if (x == 2048) { return 0; } else return 1; 
         // if (x < 0) { return -1; } else if (x == 0) { return 0; } else return 1; 
-        // return x;
-        // return -1 * x;
+        // return (x % 16);
+        // if (x % 16 < 0 % 16) { return (-1 * x) % 16; } return x + 1% 16;
         // int64_t y = x + 8;
         // if (y < 8) { return -1 * 1; }
         // if (y == 8) { return 0; }
         // return 1; 
-        return std::tanh(x + 7);
+        // return std::tanh(8 * x);
+        // double y = std::tanh(100 * x);
+        // std::cout << "y: " << y << std::endl;
+        // if (y < 0.0) { y = -1; }
+        // if (y > 0.0) { y = 1; }
+        // return y;
+        // double y = std::tanh(x);
+        // return static_cast<int>(y * 10);
+        // x -= 7;
+        // std::cout << "(x > 0) " << (x > 0) << std::endl;
+        // std::cout << "(x < 0) " << (x < 0) << std::endl;
+        // std::cout << "x " << x << std::endl;
+        if (x == 0) { return 0; }
+        if (x < 0) { return -1; } 
+        if (x > 0) { return 1; }
+        return 0;
+        // return std::tanh(8 * x);
+        // std::cout << "(x > 0) " << (x > 0) << std::endl;
+        // std::cout << "(x < 0) " << (x < 0) << std::endl;
+        // std::cout << "(x > 0) - (x < 0) " << (x > 0) - (x < 0) << std::endl;
+        // return (x > 0) - (x < 0);
     };
 
     config.coeffcomp = GetHermiteTrigCoefficients(funcStep, config.PInput.ConvertToInt(), config.order, config.scaleTHI);
@@ -225,22 +245,33 @@ Ciphertext<DCRTPoly> apply_sign_activation_fbt(Ciphertext<DCRTPoly> ct_input, FB
     // Therefore, we tell EvalFBT to leave us with exactly 2 excess levels for Layer 2.
     uint32_t excess_levels = 0; 
 
-    auto ep = SchemeletRLWEMP::GetElementParams(config.keyPair.secretKey, 37);
-    std::vector<int64_t> x = {
-        (config.PInput.ConvertToInt<int64_t>() / 2), (config.PInput.ConvertToInt<int64_t>() / 2) + 1, 0, 3, 16, 33, 64,
-        (config.PInput.ConvertToInt<int64_t>() - 1)};
-    x = Fill<int64_t>(x, config.numSlotsCKKS);
-    auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(x, BigInteger(1) << 60, config.PInput, config.keyPair.secretKey, ep);
-    SchemeletRLWEMP::ModSwitch(ctxtBFV, config.Q, BigInteger(1) << 60);
-    auto ct_image = SchemeletRLWEMP::ConvertRLWEToCKKS(*(config.cc), ctxtBFV, config.keyPair.publicKey, config.Bigq, config.numSlotsCKKS, 37);
+    auto ep = SchemeletRLWEMP::GetElementParams(config.keyPair.secretKey, 38);
+    // std::vector<int64_t> x = {
+    //     (config.PInput.ConvertToInt<int64_t>() / 2), (config.PInput.ConvertToInt<int64_t>() / 2) + 1, 0, 3, 16, 33, 64,
+    //     (config.PInput.ConvertToInt<int64_t>() - 1)};
+    // x = Fill<int64_t>(x, config.numSlotsCKKS);
+    // auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(x, BigInteger(1) << 60, config.PInput, config.keyPair.secretKey, ep);
+    // SchemeletRLWEMP::ModSwitch(ctxtBFV, config.Q, BigInteger(1) << 60);
+    // auto ct_image = SchemeletRLWEMP::ConvertRLWEToCKKS(*(config.cc), ctxtBFV, config.keyPair.publicKey, config.Bigq, config.numSlotsCKKS, 37);
+    // double integerScale = config.Bigq.ConvertToDouble() / config.PInput.ConvertToDouble();
+    // std::vector<double> b_vec(config.numSlotsCKKS, 7.0 * integerScale);
+    // Plaintext pt_bias = config.cc->MakeCKKSPackedPlaintext(b_vec, 1, ct_image->GetLevel());
+    // pt_bias->SetScalingFactor(integerScale);  // tell CKKS what scale this plaintext carries
+    // ct_image = config.cc->EvalAdd(ct_image, pt_bias);
+    // Plaintext pt_seven = config.cc->MakeCKKSPackedPlaintext(7, 1, ct_image->GetLevel());
+    //
+    // std::vector<double> vec(config.numSlotsCKKS, -10.0 * integerScale);
+    // Plaintext pt = config.cc->MakeCKKSPackedPlaintext(vec, 1, ct_image->GetLevel());
+    // pt->SetScalingFactor(integerScale);  // tell CKKS what scale this plaintext carries
+    //
+    // config.cc->EvalAddInPlace(ct_image, pt);
 
-
-    auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_image, config.Q);
+    auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_input, config.Q);
     auto computed = SchemeletRLWEMP::DecryptCoeff(polys, config.Q, config.POutput, config.keyPair.secretKey, ep, config.numSlotsCKKS, config.numSlotsCKKS);
     std::cout << "Before FBT: " << computed << std::endl;
 
     Ciphertext<DCRTPoly> r = config.cc->EvalFBT(
-        ct_image, config.coeffcomp, config.PInput.GetMSB() - 1, 
+        ct_input, config.coeffcomp, config.PInput.GetMSB() - 1, 
         ep->GetModulus(), config.scaleTHI, excess_levels, config.order
     );
 
@@ -312,6 +343,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Decrypting..." << std::endl;
     auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_scores, config.Q);
     auto computed = SchemeletRLWEMP::DecryptCoeff(polys, config.Q, config.POutput, config.keyPair.secretKey, ep, config.numSlotsCKKS, config.numSlotsCKKS);
+    std::cout << computed << std::endl;
 
     // Plaintext pt_result;
     // config.cc->Decrypt(config.keyPair.secretKey, ct_scores, &pt_result);

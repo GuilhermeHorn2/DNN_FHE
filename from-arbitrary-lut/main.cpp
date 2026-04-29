@@ -158,11 +158,12 @@ Ciphertext<DCRTPoly> linear_layer_test(
         // std::cout << "W[j].begin " << w_vec << std::endl;
         // std::cout << "w_vec " << w_vec << std::endl;
         // auto ct_w   = bridge_encrypt(w_vec, enc_depth_w, numSlotsCKKS, cc, kp, ep);
-        // auto ct_w   = bridge_encrypt(w_vec, totalDepth - 2, numSlotsCKKS, cc, kp, ep);
-        std::cout << "Scaling c_input: " << ct_input->GetScalingFactor() << std::endl;
-        Plaintext ct_w= cc->MakeCKKSPackedPlaintext(
-            Fill<double>({1}, numSlotsCKKS), 1, ct_input->GetLevel(), nullptr, numSlotsCKKS);
-        std::cout << "Plaintext ones : " << ct_w << std::endl;
+        auto ct_w   = bridge_encrypt(w_vec, totalDepth, numSlotsCKKS, cc, kp, ep);
+        // std::cout << "Scaling c_input: " << ct_input->GetScalingFactor() << std::endl;
+        // Plaintext ct_w= cc->MakeCKKSPackedPlaintext(
+        //         Fill<double>({1}, numSlotsCKKS), 1, ct_input->GetLevel(), nullptr, numSlotsCKKS);
+        // std::cout << "Plaintext ones : " << ct_w << std::endl;
+        // std::cout << "Scaling ct_w: " << ct_w->GetScalingFactor() << std::endl;
         // auto polys1 = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_w, Q);
         //
         // auto computed1 = SchemeletRLWEMP::DecryptCoeff(polys1, Q, POUTPUT, kp.secretKey, ep, numSlotsCKKS, numSlotsCKKS);
@@ -174,12 +175,12 @@ Ciphertext<DCRTPoly> linear_layer_test(
         std::cout << "Before mult input: "
           << ct_input->GetLevel() << std::endl;
 
-        auto ct_dot = cc->EvalAdd(ct_input, ct_w);
+        auto ct_dot = cc->EvalMult(ct_input, ct_w);
         // std::cout << "After mult dot: "
         //   << ct_dot->GetLevel() << std::endl;
-        // auto ct_dot = cc->EvalSum(ct_w, numSlotsCKKS);
+        // ct_dot = cc->EvalSum(ct_dot, numSlotsCKKS);
         std::cout << "After Mult " << j << std::endl;
-        // cc->RescaleInPlace(ct_dot);       // level L → L+1
+        cc->RescaleInPlace(ct_dot);       // level L → L+1
         auto polys1 = SchemeletRLWEMP::ConvertCKKSToRLWE(ct_dot, Q);
 
         auto computed1 = SchemeletRLWEMP::DecryptCoeff(polys1, Q, POUTPUT, kp.secretKey, ep, numSlotsCKKS, numSlotsCKKS, true);
@@ -354,7 +355,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     /* 6. Perform encryption in the RLWE scheme, using a larger initial ciphertext modulus.
      * Switching the modulus to a smaller ciphertext modulus helps offset the encryption error.
      */
-    auto ep = SchemeletRLWEMP::GetElementParams(keyPair.secretKey, levelsAvailableBeforeBootstrap - 1);
+    auto ep = SchemeletRLWEMP::GetElementParams(keyPair.secretKey, depth - (levelsAvailableBeforeBootstrap > 0));
     std::cout << "before encrypt " << std::endl;
 
     auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(x, QBFVInit, PInput, keyPair.secretKey, ep, true);
@@ -365,7 +366,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     /* 7. Convert from the RLWE ciphertext to a CKKS ciphertext (both use the same secret key).
     */
     auto ctxt = SchemeletRLWEMP::ConvertRLWEToCKKS(*cc, ctxtBFV, keyPair.publicKey, Bigq, numSlotsCKKS,
-                                                   levelsAvailableBeforeBootstrap - 1);
+                                                   depth - (levelsAvailableBeforeBootstrap > 0));
     std::cout << "ctxt Modulus: " << ctxt->GetElements()[0].GetModulus() << std::endl;
     std::cout << "ep Modulus: " << ep->GetModulus() << std::endl;
     // cc->ModReduceInPlace(ctxt);
@@ -383,7 +384,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     // numSlotsCKKS);
     // std::cout <bridge_encrypt(
     auto ct_ones = bridge_encrypt(
-        Fill<int64_t>({1}, numSlotsCKKS), levelsAvailableBeforeBootstrap, numSlotsCKKS, cc, keyPair, ep);
+        Fill<int64_t>({1}, numSlotsCKKS), depth - (levelsAvailableBeforeBootstrap > 0), numSlotsCKKS, cc, keyPair, ep);
     //
     ctxt = cc->EvalAdd(ctxt, ct_ones);
     // cc->RescaleInPlace(ctxt);
@@ -399,7 +400,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     auto polys2 = SchemeletRLWEMP::ConvertCKKSToRLWE(ctxt, Q);
 
     auto computed2 = SchemeletRLWEMP::DecryptCoeff(polys2, Q, POutput, keyPair.secretKey, ep, numSlotsCKKS, numSlots, true);
-    // std::cout << "ct_ones:  " << computed2 << std::endl;
+    std::cout << "ct_ones:  " << computed2 << std::endl;
     // std::cout << "After Add" << std::endl;
     // cc->ModReduceInPlace(ctxt);
     // std::cout << "Aqui 2" << std::endl;
@@ -416,7 +417,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     auto W1 = createRandomVectorOfVectors(30, 784); 
     auto b1 = std::vector<int64_t>(Fill<int64_t>({1},numSlotsCKKS));
     std::cout << "After random vector" << std::endl;
-    ctxt = linear_layer_test(ctxt, W1, b1, 784, 30, numSlotsCKKS, levelsAvailableBeforeBootstrap, cc, keyPair, ep);
+    ctxt = linear_layer_test(ctxt, W1, b1, 784, 30, numSlotsCKKS, depth - levelsAvailableBeforeBootstrap, cc, keyPair, ep);
     std::cout << "Num Elements: "
           << ctxt->GetElements()[0].GetNumOfElements() << std::endl;
     auto polys1 = SchemeletRLWEMP::ConvertCKKSToRLWE(ctxt, Q);
