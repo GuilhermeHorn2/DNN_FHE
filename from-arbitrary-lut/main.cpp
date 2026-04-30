@@ -309,10 +309,11 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     uint32_t dcrtBits                       = Bigq.GetMSB() - 1;
     uint32_t firstMod                       = Bigq.GetMSB() - 1;
     uint32_t levelsAvailableAfterBootstrap  = 0;
-    uint32_t levelsAvailableBeforeBootstrap = 3;
+    uint32_t levelsAvailableBeforeBootstrap = 1;
     uint32_t dnum                           = 3;
     SecretKeyDist secretKeyDist             = SPARSE_TERNARY;
     std::vector<uint32_t> lvlb              = {3, 3};
+    uint32_t levelsComputation = 2;
 
     CCParams<CryptoContextCKKSRNS> parameters;
     parameters.SetSecretKeyDist(secretKeyDist);
@@ -324,7 +325,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     parameters.SetBatchSize(numSlotsCKKS);
     parameters.SetRingDim(ringDim);
 
-    uint32_t depth = levelsAvailableAfterBootstrap + levelsAvailableBeforeBootstrap;
+    uint32_t depth = levelsAvailableAfterBootstrap + levelsComputation;
     depth += FHECKKSRNS::GetFBTDepth(lvlb, coeffcomp, PInput, order, secretKeyDist);
     parameters.SetMultiplicativeDepth(depth);
 
@@ -345,7 +346,7 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     auto keyPair = cc->KeyGen();
 
     cc->EvalFBTSetup(coeffcomp, numSlotsCKKS, PInput, POutput, Bigq, keyPair.publicKey, {0, 0}, lvlb,
-                         levelsAvailableAfterBootstrap, levelsAvailableBeforeBootstrap, order);
+                         levelsAvailableAfterBootstrap, levelsComputation, order);
 
     cc->EvalBootstrapKeyGen(keyPair.secretKey, numSlotsCKKS);
     cc->EvalMultKeyGen(keyPair.secretKey);
@@ -374,8 +375,12 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
           << ctxt->GetElements()[0].GetNumOfElements() << std::endl;
 
 
-    // Plaintext pt_ones = cc->MakeCKKSPackedPlaintext(
-    //     Fill<double>({1, numSlotsCKKS), 1, 0, nullptr, numSlotsCKKS);
+    std::vector<int64_t> ones(numSlotsCKKS, 1);
+    std::vector<double> multiplier(numSlotsCKKS, 2.0);
+    Plaintext pt_ones = cc->MakeCKKSPackedPlaintext(multiplier, 1, depth - lvlb[1] - levelsAvailableAfterBootstrap - levelsComputation, nullptr, numSlotsCKKS);
+    std::cout << "Num Elements pt_ones: "
+          << pt_ones->GetLevel()<< std::endl;
+    Plaintext pt_ones1 = cc->MakeCKKSPackedPlaintext(multiplier, 1, depth - lvlb[1] - levelsAvailableAfterBootstrap - levelsComputation, nullptr, numSlotsCKKS);
     // Plaintext ct_ones = cc->MakeCKKSPackedPlaintext(
     // Fill<double>({1}, numSlotsCKKS),
     // 1,                        // noiseScaleDeg (1 = not pre-scaled)
@@ -384,11 +389,13 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     // numSlotsCKKS);
     // std::cout <bridge_encrypt(
     auto ct_ones = bridge_encrypt(
-        Fill<int64_t>({1}, numSlotsCKKS), depth - (levelsAvailableBeforeBootstrap > 0), numSlotsCKKS, cc, keyPair, ep);
+        ones, depth - (levelsAvailableBeforeBootstrap > 0), numSlotsCKKS, cc, keyPair, ep);
+    // std::cout << "Num Elements ct_ones: "
+    //       << ct_ones->GetElements()[0].GetNumOfElements() << std::endl;
     //
-    ctxt = cc->EvalAdd(ctxt, ct_ones);
+    // ctxt = cc->EvalAdd(ctxt, ct_ones);
     // cc->RescaleInPlace(ctxt);
-    // ctxt = cc->EvalMult(ctxt, ct_ones);
+    // ctxt = cc->EvalAdd(ctxt, ct_ones);
     // cc->RescaleInPlace(ctxt);
     // std::cout << "Level: " << ctxt->GetLevel() << std::endl;
     // std::cout << "Towers: "
@@ -397,27 +404,37 @@ void ArbitraryLUT(std::vector<int64_t> input, BigInteger QBFVInit, BigInteger PI
     // ctxt = cc->EvalHomDecoding(ctxt, scaleTHI, 2);
     // std::cout << "Scaling factor " << ct_ones->GetScalingFactor() << std::endl;
 
+    // std::cout << "After Add" << std::endl;
+    // cc->ModReduceInPlace(ctxt);
+    // std::cout << "Aqui 2" << std::endl;
+    // ctxt = cc->EvalMult(ctxt, pt_ones1);
+    // cc->RescaleInPlace(ctxt);
+    ctxt = cc->EvalMult(ctxt, pt_ones);
+    cc->ModReduceInPlace(ctxt);
+    // std::cout << "Num Elements: "
+    //       << ctxt->GetElements()[0].GetNumOfElements() << std::endl;
+    // ctxt = cc->EvalMult(ctxt, pt_ones);
+    // cc->ModReduceInPlace(ctxt);
+    // cc->ModReduceInPlace(ctxt);
+    // std::cout << "Aqui 4" << std::endl;
+    // ctxt = cc->EvalMult(ctxt, pt_ones);
+    // std::cout << "Num Elements: "
+    //       << ctxt->GetElements()[0].GetNumOfElements() << std::endl;
+    // cc->RescaleInPlace(ctxt);
+    // cc->ModReduceInPlace(ctxt);
+    // std::cout << "Aqui 4" << std::endl;
+    // ctxt = cc->EvalMult(ctxt, ct_ones);
+    // cc->ModReduceInPlace(ctxt);
+    // std::cout << "Aqui 4" << std::endl;
     auto polys2 = SchemeletRLWEMP::ConvertCKKSToRLWE(ctxt, Q);
 
     auto computed2 = SchemeletRLWEMP::DecryptCoeff(polys2, Q, POutput, keyPair.secretKey, ep, numSlotsCKKS, numSlots, true);
     std::cout << "ct_ones:  " << computed2 << std::endl;
-    // std::cout << "After Add" << std::endl;
-    // cc->ModReduceInPlace(ctxt);
-    // std::cout << "Aqui 2" << std::endl;
-    // ctxt = cc->EvalMult(ctxt, ct_ones);
-    // cc->ModReduceInPlace(ctxt);
-    // std::cout << "Aqui 4" << std::endl;
-    // ctxt = cc->EvalMult(ctxt, ct_ones);
-    // cc->ModReduceInPlace(ctxt);
-    // std::cout << "Aqui 4" << std::endl;
-    // ctxt = cc->EvalMult(ctxt, ct_ones);
-    // cc->ModReduceInPlace(ctxt);
-    // std::cout << "Aqui 4" << std::endl;
 
     auto W1 = createRandomVectorOfVectors(30, 784); 
     auto b1 = std::vector<int64_t>(Fill<int64_t>({1},numSlotsCKKS));
     std::cout << "After random vector" << std::endl;
-    ctxt = linear_layer_test(ctxt, W1, b1, 784, 30, numSlotsCKKS, depth - levelsAvailableBeforeBootstrap, cc, keyPair, ep);
+    ctxt = linear_layer_test(ctxt, W1, b1, 784, 30, numSlotsCKKS, depth - (levelsAvailableBeforeBootstrap > 0), cc, keyPair, ep);
     std::cout << "Num Elements: "
           << ctxt->GetElements()[0].GetNumOfElements() << std::endl;
     auto polys1 = SchemeletRLWEMP::ConvertCKKSToRLWE(ctxt, Q);
