@@ -3,7 +3,6 @@
 
 CMakeFiles/main.dir/main.cpp.o
  /home/zinho/git/DNN_FHE/from-arbitrary-lut/main.cpp
- /home/zinho/git/DNN_FHE/from-arbitrary-lut/stb_image.h
  /usr/include/alloca.h
  /usr/include/asm-generic/bitsperlong.h
  /usr/include/asm-generic/errno-base.h
@@ -16,7 +15,6 @@ CMakeFiles/main.dir/main.cpp.o
  /usr/include/asm/posix_types.h
  /usr/include/asm/posix_types_64.h
  /usr/include/asm/types.h
- /usr/include/assert.h
  /usr/include/bits/atomic_wide_counter.h
  /usr/include/bits/byteswap.h
  /usr/include/bits/cpu-set.h
@@ -246,7 +244,6 @@ CMakeFiles/main.dir/main.cpp.o
  /usr/include/c++/15/limits
  /usr/include/c++/15/locale
  /usr/include/c++/15/map
- /usr/include/c++/15/math.h
  /usr/include/c++/15/memory
  /usr/include/c++/15/mutex
  /usr/include/c++/15/new
@@ -263,7 +260,6 @@ CMakeFiles/main.dir/main.cpp.o
  /usr/include/c++/15/sstream
  /usr/include/c++/15/stack
  /usr/include/c++/15/stdexcept
- /usr/include/c++/15/stdlib.h
  /usr/include/c++/15/streambuf
  /usr/include/c++/15/string
  /usr/include/c++/15/string_view
@@ -338,15 +334,11 @@ CMakeFiles/main.dir/main.cpp.o
  /usr/include/time.h
  /usr/include/wchar.h
  /usr/include/wctype.h
- /usr/lib/gcc/x86_64-redhat-linux/15/include/emmintrin.h
  /usr/lib/gcc/x86_64-redhat-linux/15/include/limits.h
- /usr/lib/gcc/x86_64-redhat-linux/15/include/mm_malloc.h
- /usr/lib/gcc/x86_64-redhat-linux/15/include/mmintrin.h
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stdarg.h
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stddef.h
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stdint.h
  /usr/lib/gcc/x86_64-redhat-linux/15/include/syslimits.h
- /usr/lib/gcc/x86_64-redhat-linux/15/include/xmmintrin.h
  /usr/local/include/openfhe/binfhe/binfhe-base-params.h
  /usr/local/include/openfhe/binfhe/binfhe-base-scheme.h
  /usr/local/include/openfhe/binfhe/binfhe-constants.h
