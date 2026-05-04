@@ -1,0 +1,23 @@
+services:
+  jupyter:
+    build:
+      context: .
+      target: development
+    container_name: dnn-fhe-jupyter
+    working_dir: /workspace
+    environment:
+      - HOME=/tmp
+    extra_hosts:
+      # Needed to allow the container to access external APIs inside the proxy.
+      - "wsl-proxy:host-gateway"
+    ports:
+      - "${PORT:-8888}:8888"
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    volumes:
+      # Mount this folder so notebooks created in Jupyter appear here.
+      - .:/workspace
+    networks:
+      - dnn_fhe_network
+
+networks:
+  dnn_fhe_network:
