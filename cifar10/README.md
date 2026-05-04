@@ -1,54 +1,106 @@
-# `cifar10` — CIFAR-10 driver on the modular FHE NN framework
+# `cifar10` — CIFAR-10 driver on the MVB framework
 
-Same network topology as the MNIST DiNN30 sub-project (`Linear → Sign →
-Linear`), retargeted to CIFAR-10:
-
-* **Input.** 32 × 32 × 3 RGB → flat **3072** entries (vs. 784 for MNIST).
-* **Hidden.** 30 bipolar neurons.
-* **Output.** 10 classes.
-* **Crypto context.** `numSlots = 4096` (next power of two ≥ 3072) and
-  `ringDim = 8192` (= 2 × numSlots). All other crypto parameters use the
-  framework defaults from [`FHEParams`](../include/network/context.h).
-
-For full framework documentation (sequential builder API, depth scheduler,
-benchmark flags, etc.) see [`MNIST_30/README.md`](../MNIST_30/README.md).
+MVB-based homomorphic inference for CIFAR-10 with the same DiNN30
+topology used by `MNIST_30/`, retargeted to RGB images. For framework
+internals, build-flag reference, and `accuracy.cpp`, see the
+[**root README**](../README.md).
 
 ---
 
-## 1. Files in this folder
+## 1. Topology
+
+| Layer       | Shape           | Notes                                                              |
+| ----------- | --------------- | ------------------------------------------------------------------ |
+| Input       | 3072 (32×32×3)  | bipolar `{-1, +1}` after per-byte threshold (loaded RGB, channels=3) |
+| Linear 1    | 3072 → 30       | exact integer matvec + bias                                        |
+| `Sign`      | 30 → 30         | `(x ≥ 0) ? +1 : -1` via MVB LUT                                    |
+| Linear 2    | 30 → 10         | output scores (one per CIFAR-10 class)                             |
+
+### Class index ↔ name (canonical CIFAR-10 order)
+
+| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+| - | - | - | - | - | - | - | - | - | - |
+| airplane | automobile | bird | cat | deer | dog | frog | horse | ship | truck |
+
+The driver prints both index and name in its score dump and final summary.
+
+### Crypto context overrides
+
+CIFAR's flat input is 3072 entries, which doesn't fit in the 1024-slot
+default. `main.cpp` overrides:
+
+```cpp
+FHEParams p;
+p.numSlots = 4096;             // next power of two ≥ 3072
+p.ringDim  = 1u << 13;         // 8192 (≥ 2 * numSlots)
+```
+
+Everything else uses the framework defaults from
+[`FHEParams`](../include/network/context.h).
+
+---
+
+## 2. Files in this folder
 
 ```
 cifar10/
 ├── CMakeLists.txt              build script (mirrors MNIST_30/MNIST_100 layout)
-├── README.md                   this file
-├── main.cpp                    driver: bigger ringDim/numSlots, RGB image loader
-├── cifar10_weights_W1.csv      hidden-layer weights  (3072 × 30)   ← provide
-├── cifar10_weights_b1.csv      hidden-layer biases   (30)          ← provide
-├── cifar10_weights_W2.csv      output-layer weights  (30 × 10)     ← provide
-├── cifar10_weights_b2.csv      output-layer biases   (10)          ← provide
-└── *.png / *.jpg               sample CIFAR images                 ← provide
+├── README.md                   you are here
+├── main.cpp                    driver: bigger ringDim/numSlots, RGB image loader, class-name labels
+├── cifar10_weights_W1.csv      hidden-layer weights  (3072 × 30)
+├── cifar10_weights_b1.csv      hidden-layer biases   (30)
+├── cifar10_weights_W2.csv      output-layer weights  (30 × 10)
+├── cifar10_weights_b2.csv      output-layer biases   (10)
+└── cifar10_test_images.zip     ~100 sample CIFAR-10 PNGs, named "<idx>_<class>.png"
 ```
-
-The four `cifar10_weights_*.csv` files and the input images are **not
-checked in** — drop your own next to this README. The driver expects them at
-`../cifar10_weights_*.csv` (i.e. it is run from `cifar10/build/`).
 
 CSV orientation: `LoadCsv2D` accepts both `out × in` and `in × out` and
 transposes automatically, so either layout works.
 
+### Test images
+
+Unzip `cifar10_test_images.zip` next to the binary (or anywhere) before
+running. Filenames follow the convention `<idx>_<classname>.png`
+(e.g. `06_automobile.png`, `52_airplane.png`, `93_frog.png`). The driver
+parses the `<classname>` part to extract a ground-truth label and prints
+a `(CORRECT)` / `(wrong)` verdict alongside the prediction. Files that
+don't match this pattern (e.g. your own `cat.png`) still work — the
+ground-truth line is just skipped.
+
+```bash
+unzip cifar10_test_images.zip -d test_images
+```
+
 ---
 
-## 2. Build & run
+## 3. Build & run
 
 ```bash
 cd cifar10
 cmake -B build -S .
 cmake --build build -j4
 cd build
+./main ../test_images/06_automobile.png
+# or with a custom image:
 ./main ../cat.png
 ```
 
-To enable timers / RSS reports, flip on any of the bench options:
+Sample output:
+
+```
+--- Final Class Scores ---
+  [0] airplane    : -3
+  [1] automobile  : 17
+  [2] bird        : 2
+  …
+================================
+ PREDICTED CLASS  : 1 (automobile)
+ REFERENCE (plain): 1 (automobile)  (matches)
+ GROUND TRUTH     : 1 (automobile)  (CORRECT)
+================================
+```
+
+To enable timers / RSS reports:
 
 ```bash
 cmake -B build -S . \
@@ -57,24 +109,31 @@ cmake -B build -S . \
 cmake --build build -j4
 ```
 
-See [`MNIST_30/README.md`](../MNIST_30/README.md#6-benchmark-flag-reference)
-for what each flag prints.
+See [root README §3](../README.md#3-common-build--run-idiom) for the full
+flag reference.
 
 ---
 
-## 3. Things to watch out for
+## 4. Things to watch out for
 
-* **Ring dimension blowup.** Going from `ringDim = 2048` (MNIST) to `8192`
-  (CIFAR) makes every CKKS operation roughly **4× slower** and **3-4× more
-  memory-hungry**. A single inference will likely require well over 1 GB of
-  RSS and several minutes of wall-time. Use `-DBENCH_MEMORY=ON` to track it.
-* **Image channels.** [`LoadImageBipolar`](../include/io/image.h) is called
-  with `channels=3` here. The default (1) is what MNIST uses, so don't drop
-  the third argument or the byte stream will be 1024 long instead of 3072.
-* **Same depth budget as DiNN30.** Both layers are linear, both consume two
-  rescales, so `Network::Compile` settles on `levelsComputation = 2` exactly
-  like the MNIST sub-project. The ring dimension is the only crypto param
+* **Ring dimension blowup.** Going from `ringDim = 2048` (MNIST) to
+  `8192` (CIFAR) makes every CKKS operation roughly **4× slower** and
+  **3-4× more memory-hungry**. A single inference will likely require
+  well over 1 GB of RSS and several minutes of wall-time. Use
+  `-DBENCH_MEMORY=ON` to track it.
+* **Image channels.**
+  [`LoadImageBipolar`](../include/io/image.h) is called with
+  `channels=3` here. The default (1) is what MNIST uses, so don't drop
+  the third argument or the byte stream will be 1024 long instead of
+  3072.
+* **Same depth budget as DiNN30.** Both layers are linear, both consume
+  two rescales, so `Network::Compile` settles on `levelsComputation = 2`
+  exactly like `MNIST_30/`. The ring dimension is the only crypto param
   that grew.
-* **Plaintext reference.** `main.cpp` recomputes the CIFAR network in
-  `double` after the FHE inference and prints `(matches)` / `(MISMATCH)`.
-  Use it as a quick correctness check on any new weight matrix.
+* **Plaintext reference.** `main.cpp` recomputes the network in `double`
+  after the FHE inference and prints `(matches)` / `(MISMATCH)`. Use it
+  as a quick correctness check on any new weight matrix.
+* **`accuracy.cpp` is MNIST-shaped as shipped.** To run the batch harness
+  on CIFAR you'd need to change `IN_DIM`, the weight paths, and either
+  rename the test directories to `0/`…`9/` or swap the iteration loop —
+  it's not a one-flag change.
