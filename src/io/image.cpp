@@ -9,29 +9,29 @@
 
 namespace io {
 
-std::vector<std::int64_t> LoadImageBipolar(const char* path, int dim) {
+std::vector<std::int64_t> LoadImageBipolar(const char* path, int dim, int channels) {
     int            w = 0, h = 0, ch = 0;
-    unsigned char* data = stbi_load(path, &w, &h, &ch, 1);
+    unsigned char* data = stbi_load(path, &w, &h, &ch, channels);
     if (!data) {
         std::cerr << "[ERROR] Cannot load: " << path << "\n";
         return {};
     }
     std::vector<std::int64_t> out(dim, -1);
-    const int                 limit = std::min(dim, w * h);
+    const int                 limit = std::min(dim, w * h * channels);
     for (int i = 0; i < limit; ++i) out[i] = (data[i] > 127) ? 1 : -1;
     stbi_image_free(data);
     return out;
 }
 
-std::vector<std::int64_t> LoadImageGrayscale(const char* path, int dim) {
+std::vector<std::int64_t> LoadImageGrayscale(const char* path, int dim, int channels) {
     int            w = 0, h = 0, ch = 0;
-    unsigned char* data = stbi_load(path, &w, &h, &ch, 1);
+    unsigned char* data = stbi_load(path, &w, &h, &ch, channels);
     if (!data) {
         std::cerr << "[ERROR] Cannot load: " << path << "\n";
         return {};
     }
     std::vector<std::int64_t> out(dim, 0);
-    const int                 limit = std::min(dim, w * h);
+    const int                 limit = std::min(dim, w * h * channels);
     for (int i = 0; i < limit; ++i)
         out[i] = static_cast<std::int64_t>(data[i]);
     stbi_image_free(data);

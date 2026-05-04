@@ -6,14 +6,17 @@
 
 namespace io {
 
-// Loads a grayscale image, thresholds at 127, and produces a {-1, +1} vector
-// of length `dim`. Pixels beyond width*height are filled with -1.
+// Loads an image, thresholds each byte at 127, and produces a {-1, +1} vector
+// of length `dim`. `channels` selects how stb_image decodes the file:
+//   1 = grayscale (default, used by MNIST), 3 = RGB (used by CIFAR), 4 = RGBA.
+// Bytes beyond `width * height * channels` are filled with -1.
 // Returns an empty vector on failure.
-std::vector<std::int64_t> LoadImageBipolar(const char* path, int dim);
+std::vector<std::int64_t> LoadImageBipolar(const char* path, int dim, int channels = 1);
 
-// Loads a grayscale image normalized to [0, 255] -> int64 (no thresholding).
-// Useful for non-bipolar networks. Pads with 0 up to `dim`.
-std::vector<std::int64_t> LoadImageGrayscale(const char* path, int dim);
+// Loads an image normalized to [0, 255] -> int64 (no thresholding).
+// Useful for non-bipolar networks. Pads with 0 up to `dim`. `channels` works
+// the same way as in LoadImageBipolar.
+std::vector<std::int64_t> LoadImageGrayscale(const char* path, int dim, int channels = 1);
 
 }  // namespace io
 
