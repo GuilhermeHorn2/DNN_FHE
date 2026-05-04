@@ -16,6 +16,10 @@ services:
     volumes:
       # Mount this folder so notebooks created in Jupyter appear here.
       - .:/workspace
+      # Expose the repo-root test_data folder so export scripts can drop
+      # PNGs where the C++ apps (cifar10/build/main, accuracy, ...) can
+      # find them via "../test_data/<dataset>/<count>".
+      - ../test_data:/repo/test_data
     networks:
       - dnn_fhe_network
 

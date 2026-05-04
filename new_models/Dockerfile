@@ -10,6 +10,7 @@ WORKDIR /workspace
 # Strictly the minimum needed to run new_models/notebooks/train_cifar100.ipynb:
 #   - torch + torchvision (CPU): model, training loop, CIFAR-100 dataset
 #   - numpy: HWC preprocessing and CSV export/reload
+#   - matplotlib: training-history plots (loss / accuracy curves)
 #   - jupyterlab: notebook server
 RUN python -m pip install --no-cache-dir --upgrade pip \
     && python -m pip install --no-cache-dir --retries 10 --timeout 180 \
@@ -17,6 +18,7 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
         torch torchvision \
     && python -m pip install --no-cache-dir --retries 10 --timeout 180 \
         numpy \
+        matplotlib \
         jupyterlab
 
 EXPOSE 8888

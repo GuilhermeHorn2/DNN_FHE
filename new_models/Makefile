@@ -2,7 +2,7 @@ PORT ?= 8888
 PROJECT_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 DOCKER_COMPOSE = HOST_UID=$$(id -u) HOST_GID=$$(id -g) PORT=$(PORT) COMPOSE_BAKE=false BUILDKIT_PROGRESS=plain docker compose -f "$(PROJECT_DIR)/docker-compose.yml" --project-directory "$(PROJECT_DIR)"
 
-.PHONY: setup up up-all down logs logs-split build restart clean sh data
+.PHONY: setup up up-all down logs logs-split build restart clean sh data export-images
 
 # First-time setup: build the image
 setup:
@@ -73,3 +73,15 @@ data:
 	$(DOCKER_COMPOSE) exec jupyter python scripts/download_datasets.py \
 		--data-dir data \
 		$(if $(ONLY),--only $(ONLY))
+
+# Export test PNGs grouped by class into <repo>/test_data/<dataset>/<count>/<label>/
+# so the C++ apps (cifar10/build/main, accuracy, ...) can consume them directly.
+# The host folder is the repo-root test_data/ (gitignored), bind-mounted at /repo/test_data.
+# Usage: make export-images
+#        make export-images COUNTS=50,100,500,1000
+#        make export-images DATASET=cifar100 COUNTS=200
+export-images:
+	$(DOCKER_COMPOSE) exec jupyter python scripts/export_test_images.py \
+		--data-dir data \
+		$(if $(COUNTS),--counts $(COUNTS)) \
+		$(if $(DATASET),--dataset $(DATASET))
