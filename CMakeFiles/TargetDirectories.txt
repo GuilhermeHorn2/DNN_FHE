@@ -1,3 +1,0 @@
-/home/zinho/git/DNN_FHE/CMakeFiles/dinn_inference.dir
-/home/zinho/git/DNN_FHE/CMakeFiles/edit_cache.dir
-/home/zinho/git/DNN_FHE/CMakeFiles/rebuild_cache.dir
