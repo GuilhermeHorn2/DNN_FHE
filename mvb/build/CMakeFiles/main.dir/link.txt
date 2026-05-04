@@ -1,1 +1,1 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/main.dir/link.d CMakeFiles/main.dir/main.cpp.o -o main  -Wl,-rpath,/usr/local/lib /usr/local/lib/libOPENFHEpke.so.1.5.0 /usr/local/lib/libOPENFHEbinfhe.so.1.5.0 -fopenmp /usr/local/lib/libOPENFHEcore.so.1.5.0 -fopenmp -ldl
+/usr/bin/c++ CMakeFiles/main.dir/main.cpp.o -o main  -Wl,-rpath,/usr/local/lib libfhednn.a /usr/local/lib/libOPENFHEpke.so.1.5.1 /usr/local/lib/libOPENFHEbinfhe.so.1.5.1 /usr/local/lib/libOPENFHEcore.so.1.5.1 -ldl -fopenmp 
