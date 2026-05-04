@@ -198,32 +198,18 @@ void RunDiNN(std::vector<int64_t>             input,
     bool     flagSP       = (numSlots <= ringDim / 2);
     uint32_t numSlotsCKKS = flagSP ? numSlots : numSlots / 2;
 
-    // ── Shift input into [0, PINPUT) ─────────────────────────────────────────
-    // Pixels are {-1, +1}. FBT requires inputs in [0, PINPUT).
-    // We add PINPUT/2 = 512, mapping:
-    //   -1 → 511   (in [0, PINPUT/2)   → sign LUT outputs -1)
-    //   +1 → 513   (in [PINPUT/2, PINPUT) → sign LUT outputs +1)
-    // int64_t half = PINPUT.ConvertToInt<int64_t>() / 2;
     std::vector<int64_t> x_shifted(numSlots, 0);
     for (int i = 0; i < IN_DIM && i < (int)numSlots; ++i)
         x_shifted[i] = input[i] + 1;
     std::cout << "x_shifted: " << x_shifted << std::endl;
 
-    // ── Identity LUT coefficients ─────────────────────────────────────────────
-    // Used for the first EvalMVBNoDecoding to enter CKKS slot space.
-    // f(x) = x over [0, PINPUT).
     std::function<int64_t(int64_t)> f_identity = [a, b](int64_t x) { return (x % a) % b; };
     auto coeffIdentity = GetHermiteTrigCoefficients(
         f_identity, PINPUT.ConvertToInt(), order, scaleTHI);
 
-    // ── Sign LUT coefficients ─────────────────────────────────────────────────
-    // Input is in [0, PINPUT). Compare against PINPUT/2 (the shifted zero):
-    //   x ≥ PINPUT/2 → original pre-activation was ≥ 0 → return +1
-    //   x <  PINPUT/2 → original pre-activation was  < 0 → return -1
-    // FBT can return negative values; it just cannot receive them.
-    int64_t pinput_half = PINPUT.ConvertToInt<int64_t>() / 2;
-    std::function<int64_t(int64_t)> f_sign = [pinput_half](int64_t x) -> int64_t {
-        return (x >= 256) ? 1 : -1;
+    auto shift_zero = 256;
+    std::function<int64_t(int64_t)> f_sign = [shift_zero](int64_t x) -> int64_t {
+        return (x >= shift_zero) ? 1 : -1;
     };
     auto coeffSign = GetHermiteTrigCoefficients(
         f_sign, PINPUT.ConvertToInt(), order, scaleTHI);
@@ -310,17 +296,6 @@ void RunDiNN(std::vector<int64_t>             input,
         nullptr, numSlotsCKKS);
     cc->EvalAddInPlace(ctxtSlots, pt_shift);
 
-    // ctxtSlots = cc->EvalMult(ctxtSlots, pt_ones);
-    // cc->ModReduceInPlace(ctxtSlots);
-    // ctxtSlots = cc->EvalMult(ctxtSlots, pt_ones);
-    // cc->ModReduceInPlace(ctxtSlots);
-    // ctxtSlots = cc->EvalHomDecoding(ctxtSlots, scaleTHI, 0);
-    //
-    // auto polys1 = SchemeletRLWEMP::ConvertCKKSToRLWE(ctxtSlots, Q);
-    // auto debug1 = SchemeletRLWEMP::DecryptCoeff(
-    //     polys1, Q, POUTPUT, keyPair.secretKey, ep, numSlotsCKKS, numSlotsCKKS, flagBR);
-    // std::cout << "after shift " << debug1 << std::endl;
-
     // ── Layer 1 (in slot space) ───────────────────────────────────────────────
     std::cout << "Layer 1 (" << IN_DIM << " → " << HID_DIM << ")...\n";
     auto ctxtHidPre = linear_layer(
@@ -338,9 +313,6 @@ void RunDiNN(std::vector<int64_t>             input,
         nullptr, numSlotsCKKS);
     cc->EvalAddInPlace(ctxtHidPre, pt_shift);
 
-    // ── Exit slot space, CKKS→RLWE→CKKS refresh, then sign EvalMVBNoDecoding ─
-    // This refresh re-encodes the Layer 1 outputs in [0, PINPUT) so that the
-    // sign LUT receives valid inputs.
     std::cout << "EvalHomDecoding + CKKS↔RLWE refresh + sign EvalMVBNoDecoding...\n";
     ctxtHidPre = cc->EvalHomDecoding(ctxtHidPre, scaleTHI, 0);
     auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ctxtHidPre, Q);
