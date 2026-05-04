@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/dinn_inference.dir/link.d CMakeFiles/dinn_inference.dir/testar_com_64GB.cpp.o -o dinn_inference  -Wl,-rpath,/usr/local/lib /usr/local/lib/libOPENFHEpke.so.1.5.0 /usr/local/lib/libOPENFHEbinfhe.so.1.5.0 -fopenmp /usr/local/lib/libOPENFHEcore.so.1.5.0 -fopenmp -ldl

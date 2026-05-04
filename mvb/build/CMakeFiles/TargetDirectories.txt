@@ -1,5 +1,0 @@
-/home/efm9ca/projects/DNN_FHE/mvb/build/CMakeFiles/fhednn.dir
-/home/efm9ca/projects/DNN_FHE/mvb/build/CMakeFiles/main.dir
-/home/efm9ca/projects/DNN_FHE/mvb/build/CMakeFiles/accuracy.dir
-/home/efm9ca/projects/DNN_FHE/mvb/build/CMakeFiles/edit_cache.dir
-/home/efm9ca/projects/DNN_FHE/mvb/build/CMakeFiles/rebuild_cache.dir

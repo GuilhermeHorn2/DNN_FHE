@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/accuracy.dir/accuracy.cpp.o -o accuracy  -Wl,-rpath,/usr/local/lib libfhednn.a /usr/local/lib/libOPENFHEpke.so.1.5.1 /usr/local/lib/libOPENFHEbinfhe.so.1.5.1 /usr/local/lib/libOPENFHEcore.so.1.5.1 -ldl -fopenmp 

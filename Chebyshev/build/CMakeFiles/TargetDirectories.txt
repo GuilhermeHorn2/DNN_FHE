@@ -1,3 +1,0 @@
-/home/efm9ca/projects/DNN_FHE/Chebyshev/build/CMakeFiles/dinn_inference.dir
-/home/efm9ca/projects/DNN_FHE/Chebyshev/build/CMakeFiles/edit_cache.dir
-/home/efm9ca/projects/DNN_FHE/Chebyshev/build/CMakeFiles/rebuild_cache.dir

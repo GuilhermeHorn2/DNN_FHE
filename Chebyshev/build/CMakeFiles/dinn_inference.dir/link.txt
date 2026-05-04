@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/dinn_inference.dir/activation_func_aprox.cpp.o -o dinn_inference  -Wl,-rpath,/usr/local/lib /usr/local/lib/libOPENFHEpke.so.1.5.1 /usr/local/lib/libOPENFHEbinfhe.so.1.5.1 -fopenmp /usr/local/lib/libOPENFHEcore.so.1.5.1 -fopenmp -ldl 
