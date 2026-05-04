@@ -66,6 +66,11 @@ core.*
 
 # ── Datasets / generated test images ─────────────────────────────────────────
 # Raw torchvision downloads (pickled batches, IDX files, tar.gz) — re-fetchable.
-new_models/data/
+# Catches new_models/data/ and any other ad-hoc data/ folder anywhere in the repo.
+data/
 # Per-class PNG trees emitted by new_models/scripts/export_test_images.py.
 test_data/
+
+# ── Jupyter ──────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*-checkpoint.ipynb
