@@ -1,15 +1,19 @@
-# `new_models/` — Parametric trainers for the FHE C++ pipeline
+# `new_models/` — Trainers for the FHE C++ pipeline
 
 Containerised JupyterLab sandbox that trains DiNN-style integer-quantized
-MLPs on **MNIST**, **CIFAR-10**, and **CIFAR-100**, and exports their weights
-as plain CSV files (`fmt="%d"`, no header) that the C++ FHE inference projects
-in this repo (`MNIST_30/`, `MNIST_100/`, `cifar10/`, …) read out-of-the-box.
+MLPs on **MNIST** and **CIFAR-10**, and exports their weights as plain CSV
+files (`fmt="%d"`, no header) that the C++ FHE inference projects in this
+repo (`MNIST_30/`, `MNIST_100/`, `cifar10/`) read out-of-the-box.
 
-Three of the notebooks share a single **parametric template**: pick the
-network shape and hidden activation in a `CONFIG` dict at the top, run all
-cells, copy the CSVs into a sub-project. A fourth file
-(`train_cifar100_baseline.ipynb`) is the original hand-written, fully
-narrated worked example kept around as a pedagogical reference.
+Both notebooks share a single **parametric template** structurally based on
+`plaintext_training1.ipynb`: train a continuous Keras MLP with
+`hard_sigmoid` hidden activations on bipolarized inputs, then **post-hoc
+discretize** every weight via `round(w · τ) / τ`, then evaluate a strict
+`sign(x)` model on the discretized weights, then export the integer copies
+`round(W · τ)` as `2 · N` headerless CSVs (plus a companion
+`<prefix>_config.json` summary). Pick the topology, hidden activation, `τ`,
+and training hyper-parameters in the `CONFIG` dict at the top — defaults
+reproduce the artifact shipped with the matching C++ sub-project.
 
 ---
 
@@ -25,15 +29,12 @@ make logs s=jupyter   # grab the access URL/token
 Then in the browser:
 
 1. Open `http://localhost:8888` (token from the log line above).
-2. Pick one of `notebooks/train_mnist.ipynb`, `train_cifar10.ipynb`,
-   `train_cifar100.ipynb`, or the read-only reference
-   `train_cifar100_baseline.ipynb`.
-3. Edit the `CONFIG` dict in § 2 (topology, activation, quantization, output
-   directory, prefix). Defaults reproduce the artifact shipped with the
-   matching C++ sub-project.
-4. **Run all cells.** The notebook ends with an *exact-round-trip* assertion
-   (§ 11): if it passes, the CSVs you just wrote are bit-for-bit equivalent
-   to the in-memory PyTorch model.
+2. Pick `notebooks/train_mnist.ipynb` or `notebooks/train_cifar10.ipynb`.
+3. Edit the `CONFIG` dict in § 2 (topology, activation, `τ`, training
+   hyper-parameters, output directory, prefix). Defaults reproduce the
+   artifact shipped with the matching C++ sub-project.
+4. **Run all cells.** The export cell writes the weight CSVs **and** a
+   companion `<prefix>_config.json` summary alongside them.
 
 Other useful targets: `make data` (downloads MNIST + CIFAR-10 + CIFAR-100
 into `./data/`), `make export-images` (writes per-class PNGs into
@@ -43,102 +44,105 @@ consume them), `make sh` (shell into the running container), `make down`
 
 ---
 
-## 2. The integer-quantized STE pattern (one paragraph)
+## 2. The "train continuous → post-hoc discretize" pipeline
 
-Each `nn.Linear` keeps continuous **shadow weights** that Adam updates as
-usual; on every forward pass the shadow tensors are projected to integers via
-straight-through estimators — **`TernarizeSTE`** for ternary `{-1, 0, +1}`
-layers, **`IntQuantSTE`** for layers in `[-max_int, +max_int]`, and
-**`RoundSTE`** for biases — so the loss gradient flows through, but the
-forward already operates on the *exact* integer weights that will be exported
-to CSV. There is no post-training quantization step, no calibration phase,
-and no PTQ accuracy cliff: the test accuracy you read off the live PyTorch
-model in § 8 is exactly the test accuracy the deployed integer-only C++
-inference path computes on the same inputs (verified end-to-end by the
-NumPy-vs-PyTorch parity check in § 11).
+Mirrors `plaintext_training1.ipynb` exactly, structurally:
+
+1. **Build a continuous Keras `Sequential` MLP.** The hidden activation
+   (`hard_sigmoid` by default) is a smooth, differentiable proxy for the
+   strict `sign(x)` we'll deploy.
+2. **Train** with Adam + cross-entropy on bipolarized inputs.
+3. **Post-hoc discretize.** Snap every weight to the nearest 1/τ lattice
+   point via `round(w · τ) / τ` and push the discretized tensors back into
+   the model.
+4. **Strict-sign evaluation.** Build a *second* Keras model with `tf.sign`
+   between Dense layers, copy the discretized weights into it, and
+   evaluate. The accuracy printed here is the cleartext accuracy the FHE
+   C++ pipeline will reproduce on the same inputs.
+5. **Export.** Write the integer copies `round(W · τ)` and `round(b · τ)`
+   as headerless `fmt='%d'` CSVs, plus a JSON config (incl. per-layer
+   L1 / L2 column norms — `max(L1)` is the OpenFHE message-space bound `B`
+   you should size the plaintext modulus around).
+
+What's parametric vs `plaintext_training1.ipynb`: `topology`,
+`hidden_activation`, `tau`, `epochs`, `batch_size`, `validation_split`,
+`binarize_threshold`, `prefix`, `output_dir` — all knobs live in `CONFIG`
+at the top of the notebook. Setting `topology = [784, 30, 10]` (the
+default for `train_mnist.ipynb`) reproduces `plaintext_training1`'s
+DiNN-30; setting `[784, 100, 10]` gives DiNN-100; `[784, 100, 30, 10]`
+stacks two hidden layers; `tau` widens / shrinks the integer dynamic range.
+
+> **Caveat.** Because discretization is post-hoc (no STE / quantization-
+> aware training), expect a small accuracy drop between the continuous
+> model and the strict-sign / discretized evaluation. The discretized
+> accuracy printed in § 7 is the one the C++ side will see.
 
 ---
 
 ## 3. Notebooks at a glance
 
-| Notebook                                  | Dataset    | Default topology  | Default `prefix`   | Default `output_dir` | Pairs naturally with    |
-| ----------------------------------------- | ---------- | ----------------- | ------------------ | -------------------- | ----------------------- |
-| `notebooks/train_mnist.ipynb`             | MNIST      | `784 → 30 → 10`   | `dinn30`           | `mnist_dinn30/`      | `MNIST_30/`, `MNIST_100/` *(swap CONFIG to `dinn100` + `[784,100,10]`)* |
-| `notebooks/train_cifar10.ipynb`           | CIFAR-10   | `3072 → 30 → 10`  | `cifar10_weights`  | `cifar10/`           | `cifar10/`              |
-| `notebooks/train_cifar100.ipynb`          | CIFAR-100  | `3072 → 1024 → 100` | `cifar100_weights` | `cifar100/`        | a future `cifar100/` sub-project |
-| `notebooks/train_cifar100_baseline.ipynb` | CIFAR-100  | `3072 → 1024 → 100` *(hardcoded)* | `cifar100_weights` | `cifar100/`  | reference / worked example for the CIFAR-100 case |
+| Notebook                                  | Dataset    | Default topology  | Default `prefix`   | Default `output_dir`    | Pairs naturally with    |
+| ----------------------------------------- | ---------- | ----------------- | ------------------ | ----------------------- | ----------------------- |
+| `notebooks/train_mnist.ipynb`             | MNIST      | `784 → 30 → 10`   | `dinn30`           | `weights/mnist_dinn30/` | `MNIST_30/`, `MNIST_100/` *(swap CONFIG to `dinn100` + `[784,100,10]`)* |
+| `notebooks/train_cifar10.ipynb`           | CIFAR-10   | `3072 → 30 → 10`  | `cifar10_weights`  | `weights/cifar10/`      | `cifar10/`              |
+| `notebooks/plaintext_training1.ipynb`     | MNIST      | `784 → 30 → 10` *(hard-coded)* | `dinn30`  | `weights/`              | reference / worked example |
 
-All three parametric notebooks have **the same 13-section structure** (title
-→ imports → CONFIG → loader → preprocessing → activation factory → MLP →
-training → plots → eval → headroom → export → reload check → summary). The
-only differences are the dataset loader, the bipolar preprocessing
-(grayscale-784 vs. HWC-3072), and the default CONFIG. The baseline notebook
-keeps the same section layout but is non-parametric: every value is hard-wired
-to the original `3072 → 1024 → 100` sign-activated CIFAR-100 setup.
+Both parametric notebooks have the same nine-section structure (title →
+deps → CONFIG → load + binarize → `build_model` → train → discretize →
+strict-sign eval → export + JSON). The only differences are the dataset
+loader, the bipolar preprocessing (grayscale-784 vs. HWC-3072), and the
+default CONFIG. The reference `plaintext_training1.ipynb` keeps the same
+section flow but is non-parametric.
 
-Each parametric notebook's § 10 export cell writes `2 * N` weight CSVs **plus
+Each parametric notebook's § 8 export cell writes `2 · N` weight CSVs **plus
 a single companion `<output_dir>/<prefix>_config.json`** that records the
-run's topology, hidden activation (name + params), per-layer quantization,
-FHE-side budgets (`preShift`, `pOutput`), training hyperparameters,
-final/best accuracies, the § 9 headroom report, the list of weight files,
-the PyTorch version, and a timestamp — everything needed to reproduce or
-audit the run from the artifact dir alone. The hand-written
-`train_cifar100_baseline.ipynb` reference does **not** emit a config JSON.
-
-Hidden-layer activations supported by the parametric notebooks (set
-`CONFIG["activation"]` to one of these strings; some take extra
-`CONFIG["act_params"]` knobs — see the table in § 5 of any parametric
-notebook):
-
-```
-sign | heaviside | ternary_act | staircase | hardtanh_q | sigmoid_q | relu_q | square_q
-```
+dataset, topology, hidden activation, `τ`, training hyper-parameters,
+final cleartext discretized accuracy, the per-layer L1 / L2 norms (and the
+recommended `B = max(L1)`), the list of weight files, the TensorFlow
+version, and a timestamp — everything needed to reproduce or audit the run
+from the artifact dir alone.
 
 ---
 
 ## 4. CONFIG cookbook
 
-Five ready-to-paste `CONFIG` dicts covering the canonical sub-project
+Four ready-to-paste `CONFIG` dicts covering the canonical sub-project
 shapes. Drop any of them into the corresponding notebook's § 2 cell, run
 all, and the resulting CSVs land in `new_models/<output_dir>/<prefix>_*.csv`.
 
-### 4.1 DiNN30 sign — `train_mnist.ipynb` → `MNIST_30/`
+### 4.1 DiNN30 — `train_mnist.ipynb` → `MNIST_30/` *(default)*
 
 ```python
 CONFIG = {
-    "epochs": 30, "batch_size": 256, "lr": 1e-3, "weight_decay": 0.0, "seed": 0,
-    "device": "cuda" if torch.cuda.is_available() else "cpu",
-    "data_dir":   "./data",
-    "output_dir": "mnist_dinn30",
-    "prefix":     "dinn30",
-    "topology":   [784, 30, 10],
-    "activation": "sign",
-    "act_params": {},
-    "layer_quant": [
-        {"kind": "ternary", "thresh": 0.7},
-        {"kind": "int",     "max_int": 15},
-    ],
-    "preShift": 256, "pOutput": 1024,
+    "dataset":       "MNIST",
+    "topology":      [784, 30, 10],
+    "hidden_activation": "hard_sigmoid",
+    "tau":           10,
+    "epochs":        10,
+    "batch_size":    128,
+    "validation_split": 0.1,
+    "binarize_threshold": 128,
+    "seed":          0,
+    "prefix":        "dinn30",
+    "output_dir":    "weights/mnist_dinn30",
 }
 ```
 
-### 4.2 DiNN100 sign — `train_mnist.ipynb` → `MNIST_100/`
+### 4.2 DiNN100 — `train_mnist.ipynb` → `MNIST_100/`
 
 ```python
 CONFIG = {
-    "epochs": 30, "batch_size": 256, "lr": 1e-3, "weight_decay": 0.0, "seed": 0,
-    "device": "cuda" if torch.cuda.is_available() else "cpu",
-    "data_dir":   "./data",
-    "output_dir": "mnist_dinn100",
-    "prefix":     "dinn100",
-    "topology":   [784, 100, 10],
-    "activation": "sign",
-    "act_params": {},
-    "layer_quant": [
-        {"kind": "ternary", "thresh": 0.7},
-        {"kind": "int",     "max_int": 15},
-    ],
-    "preShift": 256, "pOutput": 1024,
+    "dataset":       "MNIST",
+    "topology":      [784, 100, 10],
+    "hidden_activation": "hard_sigmoid",
+    "tau":           10,
+    "epochs":        15,
+    "batch_size":    128,
+    "validation_split": 0.1,
+    "binarize_threshold": 128,
+    "seed":          0,
+    "prefix":        "dinn100",
+    "output_dir":    "weights/mnist_dinn100",
 }
 ```
 
@@ -148,87 +152,58 @@ CONFIG = {
 > suffix from the four `dinn100_*_0.csv` paths so they accept the standard
 > `<prefix>_W{1,2}.csv` / `<prefix>_b{1,2}.csv` pattern emitted here.
 
-### 4.3 MNIST stacked sign — `train_mnist.ipynb` → custom 4-layer MLP
+### 4.3 MNIST stacked — `train_mnist.ipynb` → custom 4-layer MLP
 
 ```python
 CONFIG = {
-    "epochs": 40, "batch_size": 256, "lr": 1e-3, "weight_decay": 0.0, "seed": 0,
-    "device": "cuda" if torch.cuda.is_available() else "cpu",
-    "data_dir":   "./data",
-    "output_dir": "mnist_stacked",
-    "prefix":     "mnist_stacked",
-    "topology":   [784, 100, 30, 10],   # two hidden layers
-    "activation": "sign",
-    "act_params": {},
-    "layer_quant": [
-        {"kind": "ternary", "thresh": 0.7},
-        {"kind": "ternary", "thresh": 0.7},
-        {"kind": "int",     "max_int": 15},
-    ],
-    "preShift": 256, "pOutput": 1024,
+    "dataset":       "MNIST",
+    "topology":      [784, 100, 30, 10],   # two hidden layers
+    "hidden_activation": "hard_sigmoid",
+    "tau":           10,
+    "epochs":        20,
+    "batch_size":    128,
+    "validation_split": 0.1,
+    "binarize_threshold": 128,
+    "seed":          0,
+    "prefix":        "mnist_stacked",
+    "output_dir":    "weights/mnist_stacked",
 }
 ```
 
-### 4.4 CIFAR-10 sign baseline — `train_cifar10.ipynb` → `cifar10/`
+### 4.4 CIFAR-10 baseline — `train_cifar10.ipynb` → `cifar10/` *(default)*
 
 ```python
 CONFIG = {
-    "epochs": 30, "batch_size": 256, "lr": 1e-3, "weight_decay": 0.0, "seed": 0,
-    "device": "cuda" if torch.cuda.is_available() else "cpu",
-    "data_dir":   "./data",
-    "output_dir": "cifar10",
-    "prefix":     "cifar10_weights",
-    "topology":   [3072, 30, 10],
-    "activation": "sign",
-    "act_params": {},
-    "layer_quant": [
-        {"kind": "ternary", "thresh": 0.7},
-        {"kind": "int",     "max_int": 15},
-    ],
-    "preShift": 256, "pOutput": 1024,
+    "dataset":       "CIFAR10",
+    "topology":      [3072, 30, 10],
+    "hidden_activation": "hard_sigmoid",
+    "tau":           10,
+    "epochs":        10,
+    "batch_size":    128,
+    "validation_split": 0.1,
+    "binarize_threshold": 128,
+    "seed":          0,
+    "prefix":        "cifar10_weights",
+    "output_dir":    "weights/cifar10",
 }
 ```
-
-### 4.5 CIFAR-100 baseline — `train_cifar100.ipynb` → future `cifar100/`
-
-```python
-CONFIG = {
-    "epochs": 30, "batch_size": 256, "lr": 1e-3, "weight_decay": 0.0, "seed": 0,
-    "device": "cuda" if torch.cuda.is_available() else "cpu",
-    "data_dir":   "./data",
-    "output_dir": "cifar100",
-    "prefix":     "cifar100_weights",
-    "topology":   [3072, 1024, 100],
-    "activation": "sign",
-    "act_params": {},
-    "layer_quant": [
-        {"kind": "ternary", "thresh": 0.7},
-        {"kind": "int",     "max_int": 15},
-    ],
-    "preShift": 256, "pOutput": 1024,
-}
-```
-
-This reproduces the artifact written by `train_cifar100_baseline.ipynb`,
-just driven by `CONFIG` instead of hard-coded constants.
 
 ---
 
 ## 5. Wiring the CSVs into a sub-project
 
-Each parametric notebook ends with a § 12 cell that prints a paste-ready
-`Network` builder snippet assembled from `CONFIG`. The mechanical part of
-hooking it into a sub-project is a one-liner: copy or symlink the CSVs from
-`new_models/<output_dir>/` next to the sub-project's `CMakeLists.txt`, then
-build as usual. The companion `<prefix>_config.json` is informational — copy
-it along too if you want the sub-project folder to remain self-describing,
-but the C++ side does not read it (yet).
+The mechanical part of hooking notebook output into a C++ sub-project is a
+one-liner: copy or symlink the CSVs from `new_models/<output_dir>/` next to
+the sub-project's `CMakeLists.txt`, then build as usual. The companion
+`<prefix>_config.json` is informational — copy it along too if you want the
+sub-project folder to remain self-describing, but the C++ side does not
+read it (yet).
 
 ```bash
 # Example: replace the shipped MNIST_30 weights with a fresh notebook run.
-cp new_models/mnist_dinn30/dinn30_W{1,2}.csv \
-   new_models/mnist_dinn30/dinn30_b{1,2}.csv \
-   new_models/mnist_dinn30/dinn30_config.json \
+cp new_models/weights/mnist_dinn30/dinn30_W{1,2}.csv \
+   new_models/weights/mnist_dinn30/dinn30_b{1,2}.csv \
+   new_models/weights/mnist_dinn30/dinn30_config.json \
    MNIST_30/
 
 cd MNIST_30
@@ -239,5 +214,9 @@ cmake -B build -S . && cmake --build build -j
 `MNIST_30/main.cpp` already loads `../dinn30_W{1,2}.csv` and
 `../dinn30_b{1,2}.csv`, so dropping the four CSVs into the sub-project
 folder is all you need. Use the same recipe (with the matching prefix and
-output dir) for `MNIST_100/` (`dinn100_*`), `cifar10/` (`cifar10_weights_*`),
-or any future sub-project.
+output dir) for `MNIST_100/` (`dinn100_*`) and `cifar10/`
+(`cifar10_weights_*`).
+
+Also note `openfhe_params.B_recommended` in the emitted JSON: that is
+`max(L1)` across all Linear layers, the recommended message-space bound
+for the OpenFHE plaintext modulus.
