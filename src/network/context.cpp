@@ -59,13 +59,17 @@ void FHEContext::Build(const std::vector<Activation>& activations,
     // ── CCParams ─────────────────────────────────────────────────────────
     CCParams<CryptoContextCKKSRNS> p;
     p.SetSecretKeyDist(params_.secretKeyDist);
-    p.SetSecurityLevel(HEStd_NotSet);
+    p.SetSecurityLevel(params_.securityLevel);
     p.SetScalingModSize(dcrtBits);
     p.SetScalingTechnique(FIXEDMANUAL);
     p.SetFirstModSize(firstMod);
     p.SetNumLargeDigits(params_.dnum);
     p.SetBatchSize(numSlotsCKKS_);
-    p.SetRingDim(params_.ringDim);
+
+    if (params_.securityLevel == HEStd_NotSet || params_.ringDim != 0) {
+        p.SetRingDim(params_.ringDim);
+    }
+    
     p.SetMultiplicativeDepth(totalDepth_);
 
     cc_ = GenCryptoContext(p);

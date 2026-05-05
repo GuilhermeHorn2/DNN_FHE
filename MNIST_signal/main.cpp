@@ -42,7 +42,10 @@ int main(int argc, char* argv[]) {
 
     using namespace fhednn;
 
-    FHEContext ctx;
+    FHEParams params;
+    params.securityLevel = lbcrypto::HEStd_128_classic;
+    params.ringDim       = 1u << 17;   
+    FHEContext ctx{params};
     Network    net;
     net.SetInputShift(1)
        .Linear(W1, b1)

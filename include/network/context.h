@@ -30,6 +30,7 @@ struct FHEParams {
 
     std::vector<std::uint32_t>      lvlb           = {3, 3};
     lbcrypto::SecretKeyDist         secretKeyDist  = lbcrypto::SPARSE_TERNARY;
+    lbcrypto::SecurityLevel         securityLevel  = lbcrypto::HEStd_NotSet;
 };
 
 // Owns the OpenFHE crypto context, key pair, and element parameters used by
