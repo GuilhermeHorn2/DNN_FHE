@@ -10,8 +10,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /workspace
 
-# Strictly the minimum needed to run new_models/notebooks/train_cifar100.ipynb:
-#   - torch + torchvision (CPU): model, training loop, CIFAR-100 dataset
+# Strictly the minimum needed to run the notebooks under new_models/notebooks/:
+#   - torch + torchvision (CPU): model, training loop, CIFAR-10/100 datasets
+#     (train_cifar10.ipynb, train_mnist.ipynb)
+#   - tensorflow (CPU): keras model + tensorflow.keras.datasets.mnist
+#     (plaintext_training1.ipynb)
 #   - numpy: HWC preprocessing and CSV export/reload
 #   - matplotlib: training-history plots (loss / accuracy curves)
 #   - jupyterlab: notebook server
@@ -19,8 +22,8 @@ WORKDIR /workspace
 # Each pip install lives in its own RUN so that:
 #   1. BuildKit can cache each layer independently. If the proxy / BuildKit
 #      gRPC stream dies mid-build, only the failing layer needs to be retried;
-#      successfully-installed layers (notably the heavy torch one) are
-#      preserved across rebuilds.
+#      successfully-installed layers (notably the heavy torch / tensorflow
+#      ones) are preserved across rebuilds.
 #   2. The pip cache mount keeps already-downloaded wheels on the host
 #      builder, so even the *failing* layer resumes almost instantly on
 #      the next `make build` invocation.
@@ -35,6 +38,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install \
         --index-url https://download.pytorch.org/whl/cpu \
         torch torchvision
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install tensorflow-cpu
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install numpy matplotlib

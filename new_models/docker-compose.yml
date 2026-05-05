@@ -5,8 +5,14 @@ services:
       target: development
     container_name: dnn-fhe-jupyter
     working_dir: /workspace
+    # TensorFlow / torch dataloaders use /dev/shm for inter-process tensors;
+    # the Docker default of 64MB is easily exhausted and surfaces as
+    # opaque "Bus error" crashes. 2GB is plenty for these notebooks.
+    shm_size: "2gb"
     environment:
       - HOME=/tmp
+      # Quiet TensorFlow's default INFO/WARNING spam in notebook output.
+      - TF_CPP_MIN_LOG_LEVEL=2
     extra_hosts:
       # Needed to allow the container to access external APIs inside the proxy.
       - "wsl-proxy:host-gateway"
