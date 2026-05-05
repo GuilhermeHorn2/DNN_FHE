@@ -76,6 +76,15 @@ only differences are the dataset loader, the bipolar preprocessing
 keeps the same section layout but is non-parametric: every value is hard-wired
 to the original `3072 → 1024 → 100` sign-activated CIFAR-100 setup.
 
+Each parametric notebook's § 10 export cell writes `2 * N` weight CSVs **plus
+a single companion `<output_dir>/<prefix>_config.json`** that records the
+run's topology, hidden activation (name + params), per-layer quantization,
+FHE-side budgets (`preShift`, `pOutput`), training hyperparameters,
+final/best accuracies, the § 9 headroom report, the list of weight files,
+the PyTorch version, and a timestamp — everything needed to reproduce or
+audit the run from the artifact dir alone. The hand-written
+`train_cifar100_baseline.ipynb` reference does **not** emit a config JSON.
+
 Hidden-layer activations supported by the parametric notebooks (set
 `CONFIG["activation"]` to one of these strings; some take extra
 `CONFIG["act_params"]` knobs — see the table in § 5 of any parametric
@@ -211,12 +220,15 @@ Each parametric notebook ends with a § 12 cell that prints a paste-ready
 `Network` builder snippet assembled from `CONFIG`. The mechanical part of
 hooking it into a sub-project is a one-liner: copy or symlink the CSVs from
 `new_models/<output_dir>/` next to the sub-project's `CMakeLists.txt`, then
-build as usual.
+build as usual. The companion `<prefix>_config.json` is informational — copy
+it along too if you want the sub-project folder to remain self-describing,
+but the C++ side does not read it (yet).
 
 ```bash
 # Example: replace the shipped MNIST_30 weights with a fresh notebook run.
 cp new_models/mnist_dinn30/dinn30_W{1,2}.csv \
    new_models/mnist_dinn30/dinn30_b{1,2}.csv \
+   new_models/mnist_dinn30/dinn30_config.json \
    MNIST_30/
 
 cd MNIST_30
@@ -225,7 +237,7 @@ cmake -B build -S . && cmake --build build -j
 ```
 
 `MNIST_30/main.cpp` already loads `../dinn30_W{1,2}.csv` and
-`../dinn30_b{1,2}.csv`, so dropping the four files into the sub-project
+`../dinn30_b{1,2}.csv`, so dropping the four CSVs into the sub-project
 folder is all you need. Use the same recipe (with the matching prefix and
 output dir) for `MNIST_100/` (`dinn100_*`), `cifar10/` (`cifar10_weights_*`),
 or any future sub-project.
