@@ -37,6 +37,21 @@ Activation Sign(std::int64_t        preShift,
                 lbcrypto::BigInteger pInput,
                 std::size_t          order = 1);
 
+// f(x) = H(x - preShift), the Heaviside step, returning {0, 1}.
+// Like Sign() but with output range {0, 1} instead of {-1, +1}.
+Activation Heaviside(std::int64_t        preShift,
+                     lbcrypto::BigInteger pInput,
+                     std::size_t          order = 1);
+
+// f(x) = max(0, x - preShift), the rectified linear unit.
+// `preShift` plays the same role as in Sign/Heaviside: it is the post-shift
+// threshold that maps a slot-space value of 0 to the ReLU "knee", so the
+// LUT receives values shifted by `preShift` and must subtract it back when
+// the input is positive. Output range: [0, pInput - preShift).
+Activation ReLU(std::int64_t        preShift,
+                lbcrypto::BigInteger pInput,
+                std::size_t          order = 1);
+
 // f(x) = x mod pOutput. Used by the InputEncoder to enter slot space.
 Activation Identity(lbcrypto::BigInteger pInput,
                     lbcrypto::BigInteger pOutput,

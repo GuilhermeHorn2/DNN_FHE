@@ -18,6 +18,36 @@ Activation Sign(std::int64_t         preShift,
     return a;
 }
 
+Activation Heaviside(std::int64_t         preShift,
+                     lbcrypto::BigInteger pInput,
+                     std::size_t          order) {
+    Activation a;
+    a.name     = "Heaviside";
+    a.preShift = preShift;
+    a.pInput   = pInput;
+    a.order    = order;
+    const std::int64_t threshold = preShift;
+    a.f = [threshold](std::int64_t x) -> std::int64_t {
+        return (x >= threshold) ? 1 : 0;
+    };
+    return a;
+}
+
+Activation ReLU(std::int64_t         preShift,
+                lbcrypto::BigInteger pInput,
+                std::size_t          order) {
+    Activation a;
+    a.name     = "ReLU";
+    a.preShift = preShift;
+    a.pInput   = pInput;
+    a.order    = order;
+    const std::int64_t threshold = preShift;
+    a.f = [threshold](std::int64_t x) -> std::int64_t {
+        return (x >= threshold) ? (x - threshold) : 0;
+    };
+    return a;
+}
+
 Activation Identity(lbcrypto::BigInteger pInput,
                     lbcrypto::BigInteger pOutput,
                     std::size_t          order) {

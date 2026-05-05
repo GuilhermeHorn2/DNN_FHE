@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(DiNN_OpenFHE_Modular)
+project(DiNN_OpenFHE_ReLU)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ── Shared framework lives one level up (../include, ../src, ../accuracy.cpp).
 #     This sub-project only owns its driver (main.cpp), its weights
-#     (dinn30_*.csv), and its sample images (img_*.jpg).
+#     (relu100_*.csv), and its sample images (img_*.jpg).
 set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 # ── OpenFHE ──────────────────────────────────────────────────────────────────
