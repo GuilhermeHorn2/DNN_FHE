@@ -1,9 +1,12 @@
+# syntax=docker/dockerfile:1.6
 FROM python:3.12-slim AS development
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_PROGRESS_BAR=raw
+    PIP_PROGRESS_BAR=raw \
+    PIP_DEFAULT_TIMEOUT=300 \
+    PIP_RETRIES=10
 
 WORKDIR /workspace
 
@@ -12,14 +15,32 @@ WORKDIR /workspace
 #   - numpy: HWC preprocessing and CSV export/reload
 #   - matplotlib: training-history plots (loss / accuracy curves)
 #   - jupyterlab: notebook server
-RUN python -m pip install --no-cache-dir --upgrade pip \
-    && python -m pip install --no-cache-dir --retries 10 --timeout 180 \
+#
+# Each pip install lives in its own RUN so that:
+#   1. BuildKit can cache each layer independently. If the proxy / BuildKit
+#      gRPC stream dies mid-build, only the failing layer needs to be retried;
+#      successfully-installed layers (notably the heavy torch one) are
+#      preserved across rebuilds.
+#   2. The pip cache mount keeps already-downloaded wheels on the host
+#      builder, so even the *failing* layer resumes almost instantly on
+#      the next `make build` invocation.
+#
+# Recovery from a dropped BuildKit connection is therefore just:
+#   make build      # re-run; cached layers + pip cache resume the work
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --upgrade pip
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install \
         --index-url https://download.pytorch.org/whl/cpu \
-        torch torchvision \
-    && python -m pip install --no-cache-dir --retries 10 --timeout 180 \
-        numpy \
-        matplotlib \
-        jupyterlab
+        torch torchvision
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install numpy matplotlib
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install jupyterlab
 
 EXPOSE 8888
 
