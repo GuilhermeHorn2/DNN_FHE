@@ -20,12 +20,27 @@ include_directories(${OpenFHE_INCLUDE}/schemelet)
 include_directories(${OpenFHE_INCLUDE}/third-party/include)
 
 # ── Bench / build options ────────────────────────────────────────────────────
-option(BENCH_TOTAL     "Time the entire program (main start to end)"       OFF)
-option(BENCH_INFERENCE "Time the inference path inside Network::Run"       OFF)
-option(BENCH_BOOTSTRAP "Time activation/refresh blocks (FBT-equivalent)"   OFF)
-option(BENCH_LAYERS    "Time each layer's Apply()"                         OFF)
-option(BENCH_MEMORY    "Report peak RSS at instrumentation points"         OFF)
-option(BUILD_ACCURACY  "Build the accuracy benchmark binary"               OFF)
+# BENCH_ALL is a convenience umbrella: -DBENCH_ALL=ON turns every BENCH_*
+# timer flag below ON in one shot. It does NOT enable BUILD_ACCURACY (that
+# builds an extra binary, which is a separate concern). To keep things
+# predictable, BENCH_ALL unconditionally overrides the individual flags;
+# if you want a specific subset only, leave BENCH_ALL=OFF and pass the
+# individual flags explicitly.
+option(BENCH_ALL       "Enable every BENCH_* flag at once (timers + memory)" OFF)
+option(BENCH_TOTAL     "Time the entire program (main start to end)"         OFF)
+option(BENCH_INFERENCE "Time the inference path inside Network::Run"         OFF)
+option(BENCH_BOOTSTRAP "Time activation/refresh blocks (FBT-equivalent)"     OFF)
+option(BENCH_LAYERS    "Time each layer's Apply()"                           OFF)
+option(BENCH_MEMORY    "Report peak RSS at instrumentation points"           OFF)
+option(BUILD_ACCURACY  "Build the accuracy benchmark binary"                 OFF)
+
+if(BENCH_ALL)
+    set(BENCH_TOTAL     ON)
+    set(BENCH_INFERENCE ON)
+    set(BENCH_BOOTSTRAP ON)
+    set(BENCH_LAYERS    ON)
+    set(BENCH_MEMORY    ON)
+endif()
 
 set(BENCH_DEFS "")
 foreach(b TOTAL INFERENCE BOOTSTRAP LAYERS MEMORY)

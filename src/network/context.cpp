@@ -10,6 +10,31 @@ namespace fhednn {
 
 using namespace lbcrypto;
 
+namespace {
+    const char* SecurityLevelName(SecurityLevel s) {
+        switch (s) {
+            case HEStd_NotSet:        return "HEStd_NotSet (NO SECURITY GUARANTEE)";
+            case HEStd_128_classic:   return "HEStd_128_classic";
+            case HEStd_192_classic:   return "HEStd_192_classic";
+            case HEStd_256_classic:   return "HEStd_256_classic";
+            case HEStd_128_quantum:   return "HEStd_128_quantum";
+            case HEStd_192_quantum:   return "HEStd_192_quantum";
+            case HEStd_256_quantum:   return "HEStd_256_quantum";
+            default:                  return "<unknown SecurityLevel>";
+        }
+    }
+
+    const char* SecretKeyDistName(SecretKeyDist d) {
+        switch (d) {
+            case GAUSSIAN:             return "GAUSSIAN";
+            case UNIFORM_TERNARY:      return "UNIFORM_TERNARY";
+            case SPARSE_TERNARY:       return "SPARSE_TERNARY";
+            default:                   return "<unknown SecretKeyDist>";
+        }
+    }
+
+}
+
 FHEContext::FHEContext(FHEParams params) : params_(std::move(params)) {}
 
 void FHEContext::Build(const std::vector<Activation>& activations,
@@ -69,7 +94,7 @@ void FHEContext::Build(const std::vector<Activation>& activations,
     if (params_.securityLevel == HEStd_NotSet || params_.ringDim != 0) {
         p.SetRingDim(params_.ringDim);
     }
-    
+
     p.SetMultiplicativeDepth(totalDepth_);
 
     cc_ = GenCryptoContext(p);
@@ -80,7 +105,10 @@ void FHEContext::Build(const std::vector<Activation>& activations,
     cc_->Enable(FHE);
 
     std::cout << "[FHEContext] ringDim = " << cc_->GetRingDimension()
-              << "  numSlotsCKKS = " << numSlotsCKKS_ << "\n";
+              << "  numSlotsCKKS = " << numSlotsCKKS_
+              << "  securityLevel = " << SecurityLevelName(params_.securityLevel)
+              << "  secretKeyDist = " << SecretKeyDistName(params_.secretKeyDist)
+              << "\n";
 
     keyPair_ = cc_->KeyGen();
 
