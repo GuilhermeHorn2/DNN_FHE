@@ -128,8 +128,9 @@ same input.
 * **Same ringDim blowup as `cifar10/`.** `numSlots = 4096` forces
   `ringDim = 8192`, which is roughly 4× slower and 3-4× more
   memory-hungry than the MNIST poly drivers. Expect well over 1 GB RSS.
-* **No `BENCH_*` flags / no `accuracy.cpp`.** This is a standalone build —
-  the framework's benchmark and accuracy harness do not apply.
+* **No `BENCH_*` flags / no batch accuracy harness.** This is a
+  standalone build — the framework's benchmark machinery and the
+  dual-mode `main` dispatch from §4 of the root README do not apply.
 * **Polynomial vs. Sign.** Even with a well-chosen `α`, Chebyshev `tanh`
   is a smooth approximation of `Sign`. On CIFAR's already weak DiNN30
   baseline, this can shift a non-trivial fraction of predictions; treat

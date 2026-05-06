@@ -173,10 +173,10 @@ int main(int argc, char* argv[]) {
     std::cout << "--- DiNN100 OpenFHE Inference (Polynomial Mode) ---" << std::endl;
 
     std::cout << "Loading weights..." << std::endl;
-    auto W1 = load_csv_2d("../dinn100_W1_0.csv", IN_DIM, HID_DIM);
-    auto b1 = load_csv_1d("../dinn100_b1_0.csv");
-    auto W2 = load_csv_2d("../dinn100_W2_0.csv", HID_DIM, OUT_DIM);
-    auto b2 = load_csv_1d("../dinn100_b2_0.csv");
+    auto W1 = load_csv_2d("../signal100_W1.csv", IN_DIM, HID_DIM);
+    auto b1 = load_csv_1d("../signal100_b1.csv");
+    auto W2 = load_csv_2d("../signal100_W2.csv", HID_DIM, OUT_DIM);
+    auto b2 = load_csv_1d("../signal100_b2.csv");
 
     // Same input width as DiNN30 (784 bipolar pixels), so the original 0.01
     // pre-scale tuned for that setting still maps the layer-1 sums into the

@@ -1,4 +1,5 @@
 #include "bench/bench.h"
+#include "io/accuracy.h"
 #include "io/csv.h"
 #include "io/image.h"
 #include "network/activation.h"
@@ -8,8 +9,12 @@
 #include <algorithm>
 #include <climits>
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
+#include <string>
 #include <vector>
+
+namespace fs = std::filesystem;
 
 // MNIST-like DiNN100 dimensions (784 -> 100 -> 10), ReLU variant.
 static constexpr int IN_DIM  = 784;
@@ -21,7 +26,9 @@ int main(int argc, char* argv[]) {
     BENCH_MEM("startup");
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <image.png>\n"
+        std::cerr << "Usage: " << argv[0] << " <image.png | test_root>\n"
+                  << "  Single-image:  pass an image path -> runs one inference + diagnostics + plaintext reference\n"
+                  << "  Batch:         pass a directory of <label>/*.{png,jpg,jpeg} -> accuracy + confusion matrix\n"
                   << "  Weights expected at ../relu100_W{1,2}.csv and ../relu100_b{1,2}.csv\n";
         return 1;
     }
@@ -36,20 +43,25 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::cout << "Loading image: " << argv[1] << "\n";
-    // ReLU networks here are trained on binary {0, 1} pixels (same convention
-    // as the Heaviside variant), not bipolar {-1, +1}. Re-map the bipolar
-    // loader output to {0, 1}.
-    auto pixels = io::LoadImageBipolar(argv[1], IN_DIM);
-    if (pixels.empty()) return 1;
-    for (auto& p : pixels) p = (p + 1) / 2;  // {-1,+1} -> {0,1}
+    const bool batchMode = fs::is_directory(argv[1]);
 
-    // ── Plain-side magnitude diagnostics (raw, unscaled weights) ─────────
-    // Quick sanity check that explains why FHE results may be wrong: the
-    // final decryption is mod pOutput = 1024, interpreted as a signed window
-    // (-512, +512). Any class score outside that window will wrap and
-    // destroy the argmax.
-    {
+    // Single-image mode loads the image up-front so the per-image plain-side
+    // diagnostics (which need pixels) can run before we mutate W1/b1 with the
+    // scaling step. Batch mode skips this — each image goes through the
+    // PixelLoader callback inside the harness instead.
+    std::vector<std::int64_t> pixels;
+    if (!batchMode) {
+        std::cout << "Loading image: " << argv[1] << "\n";
+        // ReLU networks here are trained on binary {0, 1} pixels, not bipolar
+        // {-1, +1}, so use the dedicated {0, 1} loader.
+        pixels = io::LoadImageBinary(argv[1], IN_DIM);
+        if (pixels.empty()) return 1;
+
+        // ── Plain-side magnitude diagnostics (raw, unscaled weights) ─────
+        // Quick sanity check that explains why FHE results may be wrong:
+        // the final decryption is mod pOutput = 1024, interpreted as a
+        // signed window (-512, +512). Any class score outside that window
+        // will wrap and destroy the argmax.
         std::vector<double> hiddenDiag(HID_DIM, 0.0);
         double preActMin = 1e18, preActMax = -1e18;
         double hidMin    = 1e18, hidMax    = -1e18;
@@ -82,10 +94,9 @@ int main(int argc, char* argv[]) {
     //                        ReLU LUT does not wrap (period = pInput = 1024).
     //      OUTPUT_SCALE_K -> shrinks final class scores into (-512, +512) so
     //                        DecryptCoeff (mod pOutput = 1024) does not wrap.
-    //    argmax is invariant under any positive scalar, so the plaintext
-    //    reference below — which uses the same W/b vectors — stays in lockstep
-    //    with the FHE result. Bump either constant up if the diagnostics above
-    //    still show out-of-range values.
+    //    argmax is invariant under any positive scalar. Required regardless
+    //    of single-image or batch mode — the FHE side will not produce a
+    //    valid argmax without it.
     constexpr double HIDDEN_SCALE_K = 4.0;
     constexpr double OUTPUT_SCALE_K = 64.0;
     for (auto& row : W1) for (auto& w : row) w /= HIDDEN_SCALE_K;
@@ -95,9 +106,9 @@ int main(int argc, char* argv[]) {
     std::printf("[Diag] scaled W1/b1 by 1/%.1f, W2/b2 by 1/%.1f (argmax invariant)\n",
                 HIDDEN_SCALE_K, OUTPUT_SCALE_K);
 
-    // Re-print magnitudes after scaling so we can confirm the choice fits
-    // both the LUT and the decoder windows.
-    {
+    if (!batchMode) {
+        // Re-print magnitudes after scaling so we can confirm the choice
+        // fits both the LUT and the decoder windows.
         std::vector<double> hiddenDiag(HID_DIM, 0.0);
         double preActMin = 1e18, preActMax = -1e18;
         double hidMin    = 1e18, hidMax    = -1e18;
@@ -136,6 +147,18 @@ int main(int argc, char* argv[]) {
     net.Compile(ctx);
     BENCH_MEM("after-compile");
 
+    // ── Batch mode: dispatch into the shared accuracy harness ─────────────
+    if (batchMode) {
+        auto loadPixels = [](const std::string& p) {
+            return io::LoadImageBinary(p.c_str(), IN_DIM);
+        };
+        auto result = io::RunAccuracyLoop(net, argv[1], loadPixels, OUT_DIM);
+        io::PrintAccuracySummary(result);
+        BENCH_MEM("end");
+        return 0;
+    }
+
+    // ── Single-image mode (existing behavior) ─────────────────────────────
     auto scores = net.Run(pixels);
 
     std::cout << "\n--- Final Class Scores ---\n";

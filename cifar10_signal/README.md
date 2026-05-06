@@ -2,7 +2,7 @@
 
 MVB-based homomorphic inference for CIFAR-10 with the same DiNN30
 topology used by `MNIST_30/`, retargeted to RGB images. For framework
-internals, build-flag reference, and `accuracy.cpp`, see the
+internals, build-flag reference, and the batch accuracy harness, see the
 [**root README**](../README.md).
 
 ---
@@ -133,7 +133,8 @@ flag reference.
 * **Plaintext reference.** `main.cpp` recomputes the network in `double`
   after the FHE inference and prints `(matches)` / `(MISMATCH)`. Use it
   as a quick correctness check on any new weight matrix.
-* **`accuracy.cpp` is MNIST-shaped as shipped.** To run the batch harness
-  on CIFAR you'd need to change `IN_DIM`, the weight paths, and either
-  rename the test directories to `0/`…`9/` or swap the iteration loop —
-  it's not a one-flag change.
+* **Batch harness works out of the box.** Pass `main` a directory shaped
+  as `<root>/<label>/*.{png,jpg,jpeg}` (labels `0/` … `9/`) and it will
+  use this project's CIFAR-aware `PixelLoader` (3-channel,
+  `LoadImageBipolar`, `IN_DIM = 3072`) — no recompile or hand-editing
+  needed.

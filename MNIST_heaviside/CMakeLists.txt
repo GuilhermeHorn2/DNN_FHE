@@ -4,9 +4,10 @@ project(DiNN_OpenFHE_Heaviside)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ── Shared framework lives one level up (../include, ../src, ../accuracy.cpp).
-#     This sub-project only owns its driver (main.cpp), its weights
-#     (heaviside100_*.csv), and its sample images (img_*.jpg).
+# ── Shared framework lives one level up (../include, ../src). The accuracy
+#     harness is part of libfhednn (see src/io/accuracy.cpp). This sub-project
+#     only owns its driver (main.cpp), its weights (heaviside100_*.csv), and
+#     its sample images (img_*.jpg).
 set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 # ── OpenFHE ──────────────────────────────────────────────────────────────────
@@ -21,18 +22,15 @@ include_directories(${OpenFHE_INCLUDE}/third-party/include)
 
 # ── Bench / build options ────────────────────────────────────────────────────
 # BENCH_ALL is a convenience umbrella: -DBENCH_ALL=ON turns every BENCH_*
-# timer flag below ON in one shot. It does NOT enable BUILD_ACCURACY (that
-# builds an extra binary, which is a separate concern). To keep things
-# predictable, BENCH_ALL unconditionally overrides the individual flags;
-# if you want a specific subset only, leave BENCH_ALL=OFF and pass the
-# individual flags explicitly.
+# timer flag below ON in one shot. It unconditionally overrides the
+# individual flags; if you want a specific subset only, leave BENCH_ALL=OFF
+# and pass the individual flags explicitly.
 option(BENCH_ALL       "Enable every BENCH_* flag at once (timers + memory)" OFF)
 option(BENCH_TOTAL     "Time the entire program (main start to end)"         OFF)
 option(BENCH_INFERENCE "Time the inference path inside Network::Run"         OFF)
 option(BENCH_BOOTSTRAP "Time activation/refresh blocks (FBT-equivalent)"     OFF)
 option(BENCH_LAYERS    "Time each layer's Apply()"                           OFF)
 option(BENCH_MEMORY    "Report peak RSS at instrumentation points"           OFF)
-option(BUILD_ACCURACY  "Build the accuracy benchmark binary"                 OFF)
 
 if(BENCH_ALL)
     set(BENCH_TOTAL     ON)
@@ -60,13 +58,10 @@ target_include_directories(fhednn PUBLIC "${REPO_ROOT}/include")
 target_link_libraries(fhednn PUBLIC ${OpenFHE_LIBRARIES})
 target_compile_definitions(fhednn PUBLIC ${BENCH_DEFS})
 
-# ── Executables ──────────────────────────────────────────────────────────────
+# ── Executable ──────────────────────────────────────────────────────────────
+# `main` is dual-mode: a single image path runs one inference + diagnostics;
+# a directory path runs the shared accuracy harness from src/io/accuracy.cpp
+# over <label>/*.{png,jpg,jpeg}.
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE fhednn)
 target_compile_definitions(main PRIVATE ${BENCH_DEFS})
-
-if(BUILD_ACCURACY)
-    add_executable(accuracy "${REPO_ROOT}/accuracy.cpp")
-    target_link_libraries(accuracy PRIVATE fhednn)
-    target_compile_definitions(accuracy PRIVATE ${BENCH_DEFS})
-endif()

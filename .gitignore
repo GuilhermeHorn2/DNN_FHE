@@ -58,6 +58,9 @@ __pycache__/
 .venv/
 venv/
 
+# ── Test data downloaded by download_test_data.py ────────────────────────────
+data/
+
 # ── Logs / temp ──────────────────────────────────────────────────────────────
 *.log
 *.tmp

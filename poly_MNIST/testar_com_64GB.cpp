@@ -297,10 +297,10 @@ int main(int argc, char* argv[]) {
     std::cout << "--- DiNN OpenFHE Inference ---" << std::endl;
 
     std::cout << "Loading weights..." << std::endl;
-    auto W1 = load_csv_2d("../dinn30_W1.csv", 784, 30);
-    auto b1 = load_csv_1d("../dinn30_b1.csv");
-    auto W2 = load_csv_2d("../dinn30_W2.csv", 30, 10);
-    auto b2 = load_csv_1d("../dinn30_b2.csv");
+    auto W1 = load_csv_2d("../signal30_W1.csv", 784, 30);
+    auto b1 = load_csv_1d("../signal30_b1.csv");
+    auto W2 = load_csv_2d("../signal30_W2.csv", 30, 10);
+    auto b2 = load_csv_1d("../signal30_b2.csv");
     
     FBTConfig config = setup_fbt_environment(30);
 

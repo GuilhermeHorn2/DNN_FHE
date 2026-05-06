@@ -13,6 +13,13 @@ namespace io {
 // Returns an empty vector on failure.
 std::vector<std::int64_t> LoadImageBipolar(const char* path, int dim, int channels = 1);
 
+// Loads an image, thresholds each byte at 127, and produces a {0, 1} vector
+// of length `dim`. Use this for ReLU / binary-input networks trained on
+// {0, 1} pixels. Bytes beyond `width * height * channels` are filled with 0.
+// `channels` works the same way as in LoadImageBipolar.
+// Returns an empty vector on failure.
+std::vector<std::int64_t> LoadImageBinary(const char* path, int dim, int channels = 1);
+
 // Loads an image normalized to [0, 255] -> int64 (no thresholding).
 // Useful for non-bipolar networks. Pads with 0 up to `dim`. `channels` works
 // the same way as in LoadImageBipolar.

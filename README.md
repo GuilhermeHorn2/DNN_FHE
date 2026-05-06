@@ -36,10 +36,8 @@ DNN_FHE/
 │
 ├── src/                               framework implementation (compiled into libfhednn.a)
 │   ├── bench/bench.cpp
-│   ├── io/{csv,image}.cpp
+│   ├── io/{csv,image,accuracy}.cpp    accuracy.cpp = shared batch-eval harness (see §4)
 │   └── network/{activation,context,layer,network}.cpp
-│
-├── accuracy.cpp                       optional batch-accuracy harness (see §4)
 │
 ├── MNIST_30/                          MVB · 784 → 30 → 10 (DiNN30)
 ├── MNIST_100/                         MVB · 784 → 100 → 10 (DiNN100)
@@ -70,14 +68,17 @@ from `../src`; the polynomial ones are independent translation units.
 
 ## 3. Common build & run idiom
 
-Every sub-project produces an executable called `main` that takes one image
-path as its only argument:
+Every sub-project produces a single executable called `main` that is
+**dual-mode**: pass it an image to do a one-shot inference (with diagnostics
++ plaintext reference), or pass it a directory tree to run the shared
+accuracy harness over a labeled batch (see §4).
 
 ```bash
 cd <subproject>                    # e.g. cd MNIST_30
 cmake -B build -S .
 cmake --build build -j4
-./build/main ../<subproject>/img_1.jpg     # or ./build/main ../cat.png  for cifar10
+./build/main ../<subproject>/img_1.jpg     # single image
+./build/main /path/to/test_root            # batch + confusion matrix
 ```
 
 Each sub-project's README documents which weights and which sample images
@@ -86,24 +87,21 @@ it expects.
 ### MVB-only build options (CMake cache flags)
 
 Available in `MNIST_30/`, `MNIST_100/`, `cifar10/` only — they're consumed
-by `bench/bench.h` and `accuracy.cpp`:
+by `bench/bench.h` and the per-project drivers:
 
 | Flag                | Effect                                                              |
 | ------------------- | ------------------------------------------------------------------- |
+| `-DBENCH_ALL=ON`    | Convenience umbrella — turns every BENCH_* flag below ON at once    |
 | `-DBENCH_TOTAL=ON`  | Wraps `main()` with a single end-to-end timer                       |
 | `-DBENCH_INFERENCE` | Times `Network::Run` (per-query, excludes `Compile()` setup)        |
 | `-DBENCH_BOOTSTRAP` | Times every `ActivationLayer::Apply` (the MVB refresh path)         |
 | `-DBENCH_LAYERS`    | Times every individual layer (`Linear`, `Activation`, `DummyMult`)  |
 | `-DBENCH_MEMORY`    | Adds `(peak RSS …)` to every timer line + `[BENCH][MEM]` checkpoints |
-| `-DBUILD_ACCURACY`  | Builds the `accuracy` target alongside `main` (see §4)              |
 
 When a flag is `OFF`, its macros expand to `((void)0)` — zero runtime cost.
 
 ```bash
-cmake -B build -S . \
-  -DBENCH_TOTAL=ON -DBENCH_INFERENCE=ON \
-  -DBENCH_BOOTSTRAP=ON -DBENCH_LAYERS=ON -DBENCH_MEMORY=ON \
-  -DBUILD_ACCURACY=ON
+cmake -B build -S . -DBENCH_ALL=ON
 cmake --build build -j4
 ```
 
@@ -125,19 +123,24 @@ Sample output with all flags on:
 
 ---
 
-## 4. `accuracy.cpp` — batch accuracy harness
+## 4. Batch accuracy harness
 
-`accuracy.cpp` (repo root) is a shared MVB-framework driver that builds the
-network **once** and then iterates over a labeled directory tree, reporting
-per-image predictions, an overall accuracy, and a 10×10 confusion matrix.
+There is **no separate binary**. Every MVB sub-project's `main` accepts
+either a single image **or a directory tree** — when it gets a directory it
+delegates to a shared loop that lives in
+[`src/io/accuracy.cpp`](src/io/accuracy.cpp) (declared in
+[`include/io/accuracy.h`](include/io/accuracy.h)).
 
-It is **not built by default**: each MVB sub-project's `CMakeLists.txt`
-gates it behind `-DBUILD_ACCURACY=ON`, in which case the `accuracy` target
-appears next to `main` in `build/`.
+This means each sub-project's `main.cpp` already encodes the *correct*
+network shape, activation, pixel encoding, and any weight pre-scaling for
+that project — so the harness inherits all of those automatically.
+Conversely, the harness does **not** know how to interpret pixels by
+itself; each `main.cpp` passes a small `PixelLoader` lambda telling the
+harness which `io::LoadImage*` to call per image.
 
 ### Expected directory layout
 
-One sub-directory per label, each named with the integer class:
+One sub-directory per integer label, each containing image files:
 
 ```
 test_root/
@@ -148,21 +151,24 @@ test_root/
   9/...
 ```
 
-`.png`, `.jpg`, and `.jpeg` files are picked up; everything else is
-skipped.
+`.png`, `.jpg`, and `.jpeg` are picked up; everything else is skipped.
 
 ### Build & run
 
 ```bash
-cd MNIST_30                                # any MVB sub-project works
-cmake -B build -S . -DBUILD_ACCURACY=ON
+cd <subproject>                        # any MVB sub-project works
+cmake -B build -S . -DBENCH_ALL=ON     # bench flags are optional
 cmake --build build -j4
-cd build
-./accuracy <test_root>                     # weights resolved from ../
-./accuracy <test_root> <weights_dir>       # explicit weights directory
+./build/main /path/to/test_root        # batch mode (directory)
+./build/main ../img_1.jpg              # single-image mode (file)
 ```
 
-### Output
+`Network::Compile` is called exactly **once** before the loop, so the
+per-image cost in batch mode is essentially the same as the
+`BENCH_INFERENCE` number you'd get from a single-image run, scaled by
+image count.
+
+### Output (batch mode)
 
 ```
 [   1] some_zero.png  -> pred=0  truth=0  OK
@@ -178,18 +184,29 @@ Confusion matrix (row=truth, col=pred):
   …
 ```
 
-### Caveats
+### Adding the dispatch to a new MVB driver
 
-* **Wired for DiNN30.** As shipped, `accuracy.cpp` hard-codes
-  `IN_DIM = 784`, `HID_DIM = 30`, and weight filenames `dinn30_*.csv`.
-  Building it from `MNIST_100/` or `cifar10/` will compile, but will then
-  read the wrong weights. To run it for DiNN100 or CIFAR-10, edit the
-  three `static constexpr int` lines plus the weight paths near the top of
-  `accuracy.cpp`. (The framework itself is generic — it's the harness's
-  defaults that are MNIST-30-shaped.)
-* **Cost is amortized.** `Network::Compile` is called exactly once. The
-  per-image cost is therefore close to the `BENCH_INFERENCE` number you
-  get from `main`, scaled by image count.
+If you spin up a new MVB sub-project, add this block right after
+`net.Compile(ctx)` in its `main.cpp`:
+
+```cpp
+#include "io/accuracy.h"
+#include <filesystem>
+namespace fs = std::filesystem;
+...
+if (fs::is_directory(argv[1])) {
+    auto loadPixels = [](const std::string& p) {
+        return io::LoadImageBinary(p.c_str(), IN_DIM);   // or LoadImageBipolar(...)
+    };
+    auto r = io::RunAccuracyLoop(net, argv[1], loadPixels, OUT_DIM);
+    io::PrintAccuracySummary(r);
+    return 0;
+}
+// ...existing single-image flow follows...
+```
+
+The lambda is the only place that encodes "what pixel encoding does this
+network expect" — the rest of the harness is project-agnostic.
 
 ---
 
@@ -348,6 +365,6 @@ convenience wrappers.
   activation passed to `EvalFBTSetup` by editing `FHEContext::Build` in
   [`src/network/context.cpp`](src/network/context.cpp).
 * **Polynomial projects.** Each one is fully self-contained — they do
-  *not* link `libfhednn.a` and do *not* honor the `BENCH_*` /
-  `BUILD_ACCURACY` flags. They are useful as a baseline / low-RAM
-  alternative, not as a drop-in for the MVB pipeline.
+  *not* link `libfhednn.a`, do *not* honor the `BENCH_*` flags, and do
+  *not* support the dual-mode batch harness in §4. They are useful as a
+  baseline / low-RAM alternative, not as a drop-in for the MVB pipeline.

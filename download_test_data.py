@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Download MNIST + CIFAR-10 test data and lay it out for ``accuracy.cpp``.
+"""Download MNIST + CIFAR-10 test data and lay it out for the batch harness.
 
-The benchmark harness (``accuracy.cpp``) iterates a tree shaped like::
+Each MVB sub-project's ``main`` is dual-mode: pass an image path for one-shot
+inference, or pass a directory shaped like::
 
     <root>/0/*.png
     <root>/1/*.png
     ...
     <root>/9/*.png
 
-This script fetches the official test splits, samples a configurable number
-of images per dataset (default: 50, balanced across the 10 classes so every
-label directory is non-empty), and writes them as PNGs in the expected
-layout::
+to dispatch into the shared accuracy harness (see ``src/io/accuracy.cpp`` and
+the root ``README.md`` §4). This script fetches the official test splits,
+samples a configurable number of images per dataset (default: 50, balanced
+across the 10 classes so every label directory is non-empty), and writes
+them as PNGs in the expected layout::
 
     data/mnist/<label>/*.png        # 28x28 grayscale  (784 = 28*28*1)
     data/cifar10/<label>/*.png      # 32x32 RGB        (3072 = 32*32*3)
@@ -19,9 +21,10 @@ layout::
 After running this you can drive the harness with, e.g.::
 
     cd MNIST_signal
-    cmake -B build -S . -DBUILD_ACCURACY=ON
+    cmake -B build -S .
     cmake --build build -j4
-    ./build/accuracy ../data/mnist ..
+    ./build/main ../data/mnist            # batch mode
+    ./build/main ../img_1.jpg             # single-image mode (still works)
 
 Dependencies: ``numpy``, ``Pillow`` (see ``requirements.txt``).
 """

@@ -169,10 +169,10 @@ int main(int argc, char* argv[]) {
     std::cout << "--- DiNN OpenFHE Inference (Polynomial Mode) ---" << std::endl;
 
     std::cout << "Loading weights..." << std::endl;
-    auto W1 = load_csv_2d("../dinn100_W1_0.csv", 784, 100);
-    auto b1 = load_csv_1d("../dinn100_b1_0.csv");
-    auto W2 = load_csv_2d("../dinn100_W2_0.csv", 100, 10);
-    auto b2 = load_csv_1d("../dinn100_b2_0.csv");
+    auto W1 = load_csv_2d("../signal100_W1.csv", 784, 100);
+    auto b1 = load_csv_1d("../signal100_b1.csv");
+    auto W2 = load_csv_2d("../signal100_W2.csv", 100, 10);
+    auto b2 = load_csv_1d("../signal100_b2.csv");
     
     FHEConfig config = setup_fhe_environment();
 

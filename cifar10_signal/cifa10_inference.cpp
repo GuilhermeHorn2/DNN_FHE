@@ -159,16 +159,16 @@ void RunDiNN(std::vector<int64_t>              input,
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <image.png>\n"
-                  << "       Weights: ../cifar10_weights_W1.csv  ../cifar10_weights_b1.csv\n"
-                  << "                ../cifar10_weights_W2.csv  ../cifar10_weights_b2.csv\n";
+                  << "       Weights: ../signal30_W1.csv  ../signal30_b1.csv\n"
+                  << "                ../signal30_W2.csv  ../signal30_b2.csv\n";
         return 1;
     }
 
     std::cout << "Loading weights...\n";
-    auto W1 = load_csv_2d("../cifar10_weights_W1.csv", IN_DIM,  HID_DIM);
-    auto b1 = load_csv_1d("../cifar10_weights_b1.csv");
-    auto W2 = load_csv_2d("../cifar10_weights_W2.csv", HID_DIM, OUT_DIM);
-    auto b2 = load_csv_1d("../cifar10_weights_b2.csv");
+    auto W1 = load_csv_2d("../signal30_W1.csv", IN_DIM,  HID_DIM);
+    auto b1 = load_csv_1d("../signal30_b1.csv");
+    auto W2 = load_csv_2d("../signal30_W2.csv", HID_DIM, OUT_DIM);
+    auto b2 = load_csv_1d("../signal30_b2.csv");
     if (W1.empty() || b1.empty() || W2.empty() || b2.empty()) {
         std::cerr << "Failed to load weights.\n"; return 1;
     }

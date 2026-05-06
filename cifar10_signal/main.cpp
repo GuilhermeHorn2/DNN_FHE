@@ -1,4 +1,5 @@
 #include "bench/bench.h"
+#include "io/accuracy.h"
 #include "io/csv.h"
 #include "io/image.h"
 #include "network/activation.h"
@@ -8,8 +9,12 @@
 #include <algorithm>
 #include <climits>
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
+#include <string>
 #include <vector>
+
+namespace fs = std::filesystem;
 
 // CIFAR-10: 32 x 32 x 3 RGB → flat 3072-dim input, then a 30-neuron hidden
 // bipolar layer and a 10-class output (same topology as DiNN30, just a
@@ -23,27 +28,23 @@ int main(int argc, char* argv[]) {
     BENCH_MEM("startup");
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <image.png>\n"
-                  << "  Weights expected at ../cifar10_weights_W{1,2}.csv "
-                  << "and ../cifar10_weights_b{1,2}.csv\n";
+        std::cerr << "Usage: " << argv[0] << " <image.png | test_root>\n"
+                  << "  Single-image:  pass an image path -> runs one inference + plaintext reference\n"
+                  << "  Batch:         pass a directory of <label>/*.{png,jpg,jpeg} -> accuracy + confusion matrix\n"
+                  << "  Weights expected at ../signal30_W{1,2}.csv "
+                  << "and ../signal30_b{1,2}.csv\n";
         return 1;
     }
 
     std::cout << "Loading weights...\n";
-    auto W1 = io::LoadCsv2D("../cifar10_weights_W1.csv", IN_DIM,  HID_DIM);
-    auto b1 = io::LoadCsv1D("../cifar10_weights_b1.csv");
-    auto W2 = io::LoadCsv2D("../cifar10_weights_W2.csv", HID_DIM, OUT_DIM);
-    auto b2 = io::LoadCsv1D("../cifar10_weights_b2.csv");
+    auto W1 = io::LoadCsv2D("../signal30_W1.csv", IN_DIM,  HID_DIM);
+    auto b1 = io::LoadCsv1D("../signal30_b1.csv");
+    auto W2 = io::LoadCsv2D("../signal30_W2.csv", HID_DIM, OUT_DIM);
+    auto b2 = io::LoadCsv1D("../signal30_b2.csv");
     if (W1.empty() || b1.empty() || W2.empty() || b2.empty()) {
         std::cerr << "Failed to load weights.\n";
         return 1;
     }
-
-    std::cout << "Loading image: " << argv[1] << "\n";
-    // CIFAR images are 3-channel RGB; passing channels=3 forces stb_image
-    // to deliver 3072 = 32*32*3 bytes regardless of the file's encoding.
-    auto pixels = io::LoadImageBipolar(argv[1], IN_DIM, /*channels=*/3);
-    if (pixels.empty()) return 1;
 
     using namespace fhednn;
 
@@ -62,6 +63,24 @@ int main(int argc, char* argv[]) {
 
     net.Compile(ctx);
     BENCH_MEM("after-compile");
+
+    // ── Batch mode: argv[1] is a directory of <label>/*.{png,jpg,jpeg} ────
+    // CIFAR images are 3-channel RGB; passing channels=3 forces stb_image
+    // to deliver 3072 = 32*32*3 bytes regardless of the file's encoding.
+    if (fs::is_directory(argv[1])) {
+        auto loadPixels = [](const std::string& path) {
+            return io::LoadImageBipolar(path.c_str(), IN_DIM, /*channels=*/3);
+        };
+        auto result = io::RunAccuracyLoop(net, argv[1], loadPixels, OUT_DIM);
+        io::PrintAccuracySummary(result);
+        BENCH_MEM("end");
+        return 0;
+    }
+
+    // ── Single-image mode (existing behavior) ─────────────────────────────
+    std::cout << "Loading image: " << argv[1] << "\n";
+    auto pixels = io::LoadImageBipolar(argv[1], IN_DIM, /*channels=*/3);
+    if (pixels.empty()) return 1;
 
     auto scores = net.Run(pixels);
 

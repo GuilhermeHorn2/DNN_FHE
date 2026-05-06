@@ -1,4 +1,5 @@
 #include "bench/bench.h"
+#include "io/accuracy.h"
 #include "io/csv.h"
 #include "io/image.h"
 #include "network/activation.h"
@@ -8,8 +9,12 @@
 #include <algorithm>
 #include <climits>
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
+#include <string>
 #include <vector>
+
+namespace fs = std::filesystem;
 
 // MNIST-like DiNN100 dimensions (784 -> 100 -> 10), Heaviside variant.
 static constexpr int IN_DIM  = 784;
@@ -21,7 +26,9 @@ int main(int argc, char* argv[]) {
     BENCH_MEM("startup");
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <image.png>\n"
+        std::cerr << "Usage: " << argv[0] << " <image.png | test_root>\n"
+                  << "  Single-image:  pass an image path -> runs one inference + plaintext reference\n"
+                  << "  Batch:         pass a directory of <label>/*.{png,jpg,jpeg} -> accuracy + confusion matrix\n"
                   << "  Weights expected at ../heaviside100_W{1,2}.csv and ../heaviside100_b{1,2}.csv\n";
         return 1;
     }
@@ -36,13 +43,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::cout << "Loading image: " << argv[1] << "\n";
-    // Heaviside networks are trained on binary {0, 1} pixels, not bipolar
-    // {-1, +1}. Re-map the bipolar loader output to {0, 1}.
-    auto pixels = io::LoadImageBipolar(argv[1], IN_DIM);
-    if (pixels.empty()) return 1;
-    for (auto& p : pixels) p = (p + 1) / 2;  // {-1,+1} -> {0,1}
-
     using namespace fhednn;
 
     FHEContext ctx;
@@ -54,6 +54,24 @@ int main(int argc, char* argv[]) {
 
     net.Compile(ctx);
     BENCH_MEM("after-compile");
+
+    // ── Batch mode: argv[1] is a directory of <label>/*.{png,jpg,jpeg} ────
+    if (fs::is_directory(argv[1])) {
+        auto loadPixels = [](const std::string& p) {
+            return io::LoadImageBinary(p.c_str(), IN_DIM);
+        };
+        auto result = io::RunAccuracyLoop(net, argv[1], loadPixels, OUT_DIM);
+        io::PrintAccuracySummary(result);
+        BENCH_MEM("end");
+        return 0;
+    }
+
+    // ── Single-image mode (existing behavior) ─────────────────────────────
+    std::cout << "Loading image: " << argv[1] << "\n";
+    // Heaviside networks here are trained on binary {0, 1} pixels, not
+    // bipolar {-1, +1}, so use the dedicated {0, 1} loader.
+    auto pixels = io::LoadImageBinary(argv[1], IN_DIM);
+    if (pixels.empty()) return 1;
 
     auto scores = net.Run(pixels);
 
