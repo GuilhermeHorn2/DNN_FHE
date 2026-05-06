@@ -211,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
         help="raw download cache (default: ./data/_downloads)",
     )
     ap.add_argument(
-        "--seed", type=int, default=0, help="RNG seed (default: 0)"
+        "--seed", type=int, default=42, help="RNG seed (default: 42)"
     )
     ap.add_argument(
         "--only",
@@ -245,9 +245,16 @@ def main(argv: list[str] | None = None) -> int:
             "cifar10", images, labels, idx, args.out / "cifar10", grayscale=False
         )
 
-    print("\nDone. Run the accuracy harness with, e.g.:")
-    print(f"  ./build/accuracy {args.out}/mnist <weights_dir>")
-    print(f"  ./build/accuracy {args.out}/cifar10 <weights_dir>")
+    out_abs = args.out.resolve()
+    print("\nDone. Run any sub-project's batch harness against the test data, e.g.:")
+    if args.only in (None, "mnist"):
+        print("  cd MNIST_signal && cmake -B build -S . && cmake --build build -j4")
+        print(f"  ./build/main {out_abs / 'mnist'}")
+        print("  # MNIST_heaviside and MNIST_ReLu use the same invocation")
+        print("  # poly_MNIST is single-image only: ./build/main <path/to/image.png>")
+    if args.only in (None, "cifar10"):
+        print("  cd cifar10_signal && cmake -B build -S . && cmake --build build -j4")
+        print(f"  ./build/main {out_abs / 'cifar10'}")
     return 0
 
 
