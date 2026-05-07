@@ -90,27 +90,33 @@ struct FHEConfig {
     uint32_t numSlotsCKKS; 
 };
 
-// --- Setup com Bootstrapping Habilitado ---
+// --- Setup com Bootstrapping Habilitado e Sem Segurança ---
 FHEConfig setup_fhe_environment() {
-    std::cout << "Setting up FHE Environment (Bootstrapping Enabled)..." << std::endl;
+    std::cout << "Setting up FHE Environment (Security: HEStd_NotSet)..." << std::endl;
     FHEConfig config;
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetSecurityLevel(HEStd_128_classic); 
+    
+    // 1. Desabilita a trava de segurança do OpenFHE
+    parameters.SetSecurityLevel(HEStd_NotSet); 
+    
+    // 2. Força um anel muito menor (16384 ou 32768) para economizar RAM. 
+    // Como a profundidade é 17, 32768 é o mais seguro para não dar erro matemático interno,
+    // mas 16384 pode rodar dependendo dos tamanhos exatos dos módulos.
+    parameters.SetRingDim(32768); 
+    
     parameters.SetScalingModSize(50);
     parameters.SetFirstModSize(60);
     parameters.SetScalingTechnique(FLEXIBLEAUTO);
     parameters.SetMultiplicativeDepth(17);
     
-    // 1. Force a smaller batch size (slots) instead of 0 (which defaults to max)
-    uint32_t desired_slots = 1024; 
+    // 3. Limita o número de slots gerados para poupar RAM
+    uint32_t desired_slots = 1024;
     parameters.SetBatchSize(desired_slots); 
 
     config.cc = GenCryptoContext(parameters);
     
     uint32_t n = config.cc->GetRingDimension();
-    
-    // 2. Use the desired slots instead of n / 2
     config.numSlotsCKKS = desired_slots; 
     
     std::cout << "Ring Dimension (n): " << n << std::endl;
@@ -127,11 +133,10 @@ FHEConfig setup_fhe_environment() {
     config.cc->EvalMultKeyGen(config.keyPair.secretKey);
     config.cc->EvalSumKeyGen(config.keyPair.secretKey);
     
-    std::cout << "Setting up Bootstrapping Keys (This will consume RAM and Time)..." << std::endl;
-    std::vector<uint32_t> levelBudget = {4, 4}; 
+    std::cout << "Setting up Bootstrapping Keys..." << std::endl;
+    std::vector<uint32_t> levelBudget = {4, 4};
     std::vector<uint32_t> bsgsDim = {0, 0};
     
-    // 3. This will now generate keys for 1024 slots, requiring a fraction of the RAM
     config.cc->EvalBootstrapSetup(levelBudget, bsgsDim, config.numSlotsCKKS);
     config.cc->EvalBootstrapKeyGen(config.keyPair.secretKey, config.numSlotsCKKS);
     std::cout << "Bootstrapping keys generated successfully." << std::endl;
@@ -236,9 +241,6 @@ int plaintext_inference(
 
 int main(int argc, char* argv[]) {
 
-    // =========================================================
-    // ARGUMENT CHECK
-    // =========================================================
     if (argc < 2) {
         std::cerr << "Usage:\n";
         std::cerr << "./dinn_inference <image_path>\n\n";
@@ -256,14 +258,8 @@ int main(int argc, char* argv[]) {
 
     std::cout << "--- DiNN OpenFHE Inference (Single Image Mode) ---" << std::endl;
 
-    // =========================================================
-    // MEMORY BEFORE FHE
-    // =========================================================
     long mem_before_fhe = get_current_memory_kb();
 
-    // =========================================================
-    // LOAD WEIGHTS
-    // =========================================================
     std::cout << "Loading weights..." << std::endl;
 
     auto W1 = load_csv_2d("../dinn30_W1.csv", 784, 30);
@@ -272,9 +268,6 @@ int main(int argc, char* argv[]) {
     auto W2 = load_csv_2d("../dinn30_W2.csv", 30, 10);
     auto b2 = load_csv_1d("../dinn30_b2.csv");
 
-    // =========================================================
-    // FHE SETUP
-    // =========================================================
     FHEConfig config = setup_fhe_environment();
 
     long mem_after_fhe_setup = get_current_memory_kb();
@@ -284,9 +277,6 @@ int main(int argc, char* argv[]) {
               << fhe_base_memory / 1024
               << " MB\n" << std::endl;
 
-    // =========================================================
-    // LOAD IMAGE
-    // =========================================================
     std::cout << "Loading image: " << image_path << std::endl;
 
     int width, height, channels;
@@ -312,9 +302,6 @@ int main(int argc, char* argv[]) {
 
     stbi_image_free(img_data);
 
-    // =========================================================
-    // PLAINTEXT INFERENCE
-    // =========================================================
     double pt_time = 0.0;
 
     int plaintext_pred = plaintext_inference(
@@ -326,9 +313,6 @@ int main(int argc, char* argv[]) {
         pt_time
     );
 
-    // =========================================================
-    // START FHE INFERENCE
-    // =========================================================
     auto start_inference = std::chrono::high_resolution_clock::now();
 
     Plaintext pt_image =
@@ -341,9 +325,6 @@ int main(int argc, char* argv[]) {
 
     auto start_eval = std::chrono::high_resolution_clock::now();
 
-    // =========================================================
-    // LAYER 1
-    // =========================================================
     auto ct_hidden_pre_act =
         compute_linear_layer(
             ct_image,
@@ -353,9 +334,6 @@ int main(int argc, char* argv[]) {
             30
         );
 
-    // =========================================================
-    // ACTIVATION + BOOTSTRAP
-    // =========================================================
     auto start_act_bs =
         std::chrono::high_resolution_clock::now();
 
@@ -374,9 +352,6 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> act_bs_duration =
         end_act_bs - start_act_bs;
 
-    // =========================================================
-    // LAYER 2
-    // =========================================================
     auto ct_scores =
         compute_linear_layer(
             ct_bootstrapped,
@@ -389,16 +364,10 @@ int main(int argc, char* argv[]) {
     auto end_eval =
         std::chrono::high_resolution_clock::now();
 
-    // =========================================================
-    // MEMORY
-    // =========================================================
     long current_peak = get_peak_memory_kb();
     long active_inference_cost =
         current_peak - mem_after_fhe_setup;
 
-    // =========================================================
-    // DECRYPT
-    // =========================================================
     Plaintext pt_result;
 
     config.cc->Decrypt(
@@ -412,9 +381,6 @@ int main(int argc, char* argv[]) {
     auto computed =
         pt_result->GetRealPackedValue();
 
-    // =========================================================
-    // FINAL TIME
-    // =========================================================
     auto end_inference =
         std::chrono::high_resolution_clock::now();
 
@@ -424,9 +390,6 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> total_duration =
         end_inference - start_inference;
 
-    // =========================================================
-    // PREDICTION
-    // =========================================================
     int fhe_pred = 0;
     double max_score = computed[0];
 
@@ -446,9 +409,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // =========================================================
-    // RESULTS
-    // =========================================================
     std::cout << "\n=========================================\n";
 
     if (fhe_pred == plaintext_pred) {
