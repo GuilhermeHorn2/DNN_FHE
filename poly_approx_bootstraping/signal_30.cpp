@@ -234,166 +234,269 @@ int plaintext_inference(
 }
 
 int main(int argc, char* argv[]) {
-    std::string directory_path = "/home/horn/Downloads/dnn_crypto/mnist/testSet";
-    int n_images_to_test = 20;
 
-    if (argc >= 2) n_images_to_test = std::stoi(argv[1]);
-    if (argc >= 3) directory_path = argv[2];
-
-    if (!fs::exists(directory_path) || !fs::is_directory(directory_path)) {
-        std::cerr << "Erro: Diretorio invalido -> " << directory_path << std::endl;
+    // =========================================================
+    // ARGUMENT CHECK
+    // =========================================================
+    if (argc < 2) {
+        std::cerr << "Usage:\n";
+        std::cerr << "./dinn_inference <image_path>\n\n";
+        std::cerr << "Example:\n";
+        std::cerr << "./dinn_inference /home/horn/Downloads/dnn_crypto/mnist/testSet/3.png\n";
         return 1;
     }
 
-    std::cout << "--- DiNN OpenFHE Inference (FHE vs Plaintext Mode) ---" << std::endl;
-    
+    std::string image_path = argv[1];
+
+    if (!fs::exists(image_path)) {
+        std::cerr << "Error: Image does not exist -> " << image_path << std::endl;
+        return 1;
+    }
+
+    std::cout << "--- DiNN OpenFHE Inference (Single Image Mode) ---" << std::endl;
+
+    // =========================================================
+    // MEMORY BEFORE FHE
+    // =========================================================
     long mem_before_fhe = get_current_memory_kb();
 
+    // =========================================================
+    // LOAD WEIGHTS
+    // =========================================================
     std::cout << "Loading weights..." << std::endl;
+
     auto W1 = load_csv_2d("../dinn30_W1.csv", 784, 30);
     auto b1 = load_csv_1d("../dinn30_b1.csv");
+
     auto W2 = load_csv_2d("../dinn30_W2.csv", 30, 10);
     auto b2 = load_csv_1d("../dinn30_b2.csv");
-    
+
+    // =========================================================
+    // FHE SETUP
+    // =========================================================
     FHEConfig config = setup_fhe_environment();
 
     long mem_after_fhe_setup = get_current_memory_kb();
     long fhe_base_memory = mem_after_fhe_setup - mem_before_fhe;
 
-    std::cout << "-> Memória Base FHE (Chaves + Contexto + Bootstrap): " << fhe_base_memory / 1024 << " MB\n" << std::endl;
+    std::cout << "-> FHE Base Memory: "
+              << fhe_base_memory / 1024
+              << " MB\n" << std::endl;
 
-    std::vector<std::string> valid_files;
-    for (const auto& entry : fs::directory_iterator(directory_path)) {
-        if (entry.is_regular_file()) {
-            std::string filename = entry.path().filename().string();
-            if (filename.find(".png") != std::string::npos || filename.find(".jpg") != std::string::npos) {
-                valid_files.push_back(entry.path().string());
-            }
-        }
-    }
-    
-    std::sort(valid_files.begin(), valid_files.end());
-    int files_to_process = std::min(n_images_to_test, static_cast<int>(valid_files.size()));
+    // =========================================================
+    // LOAD IMAGE
+    // =========================================================
+    std::cout << "Loading image: " << image_path << std::endl;
 
-    int matches_with_plaintext = 0;
-    double total_fhe_eval_time = 0.0;
-    double total_fhe_end_to_end_time = 0.0;
-    double total_plaintext_time = 0.0;
-    double total_act_bs_time = 0.0; 
-    
-    long total_inference_memory_kb = 0;
+    int width, height, channels;
 
-    for (int i = 0; i < files_to_process; ++i) {
-        std::string filepath = valid_files[i];
-        std::string filename = fs::path(filepath).filename().string();
+    unsigned char* img_data =
+        stbi_load(image_path.c_str(),
+                  &width,
+                  &height,
+                  &channels,
+                  1);
 
-        std::cout << "\n[" << i + 1 << "/" << files_to_process << "] Processando: " << filename << std::endl;
-
-        int width, height, channels;
-        unsigned char *img_data = stbi_load(filepath.c_str(), &width, &height, &channels, 1); 
-        
-        if (img_data == NULL) continue;
-
-        std::vector<double> real_image(784, 0.0);
-        for(int p = 0; p < 784; ++p) {
-            double pixel = img_data[p] / 255.0; 
-            real_image[p] = (pixel > 0.5) ? 1.0 : -1.0; 
-        }
-        stbi_image_free(img_data);
-
-        double pt_time = 0.0;
-        int plaintext_pred = plaintext_inference(real_image, W1, b1, W2, b2, pt_time);
-        total_plaintext_time += pt_time;
-
-        auto start_inference = std::chrono::high_resolution_clock::now();
-
-        Plaintext pt_image = config.cc->MakeCKKSPackedPlaintext(real_image);
-        auto ct_image = config.cc->Encrypt(config.keyPair.publicKey, pt_image);
-
-        long mem_before_inference = get_current_memory_kb();
-
-        auto start_eval = std::chrono::high_resolution_clock::now();
-
-        auto ct_hidden_pre_act = compute_linear_layer(ct_image, W1, b1, config, 30);
-        
-        // --- BLOCO ISOLADO: Ativação + Bootstrapping ---
-        auto start_act_bs = std::chrono::high_resolution_clock::now();
-        
-        auto ct_hidden_post_act = apply_approx_activation(ct_hidden_pre_act, config);
-        // Refresh de ruído e resgate de níveis multiplicativos
-        auto ct_bootstrapped = config.cc->EvalBootstrap(ct_hidden_post_act);
-        
-        auto end_act_bs = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> act_bs_duration = end_act_bs - start_act_bs;
-        total_act_bs_time += act_bs_duration.count();
-        // ----------------------------------------------
-
-        auto ct_scores = compute_linear_layer(ct_bootstrapped, W2, b2, config, 10);
-
-        auto end_eval = std::chrono::high_resolution_clock::now();
-        
-        long mem_after_inference = get_current_memory_kb();
-        long current_inference_mem = mem_after_inference - mem_before_inference;
-        if(current_inference_mem < 0) current_inference_mem = 0; 
-        
-        long current_peak = get_peak_memory_kb();
-        long active_inference_cost = current_peak - mem_after_fhe_setup;
-
-        total_inference_memory_kb += active_inference_cost;
-
-        std::chrono::duration<double> eval_duration = end_eval - start_eval;
-        total_fhe_eval_time += eval_duration.count();
-
-        Plaintext pt_result;
-        config.cc->Decrypt(config.keyPair.secretKey, ct_scores, &pt_result);
-        pt_result->SetLength(10);
-        auto computed = pt_result->GetRealPackedValue();
-
-        auto end_inference = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> inference_duration = end_inference - start_inference;
-        total_fhe_end_to_end_time += inference_duration.count();
-
-        int fhe_pred = 0;
-        double max_score = computed[0];
-
-        for (int d = 0; d < 10; ++d) {
-            if (computed[d] > max_score) {
-                max_score = computed[d];
-                fhe_pred = d;
-            }
-        }
-
-        if (fhe_pred == plaintext_pred) {
-            matches_with_plaintext++;
-            std::cout << " -> OK! Predição: " << fhe_pred;
-        } else {
-            std::cout << " -> DIVERGÊNCIA! FHE: " << fhe_pred << " | PT: " << plaintext_pred;
-        }
-        std::cout << "\n    Tempo Eval Total: " << eval_duration.count() << "s";
-        std::cout << "\n    Tempo (Ativação + Bootstrap): " << act_bs_duration.count() << "s";
-        std::cout << "\n    RAM da Inferencia Ativa: " << active_inference_cost / 1024 << " MB\n";
+    if (img_data == NULL) {
+        std::cerr << "Error loading image." << std::endl;
+        return 1;
     }
 
-    std::cout << "\n=========================================" << std::endl;
-    std::cout << "             RELATÓRIO FINAL             " << std::endl;
-    std::cout << "=========================================" << std::endl;
-    
-    if (files_to_process > 0) {
-        double fidelity = (static_cast<double>(matches_with_plaintext) / files_to_process) * 100.0;
-        std::cout << "Fidelidade FHE vs Plaintext: " << fidelity << "% (" << matches_with_plaintext << "/" << files_to_process << ")" << std::endl;
-        
-        std::cout << "\n--- Tempos Médios ---" << std::endl;
-        std::cout << "Plaintext (CPU): " << (total_plaintext_time / files_to_process) << " s" << std::endl;
-        std::cout << "FHE Eval (Completo): " << (total_fhe_eval_time / files_to_process) << " s" << std::endl;
-        std::cout << "FHE Somente (Act + Bootstrapping): " << (total_act_bs_time / files_to_process) << " s" << std::endl;
-        std::cout << "FHE (I/O + Cripto + Eval): " << (total_fhe_end_to_end_time / files_to_process) << " s" << std::endl;
+    std::vector<double> real_image(784, 0.0);
 
-        std::cout << "\n--- Consumo de Memória ---" << std::endl;
-        std::cout << "Ambiente FHE (Base + Keys + Bootstrap): ~" << fhe_base_memory / 1024 << " MB (Permanente)" << std::endl;
-        std::cout << "Custo por Inferência: ~" << (total_inference_memory_kb / files_to_process) / 1024 << " MB (Dinâmico)" << std::endl;
-        std::cout << "Pico Global do Processo: " << get_peak_memory_kb() / 1024 << " MB" << std::endl;
+    for (int p = 0; p < 784; ++p) {
+        double pixel = img_data[p] / 255.0;
+        real_image[p] = (pixel > 0.5) ? 1.0 : -1.0;
     }
-    std::cout << "=========================================" << std::endl;
+
+    stbi_image_free(img_data);
+
+    // =========================================================
+    // PLAINTEXT INFERENCE
+    // =========================================================
+    double pt_time = 0.0;
+
+    int plaintext_pred = plaintext_inference(
+        real_image,
+        W1,
+        b1,
+        W2,
+        b2,
+        pt_time
+    );
+
+    // =========================================================
+    // START FHE INFERENCE
+    // =========================================================
+    auto start_inference = std::chrono::high_resolution_clock::now();
+
+    Plaintext pt_image =
+        config.cc->MakeCKKSPackedPlaintext(real_image);
+
+    auto ct_image =
+        config.cc->Encrypt(config.keyPair.publicKey, pt_image);
+
+    long mem_before_inference = get_current_memory_kb();
+
+    auto start_eval = std::chrono::high_resolution_clock::now();
+
+    // =========================================================
+    // LAYER 1
+    // =========================================================
+    auto ct_hidden_pre_act =
+        compute_linear_layer(
+            ct_image,
+            W1,
+            b1,
+            config,
+            30
+        );
+
+    // =========================================================
+    // ACTIVATION + BOOTSTRAP
+    // =========================================================
+    auto start_act_bs =
+        std::chrono::high_resolution_clock::now();
+
+    auto ct_hidden_post_act =
+        apply_approx_activation(
+            ct_hidden_pre_act,
+            config
+        );
+
+    auto ct_bootstrapped =
+        config.cc->EvalBootstrap(ct_hidden_post_act);
+
+    auto end_act_bs =
+        std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> act_bs_duration =
+        end_act_bs - start_act_bs;
+
+    // =========================================================
+    // LAYER 2
+    // =========================================================
+    auto ct_scores =
+        compute_linear_layer(
+            ct_bootstrapped,
+            W2,
+            b2,
+            config,
+            10
+        );
+
+    auto end_eval =
+        std::chrono::high_resolution_clock::now();
+
+    // =========================================================
+    // MEMORY
+    // =========================================================
+    long current_peak = get_peak_memory_kb();
+    long active_inference_cost =
+        current_peak - mem_after_fhe_setup;
+
+    // =========================================================
+    // DECRYPT
+    // =========================================================
+    Plaintext pt_result;
+
+    config.cc->Decrypt(
+        config.keyPair.secretKey,
+        ct_scores,
+        &pt_result
+    );
+
+    pt_result->SetLength(10);
+
+    auto computed =
+        pt_result->GetRealPackedValue();
+
+    // =========================================================
+    // FINAL TIME
+    // =========================================================
+    auto end_inference =
+        std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> eval_duration =
+        end_eval - start_eval;
+
+    std::chrono::duration<double> total_duration =
+        end_inference - start_inference;
+
+    // =========================================================
+    // PREDICTION
+    // =========================================================
+    int fhe_pred = 0;
+    double max_score = computed[0];
+
+    std::cout << "\n--- Scores ---\n";
+
+    for (int d = 0; d < 10; ++d) {
+
+        std::cout << "Digit "
+                  << d
+                  << ": "
+                  << computed[d]
+                  << std::endl;
+
+        if (computed[d] > max_score) {
+            max_score = computed[d];
+            fhe_pred = d;
+        }
+    }
+
+    // =========================================================
+    // RESULTS
+    // =========================================================
+    std::cout << "\n=========================================\n";
+
+    if (fhe_pred == plaintext_pred) {
+        std::cout << "MATCH!\n";
+    } else {
+        std::cout << "DIVERGENCE!\n";
+    }
+
+    std::cout << "Plaintext Prediction: "
+              << plaintext_pred
+              << std::endl;
+
+    std::cout << "FHE Prediction: "
+              << fhe_pred
+              << std::endl;
+
+    std::cout << "\n--- Timing ---\n";
+
+    std::cout << "Plaintext Time: "
+              << pt_time
+              << " s\n";
+
+    std::cout << "FHE Eval Time: "
+              << eval_duration.count()
+              << " s\n";
+
+    std::cout << "Activation + Bootstrap: "
+              << act_bs_duration.count()
+              << " s\n";
+
+    std::cout << "Total FHE Time: "
+              << total_duration.count()
+              << " s\n";
+
+    std::cout << "\n--- Memory ---\n";
+
+    std::cout << "FHE Base Memory: ~"
+              << fhe_base_memory / 1024
+              << " MB\n";
+
+    std::cout << "Inference Memory: ~"
+              << active_inference_cost / 1024
+              << " MB\n";
+
+    std::cout << "Global Peak Memory: "
+              << get_peak_memory_kb() / 1024
+              << " MB\n";
+
+    std::cout << "=========================================\n";
 
     return 0;
 }
