@@ -100,20 +100,22 @@ FHEConfig setup_fhe_environment() {
     parameters.SetScalingModSize(50);
     parameters.SetFirstModSize(60);
     parameters.SetScalingTechnique(FLEXIBLEAUTO);
-    
-    // Aumentamos a profundidade multiplicativa para acomodar o circuito de Bootstrap
     parameters.SetMultiplicativeDepth(17);
-    parameters.SetBatchSize(0); 
+    
+    // 1. Force a smaller batch size (slots) instead of 0 (which defaults to max)
+    uint32_t desired_slots = 1024; 
+    parameters.SetBatchSize(desired_slots); 
 
     config.cc = GenCryptoContext(parameters);
     
     uint32_t n = config.cc->GetRingDimension();
-    config.numSlotsCKKS = n / 2; 
+    
+    // 2. Use the desired slots instead of n / 2
+    config.numSlotsCKKS = desired_slots; 
     
     std::cout << "Ring Dimension (n): " << n << std::endl;
-    std::cout << "Max Slots (n/2): " << config.numSlotsCKKS << std::endl;
+    std::cout << "Configured Slots: " << config.numSlotsCKKS << std::endl;
 
-    // Habilitando as flags essenciais, INCLUINDO o FHE (necessário para Bootstrap)
     config.cc->Enable(PKE);
     config.cc->Enable(KEYSWITCH);
     config.cc->Enable(LEVELEDSHE);
@@ -124,13 +126,12 @@ FHEConfig setup_fhe_environment() {
     config.keyPair = config.cc->KeyGen();
     config.cc->EvalMultKeyGen(config.keyPair.secretKey);
     config.cc->EvalSumKeyGen(config.keyPair.secretKey);
-    // (As chaves manuais de rotação foram removidas daqui)
     
-    // --- Configuração e Geração das Chaves de Bootstrapping ---
     std::cout << "Setting up Bootstrapping Keys (This will consume RAM and Time)..." << std::endl;
-    std::vector<uint32_t> levelBudget = {4, 4}; // Valores padrão recomendados
+    std::vector<uint32_t> levelBudget = {4, 4}; 
     std::vector<uint32_t> bsgsDim = {0, 0};
     
+    // 3. This will now generate keys for 1024 slots, requiring a fraction of the RAM
     config.cc->EvalBootstrapSetup(levelBudget, bsgsDim, config.numSlotsCKKS);
     config.cc->EvalBootstrapKeyGen(config.keyPair.secretKey, config.numSlotsCKKS);
     std::cout << "Bootstrapping keys generated successfully." << std::endl;
