@@ -26,6 +26,23 @@ int ArgMax(const Scores& s, int cap) {
     return best;
 }
 
+std::int64_t pixelsSize(const std::string& testRoot, const PixelLoader& loadPixels) {
+    const fs::path classDir = fs::path(testRoot) / "0";
+    if (!fs::exists(classDir) || !fs::is_directory(classDir)) return 0;
+
+    const auto it = fs::directory_iterator(classDir);
+    if (it == fs::directory_iterator{}) return 0;
+
+    const auto& entry = *it;
+    if (!entry.is_regular_file()) return 0;
+
+    const auto ext = entry.path().extension().string();
+    if (ext != ".png" && ext != ".jpg" && ext != ".jpeg") return 0;
+
+    const auto pixels = loadPixels(entry.path().string());
+    return pixels.empty() ? 0 : pixels.size();
+}
+
 }  // namespace
 
 AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
@@ -36,6 +53,8 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
     AccuracyResult r;
     r.confusion.assign(outDim, std::vector<int>(outDim, 0));
     r.hasPlain = static_cast<bool>(plainScorer);
+    auto zeroesVec = std::vector<std::int64_t>(pixelsSize(testRoot, loadPixels), 0);
+    auto zeroes = net.EncodeInput(zeroesVec);
 
     for (int label = 0; label < outDim; ++label) {
         const fs::path classDir = fs::path(testRoot) / std::to_string(label);
@@ -51,7 +70,7 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
             if (pixels.empty()) continue;
 
             // FHE side
-            auto fheScores = net.Run(pixels);
+            auto fheScores = net.Run(pixels, zeroes);
             const int predicted = ArgMax(fheScores, outDim);
 
             ++r.total;

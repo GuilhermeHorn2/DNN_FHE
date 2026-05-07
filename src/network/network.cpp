@@ -233,7 +233,7 @@ std::vector<std::int64_t> Network::DecodeOutput(
         reportLen, reportLen, ctx_->flagBR());
 }
 
-std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput) {
+std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput, Ciphertext<DCRTPoly> zeroes) {
     if (!compiled_ || !ctx_) {
         throw std::runtime_error("Network::Run called before Compile().");
     }
