@@ -1,0 +1,44 @@
+internet+docker: ok | DNN_FHE/poly_approx_bootstraping/build on  main [!?] via △ v3.22.1
+❯ ./dinn_inference ../img_1.jpg
+--- DiNN OpenFHE Inference (Single Image Mode) ---
+Loading weights...
+Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)...
+Ring Dimension (n): 65536
+Configured Slots: 1024
+Multiplicative Depth: 32
+Setting up Bootstrapping (precomputations)...
+Generating keys...
+Generating Bootstrapping Keys...
+Bootstrapping keys generated successfully.
+-> FHE Base Memory: 10341 MB
+
+Loading image: ../img_1.jpg
+
+--- Scores ---
+Digit 0: 48.3077
+Digit 1: -63.5919
+Digit 2: 95.7538
+Digit 3: 17.5795
+Digit 4: -32.173
+Digit 5: -9.55589
+Digit 6: 7.9207
+Digit 7: -40.7191
+Digit 8: 22.588
+Digit 9: -34.7351
+
+=========================================
+MATCH!
+Plaintext Prediction: 2
+FHE Prediction: 2
+
+--- Timing ---
+Plaintext Time: 5.8291e-05 s
+FHE Eval Time: 225.979 s
+Activation + Bootstrap: 38.7805 s
+Total FHE Time: 226.56 s
+
+--- Memory ---
+FHE Base Memory: ~10341 MB
+Inference Memory: ~508 MB
+Global Peak Memory: 10856 MB
+=========================================
