@@ -23,9 +23,12 @@ DATA_DIR="${1:-${SCRIPT_DIR}/data/mnist}"
 LOG_DIR="${SCRIPT_DIR}/run_logs/$(date +%Y%m%d_%H%M%S)"
 
 VARIANTS=(
-    MNIST_signal
-    MNIST_heaviside
-    MNIST_relu
+    # MNIST_signal
+    # MNIST_heaviside
+    # MNIST_relu
+    poly_bootstraping_signal
+    # poly_bootstraping_heaviside
+    # poly_bootstraping_relu
 )
 HIDDEN_SIZES=(30)
 
