@@ -188,11 +188,32 @@ int main(int argc, char* argv[]) {
     BENCH_MEM("after-compile");
 
     // ── Batch mode: dispatch into the shared accuracy harness ─────────────
+    // Plain-side reference uses the *scaled* W1/b1/W2/b2 that the FHE side
+    // also sees — argmax is invariant under positive scaling, so this still
+    // gives a faithful FHE-vs-plain agreement signal.
     if (batchMode) {
         auto loadPixels = [](const std::string& p) {
             return io::LoadImageBinary(p.c_str(), IN_DIM);
         };
-        auto result = io::RunAccuracyLoop(net, inputPath, loadPixels, OUT_DIM);
+
+        auto plainScore = [&, HID_DIM](const std::vector<std::int64_t>& px) {
+            std::vector<double> hidden(HID_DIM, 0.0);
+            for (int j = 0; j < HID_DIM; ++j) {
+                double acc = b1[j];
+                for (int i = 0; i < IN_DIM; ++i)
+                    acc += W1[j][i] * static_cast<double>(px[i]);
+                hidden[j] = (acc > 0.0) ? acc : 0.0;
+            }
+            std::vector<double> scores(OUT_DIM, 0.0);
+            for (int j = 0; j < OUT_DIM; ++j) {
+                scores[j] = b2[j];
+                for (int i = 0; i < HID_DIM; ++i)
+                    scores[j] += W2[j][i] * hidden[i];
+            }
+            return scores;
+        };
+
+        auto result = io::RunAccuracyLoop(net, inputPath, loadPixels, OUT_DIM, plainScore);
         io::PrintAccuracySummary(result);
         BENCH_MEM("end");
         return 0;

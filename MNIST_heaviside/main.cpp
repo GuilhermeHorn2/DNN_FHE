@@ -96,11 +96,36 @@ int main(int argc, char* argv[]) {
     BENCH_MEM("after-compile");
 
     // ── Batch mode: inputPath is a directory of <label>/*.{png,jpg,jpeg} ──
+    // The harness only knows how to walk + score; it asks us how to turn a
+    // single image path into the {0, 1} pixel vector this Heaviside network
+    // expects, and (optionally) how to score the same pixels in plaintext
+    // so it can report FHE vs plain agreement.
     if (fs::is_directory(inputPath)) {
         auto loadPixels = [](const std::string& p) {
             return io::LoadImageBinary(p.c_str(), IN_DIM);
         };
-        auto result = io::RunAccuracyLoop(net, inputPath, loadPixels, OUT_DIM);
+
+        // Plain-side reference: same topology as the FHE network (Linear ->
+        // Heaviside -> Linear). Captures W1/b1/W2/b2 by reference; they are
+        // not mutated after Compile() in this driver, so this is safe.
+        auto plainScore = [&, HID_DIM](const std::vector<std::int64_t>& px) {
+            std::vector<double> hidden(HID_DIM, 0.0);
+            for (int j = 0; j < HID_DIM; ++j) {
+                double acc = b1[j];
+                for (int i = 0; i < IN_DIM; ++i)
+                    acc += W1[j][i] * static_cast<double>(px[i]);
+                hidden[j] = (acc >= 0.0) ? 1.0 : 0.0;
+            }
+            std::vector<double> scores(OUT_DIM, 0.0);
+            for (int j = 0; j < OUT_DIM; ++j) {
+                scores[j] = b2[j];
+                for (int i = 0; i < HID_DIM; ++i)
+                    scores[j] += W2[j][i] * hidden[i];
+            }
+            return scores;
+        };
+
+        auto result = io::RunAccuracyLoop(net, inputPath, loadPixels, OUT_DIM, plainScore);
         io::PrintAccuracySummary(result);
         BENCH_MEM("end");
         return 0;
