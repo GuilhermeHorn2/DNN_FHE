@@ -1,0 +1,33 @@
+# Run scripts/download_test_data.py inside a container with the project
+# root mounted at /workspace, so the generated `data/` directory shows
+# up directly in the host repo.
+#
+# Usage (from this directory):
+#   docker compose run --rm download
+#
+# Pass arguments through to the script, e.g.:
+#   docker compose run --rm download --count 100 --only mnist
+
+services:
+  download:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Needed to allow the build step (pip install) to reach the
+      # outside world through the BCN proxy.
+      extra_hosts:
+        - "wsl-proxy:host-gateway"
+    image: dnn-fhe-download-test-data:latest
+    # Mount the repo root (the parent of this scripts/ folder) so the
+    # script's relative output paths (./data, ./data/_downloads) land
+    # in the host project root.
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace
+    extra_hosts:
+    # Needed to allow the container to access external API inside the proxy. Mandatory for BCN machines.
+      - "wsl-proxy:host-gateway"
+    # Match the host UID/GID so files written into the bind mount are
+    # owned by the invoking user instead of root. Override at runtime
+    # with: `USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose run ...`.
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
