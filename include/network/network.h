@@ -53,8 +53,6 @@ public:
     // Append an arbitrary Layer. Useful for custom layers.
     Network& Add(std::unique_ptr<Layer> layer);
 
-    lbcrypto::Ciphertext<lbcrypto::DCRTPoly> EncryptZeroes();
-
     // ── Compile / Run ─────────────────────────────────────────────────────
 
     // Computes levelsComputation, inserts DummyMult padding, and builds the
@@ -65,7 +63,7 @@ public:
     // back -> [layers...] -> HomDecoding -> decrypt.
     // Returns the decrypted output vector (length = trailing Linear's outDim,
     // or rawInput.size() if no Linear is present).
-    std::vector<std::int64_t> Run(const std::vector<std::int64_t>& rawInput, lbcrypto::Ciphertext<lbcrypto::DCRTPoly> zeroes = nullptr);
+    std::vector<std::int64_t> Run(const std::vector<std::int64_t>& rawInput);
 
     // ── Introspection ─────────────────────────────────────────────────────
     std::size_t NumLayers() const { return layers_.size(); }

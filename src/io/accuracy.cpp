@@ -55,7 +55,8 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
     AccuracyResult r;
     r.confusion.assign(outDim, std::vector<int>(outDim, 0));
     r.hasPlain = static_cast<bool>(plainScorer);
-    auto zeroes = net.EncryptZeroes();
+    auto zeroesVec = std::vector<std::int64_t>(pixelsSize(testRoot, loadPixels), 0);
+    auto zeroes = net.EncodeInput(zeroesVec);
 
     for (int label = 0; label < outDim; ++label) {
         const fs::path classDir = fs::path(testRoot) / std::to_string(label);

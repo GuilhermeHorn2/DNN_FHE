@@ -53,48 +53,6 @@ Network& Network::Add(std::unique_ptr<Layer> layer) {
     return *this;
 }
 
-Ciphertext<DCRTPoly> Network::EncryptZeroes() {
-    BENCH_LAYER_SCOPE("InputEncoder");
-
-    if (!ctx_) throw std::runtime_error("Network::Run before Compile.");
-    auto&         cc           = ctx_->cc();
-    const auto&   params       = ctx_->params();
-    const auto    numSlotsCKKS = ctx_->numSlotsCKKS();
-    const auto    numSlots     = params.numSlots;
-    const double  scaleTHI     = static_cast<double>(params.scaleTHI);
-
-    std::vector<std::int64_t> x(numSlots, 0);
-
-    // ── Encrypt RLWE / mod-switch ─────────────────────────────────────────
-    auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(
-        x, params.qBFVInit, params.pInput,
-        ctx_->keyPair().secretKey, ctx_->elementParams(), ctx_->flagBR());
-    SchemeletRLWEMP::ModSwitch(ctxtBFV, params.Q, params.qBFVInit);
-
-    BENCH_MEM("after-encrypt");
-
-    // ── RLWE -> CKKS ──────────────────────────────────────────────────────
-    const std::uint32_t firstLvl =
-        ctx_->totalDepth() - (params.levelsAvailableBeforeBootstrap > 0);
-    auto ctxt = SchemeletRLWEMP::ConvertRLWEToCKKS(
-        *cc, ctxtBFV, ctx_->keyPair().publicKey,
-        params.BIGQ, numSlotsCKKS, firstLvl);
-
-    // ── Identity EvalMVBNoDecoding (enter slot space) ─────────────────────
-    auto identity = activations::Identity(
-        params.pInput, params.pOutput, params.hermiteOrder);
-    auto coeffIdentity = GetHermiteTrigCoefficients(
-        identity.f, identity.pInput.ConvertToInt(), identity.order, params.scaleTHI);
-
-    auto powers = cc->EvalMVBPrecompute(
-        ctxt, coeffIdentity, params.pInput.GetMSB() - 1,
-        ctx_->elementParams()->GetModulus(), identity.order);
-    auto ctxtSlots = cc->EvalMVBNoDecoding(
-        powers, coeffIdentity, params.pInput.GetMSB() - 1, identity.order);
-
-    return ctxtSlots;
-}
-
 // ── Compile ─────────────────────────────────────────────────────────────────
 
 void Network::Compile(FHEContext& ctx) {
@@ -282,28 +240,7 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
     BENCH_INFERENCE_SCOPE("Inference (Run)");
 
     ForwardState         state;
-
-    auto& cc = ctx_->cc();
-    const auto&   params       = ctx_->params();
-    const std::uint32_t plaintextLvl = ctx_->totalDepth()
-                                     - params.lvlb[1]
-                                     - params.levelsAvailableAfterBootstrap
-                                     - ctx_->levelsComputation();
-    const auto    numSlotsCKKS = ctx_->numSlotsCKKS();
-    Ciphertext<DCRTPoly> ct;
-    if (!zeroes) {
-        ct = EncodeInput(rawInput);
-    } else {
-        const double scaleTHI = static_cast<double>(params.scaleTHI);
-        std::vector<double> rawInputDouble(numSlotsCKKS, 0.0);
-        const std::size_t lim = std::min<std::size_t>(rawInput.size(), numSlotsCKKS);
-        for (std::size_t i = 0; i < lim; ++i) {
-            rawInputDouble[i] = static_cast<double>(rawInput[i]) / scaleTHI;
-        }
-        Plaintext pt_rawInput = cc->MakeCKKSPackedPlaintext(
-            rawInputDouble, 1, plaintextLvl, nullptr, numSlotsCKKS);
-        ct = cc->EvalAdd(zeroes, pt_rawInput);
-    }
+    Ciphertext<DCRTPoly> ct = EncodeInput(rawInput);
     BENCH_MEM("after-input-encode");
 
     // Per-layer instrumentation lives here (not inside each layer's Apply)
