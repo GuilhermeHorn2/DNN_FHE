@@ -21,7 +21,7 @@ struct FHEParams {
     lbcrypto::BigInteger BIGQ     = lbcrypto::BigInteger(1) << 47;
 
     std::uint32_t numSlots                       = 1024;
-    std::uint32_t ringDim                        = 1u << 11;     // 2048
+    std::uint32_t ringDim                        = 1u << 16;     // 2048
     std::uint64_t scaleTHI                       = 32;
     std::size_t   hermiteOrder                   = 1;
     std::uint32_t levelsAvailableAfterBootstrap  = 0;
