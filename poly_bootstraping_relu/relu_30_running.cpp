@@ -551,10 +551,10 @@ int run_folder_mode(
             sum_peak_l2    += r.layer2_peak_delta_kb;
 
             std::printf(
-                "[%4d] %-30s -> pred=%d truth=%d %-4s   "
-                "t=[l1 %.2f | a+b %.2f | l2 %.2f] s   "
-                "rss=[l1 %+ld | a+b %+ld | l2 %+ld] MB   "
-                "peak=[l1 %+ld | a+b %+ld | l2 %+ld] MB\n",
+                "[%4d] %-30s -> pred=%d truth=%d %s\n"
+                "  tempo: layer 1 %.2f  -  activation + bootstrap %.2f | layer 2 %.2f   [s]\n"
+                "  rss:   layer 1 %+ld  -  activation + bootstrap %+ld | layer 2 %+ld   [MB]\n"
+                "  peak:  layer 1 %+ld  -  activation + bootstrap %+ld | layer 2 %+ld   [MB]\n",
                 total, path.filename().c_str(),
                 r.fhe_pred, label,
                 r.fhe_pred == label ? "OK" : "MISS",
