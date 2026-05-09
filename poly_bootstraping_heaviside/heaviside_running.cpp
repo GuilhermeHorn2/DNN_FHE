@@ -93,7 +93,7 @@ struct FHEConfig {
 
 // --- Setup com Bootstrapping Habilitado e Sem Segurança ---
 FHEConfig setup_fhe_environment() {
-    std::cout << "Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)..." << std::endl;
+    std::cout << "Setting up FHE Environment (Security: HEStd_128_classic, Bootstrap)..." << std::endl;
     FHEConfig config;
 
     CCParams<CryptoContextCKKSRNS> parameters;
@@ -104,8 +104,8 @@ FHEConfig setup_fhe_environment() {
     SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
     parameters.SetSecretKeyDist(secretKeyDist);
 
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1 << 16); // 65536 - needed to fit the modulus chain for bootstrap depth
+    parameters.SetSecurityLevel(HEStd_128_classic);
+    parameters.SetRingDim(1 << 17);
 
     // Scaling parameters recommended by the OpenFHE 1.5.1 bootstrap example
     ScalingTechnique rescaleTech = FLEXIBLEAUTO;
@@ -203,17 +203,20 @@ Ciphertext<DCRTPoly> compute_linear_layer(
 Ciphertext<DCRTPoly> apply_approx_activation(Ciphertext<DCRTPoly> ct_input, FHEConfig& config) {
     std::vector<double> scale_vec(config.numSlotsCKKS, 0.01);
     Plaintext pt_scale = config.cc->MakeCKKSPackedPlaintext(scale_vec);
-    
+
     auto ct_scaled = config.cc->EvalMult(ct_input, pt_scale);
-    ct_scaled = config.cc->Rescale(ct_scaled); 
+    ct_scaled = config.cc->Rescale(ct_scaled);
 
     double lowerBound = -8.0;
     double upperBound = 8.0;
     uint32_t degree = 7;
-    
-    auto tanh_lambda = [](double x) -> double { return std::tanh(x); };
-    
-    return config.cc->EvalChebyshevFunction(tanh_lambda, ct_scaled, lowerBound, upperBound, degree);
+
+    // Smooth Heaviside: H(x) ~= 0.5 * (1 + tanh(k*x)), output in {0, 1}.
+    auto heaviside_lambda = [](double x) -> double {
+        return 0.5 * (1.0 + std::tanh(x));
+    };
+
+    return config.cc->EvalChebyshevFunction(heaviside_lambda, ct_scaled, lowerBound, upperBound, degree);
 }
 
 int plaintext_inference(
@@ -231,7 +234,8 @@ int plaintext_inference(
         for (int j = 0; j < 784; ++j) {
             sum += W1[i][j] * image[j];
         }
-        hidden[i] = std::tanh(sum * 0.01);
+        // Smooth Heaviside: H(x) ~= 0.5 * (1 + tanh(k*x)), output in {0, 1}.
+        hidden[i] = 0.5 * (1.0 + std::tanh(sum * 0.01));
     }
 
     std::vector<double> output(10, 0.0);
@@ -285,8 +289,8 @@ struct InferenceResult {
     long inference_kb;                   // peak RSS minus mem_after_fhe_setup (kept for compat)
 };
 
-// Loads `path` as 28x28 grayscale (784 pixels) and binarizes to {-1, +1}
-// (Sign-trained network expects bipolar inputs).
+// Loads `path` as 28x28 grayscale (784 pixels) and binarizes to {0, +1}
+// (Heaviside-trained network expects non-negative binary inputs).
 // Returns an empty vector on failure so callers can `continue` in folder mode.
 std::vector<double> load_image_to_input(const std::string& path) {
     int width, height, channels;
@@ -297,7 +301,7 @@ std::vector<double> load_image_to_input(const std::string& path) {
     std::vector<double> real_image(784, 0.0);
     for (int p = 0; p < 784; ++p) {
         double pixel = img_data[p] / 255.0;
-        real_image[p] = (pixel > 0.5) ? 1.0 : -1.0;
+        real_image[p] = (pixel > 0.5) ? 1.0 : 0.0;
     }
     stbi_image_free(img_data);
     return real_image;
@@ -527,9 +531,9 @@ int run_folder_mode(
 
             std::printf(
                 "[%4d] %-30s -> pred=%d truth=%d %s\n"
-                "  tempo: layer 1 %.2f  -  activation + bootstrap %.2f | layer 2 %.2f   [s]\n"
-                "  rss:   layer 1 %+ld  -  activation + bootstrap %+ld | layer 2 %+ld   [MB]\n"
-                "  peak:  layer 1 %+ld  -  activation + bootstrap %+ld | layer 2 %+ld   [MB]\n",
+                "  TIME -> layer 1: %.2f  |  activation + bootstrap: %.2f  |  layer 2: %.2f [s]\n"
+                "  RSS  -> layer 1: %+ld  |  activation + bootstrap: %+ld  |  layer 2: %+ld [MB]\n"
+                "  PEAK -> layer 1: %+ld  |  activation + bootstrap: %+ld  |  layer 2: %+ld [MB]\n",
                 total, path.filename().c_str(),
                 r.fhe_pred, label,
                 r.fhe_pred == label ? "OK" : "MISS",
@@ -643,7 +647,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Loading weights..." << std::endl;
 
-    const std::string tag       = "dinn" + std::to_string(hidden_size);
+    const std::string tag       = "heaviside" + std::to_string(hidden_size);
     const std::string W1_path   = "../" + tag + "_W1.csv";
     const std::string b1_path   = "../" + tag + "_b1.csv";
     const std::string W2_path   = "../" + tag + "_W2.csv";

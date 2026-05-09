@@ -3,7 +3,6 @@
 #include "bench/bench.h"
 
 #include "math/hermite.h"
-#include "schemelet/rlwe-mp.h"
 
 #include <algorithm>
 #include <iostream>
@@ -295,7 +294,12 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
     if (!zeroes) {
         ct = EncodeInput(rawInput);
     } else {
-        std::vector<double> rawInputDouble(rawInput.begin(), rawInput.end());
+        const double scaleTHI = static_cast<double>(params.scaleTHI);
+        std::vector<double> rawInputDouble(numSlotsCKKS, 0.0);
+        const std::size_t lim = std::min<std::size_t>(rawInput.size(), numSlotsCKKS);
+        for (std::size_t i = 0; i < lim; ++i) {
+            rawInputDouble[i] = static_cast<double>(rawInput[i]) / scaleTHI;
+        }
         Plaintext pt_rawInput = cc->MakeCKKSPackedPlaintext(
             rawInputDouble, 1, plaintextLvl, nullptr, numSlotsCKKS);
         ct = cc->EvalAdd(zeroes, pt_rawInput);

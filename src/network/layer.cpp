@@ -3,7 +3,6 @@
 #include "bench/bench.h"
 
 #include "math/hermite.h"
-#include "schemelet/rlwe-mp.h"
 
 #include <iostream>
 #include <stdexcept>

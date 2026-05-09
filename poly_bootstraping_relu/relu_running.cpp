@@ -93,7 +93,7 @@ struct FHEConfig {
 
 // --- Setup com Bootstrapping Habilitado e Sem Segurança ---
 FHEConfig setup_fhe_environment() {
-    std::cout << "Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)..." << std::endl;
+    std::cout << "Setting up FHE Environment (Security: HEStd_128_classic, Bootstrap)..." << std::endl;
     FHEConfig config;
 
     CCParams<CryptoContextCKKSRNS> parameters;
@@ -104,9 +104,9 @@ FHEConfig setup_fhe_environment() {
     SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
     parameters.SetSecretKeyDist(secretKeyDist);
 
-    parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1 << 16); // 65536 - needed to fit the modulus chain for bootstrap depth
-
+    parameters.SetSecurityLevel(HEStd_128_classic);
+    parameters.SetRingDim(1 << 17); 
+    
     // Scaling parameters recommended by the OpenFHE 1.5.1 bootstrap example
     ScalingTechnique rescaleTech = FLEXIBLEAUTO;
     uint32_t dcrtBits = 59;
@@ -200,23 +200,41 @@ Ciphertext<DCRTPoly> compute_linear_layer(
     return ct_layer_out;
 }
 
-Ciphertext<DCRTPoly> apply_approx_activation(Ciphertext<DCRTPoly> ct_input, FHEConfig& config) {
-    std::vector<double> scale_vec(config.numSlotsCKKS, 0.01);
+// Auto-tunes the Chebyshev pre-scale from the L1 norm of W1's rows + |b1|, so
+// the worst-case |layer-1 pre-activation| maps into roughly half of [-8, 8].
+// Worst case happens when every input pixel aligns sign-wise with W1[j][i].
+double compute_pre_scale(const std::vector<std::vector<int64_t>>& W1,
+                         const std::vector<int64_t>& b1) {
+    int64_t max_abs_pre = 1;
+    for (size_t j = 0; j < W1.size(); ++j) {
+        int64_t row_l1 = std::abs(b1[j]);
+        for (auto w : W1[j]) row_l1 += std::abs(w);
+        if (row_l1 > max_abs_pre) max_abs_pre = row_l1;
+    }
+    // 4.0 (not 8.0) leaves headroom so Chebyshev edge effects don't dominate.
+    return 4.0 / static_cast<double>(max_abs_pre);
+}
+
+Ciphertext<DCRTPoly> apply_approx_activation(Ciphertext<DCRTPoly> ct_input,
+                                             FHEConfig& config,
+                                             double pre_scale) {
+    std::vector<double> scale_vec(config.numSlotsCKKS, pre_scale);
     Plaintext pt_scale = config.cc->MakeCKKSPackedPlaintext(scale_vec);
 
     auto ct_scaled = config.cc->EvalMult(ct_input, pt_scale);
     ct_scaled = config.cc->Rescale(ct_scaled);
 
+    // ReLU has a kink at 0; degree 7 is visibly noisy there, degree 13 fits the
+    // remaining depth budget (linear 2 + scale 1 + cheb 5 = 8 of 10 levels).
     double lowerBound = -8.0;
     double upperBound = 8.0;
-    uint32_t degree = 7;
+    uint32_t degree = 13;
 
-    // Smooth Heaviside: H(x) ~= 0.5 * (1 + tanh(k*x)), output in {0, 1}.
-    auto heaviside_lambda = [](double x) -> double {
-        return 0.5 * (1.0 + std::tanh(x));
+    auto relu_lambda = [](double x) -> double {
+        return std::max(0.0, x);
     };
 
-    return config.cc->EvalChebyshevFunction(heaviside_lambda, ct_scaled, lowerBound, upperBound, degree);
+    return config.cc->EvalChebyshevFunction(relu_lambda, ct_scaled, lowerBound, upperBound, degree);
 }
 
 int plaintext_inference(
@@ -234,8 +252,7 @@ int plaintext_inference(
         for (int j = 0; j < 784; ++j) {
             sum += W1[i][j] * image[j];
         }
-        // Smooth Heaviside: H(x) ~= 0.5 * (1 + tanh(k*x)), output in {0, 1}.
-        hidden[i] = 0.5 * (1.0 + std::tanh(sum * 0.01));
+        hidden[i] = std::max(0.0, sum);
     }
 
     std::vector<double> output(10, 0.0);
@@ -248,7 +265,7 @@ int plaintext_inference(
             sum += W2[i][j] * hidden[j];
         }
         output[i] = sum;
-
+        
         if (sum > max_score) {
             max_score = sum;
             predicted_class = i;
@@ -290,7 +307,7 @@ struct InferenceResult {
 };
 
 // Loads `path` as 28x28 grayscale (784 pixels) and binarizes to {0, +1}
-// (Heaviside-trained network expects non-negative binary inputs).
+// (ReLU-trained network expects non-negative inputs).
 // Returns an empty vector on failure so callers can `continue` in folder mode.
 std::vector<double> load_image_to_input(const std::string& path) {
     int width, height, channels;
@@ -310,7 +327,8 @@ std::vector<double> load_image_to_input(const std::string& path) {
 // Encrypt -> linear1 -> activation -> bootstrap -> linear2 -> decrypt for one
 // image. Captures per-phase timings (Linear 1 / Activation+Bootstrap /
 // Linear 2) and per-phase RSS + peak memory deltas at the four boundaries.
-// The encrypt/decrypt steps stay outside the per-phase windows; their cost
+// `pre_scale` is forwarded to the ReLU Chebyshev approximation. The
+// encrypt/decrypt steps stay outside the per-phase windows; their cost
 // shows up in `total_seconds - eval_seconds`.
 InferenceResult run_fhe_inference(
     const std::vector<double>& real_image,
@@ -318,6 +336,7 @@ InferenceResult run_fhe_inference(
     const std::vector<std::vector<int64_t>>& W2, const std::vector<int64_t>& b2,
     int hidden_size,
     FHEConfig& config,
+    double pre_scale,
     long mem_after_fhe_setup)
 {
     InferenceResult r;
@@ -339,7 +358,7 @@ InferenceResult run_fhe_inference(
     long peak1 = get_peak_memory_kb();
 
     // --- Activation + Bootstrap ---
-    auto ct_hidden_post_act = apply_approx_activation(ct_hidden_pre_act, config);
+    auto ct_hidden_post_act = apply_approx_activation(ct_hidden_pre_act, config, pre_scale);
     auto ct_bootstrapped    = config.cc->EvalBootstrap(ct_hidden_post_act);
 
     auto t2 = std::chrono::high_resolution_clock::now();
@@ -408,6 +427,7 @@ int run_single_image_mode(
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
     const std::vector<std::vector<int64_t>>& W2, const std::vector<int64_t>& b2,
     FHEConfig& config,
+    double pre_scale,
     long mem_after_fhe_setup,
     long fhe_base_memory)
 {
@@ -424,7 +444,7 @@ int run_single_image_mode(
         real_image, W1, b1, W2, b2, hidden_size, pt_time);
 
     auto r = run_fhe_inference(
-        real_image, W1, b1, W2, b2, hidden_size, config, mem_after_fhe_setup);
+        real_image, W1, b1, W2, b2, hidden_size, config, pre_scale, mem_after_fhe_setup);
 
     std::cout << "\n--- Scores ---\n";
     for (int d = 0; d < 10; ++d) {
@@ -474,6 +494,7 @@ int run_folder_mode(
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
     const std::vector<std::vector<int64_t>>& W2, const std::vector<int64_t>& b2,
     FHEConfig& config,
+    double pre_scale,
     long mem_after_fhe_setup,
     long fhe_base_memory)
 {
@@ -511,7 +532,7 @@ int run_folder_mode(
             if (real_image.empty()) continue;
 
             auto r = run_fhe_inference(
-                real_image, W1, b1, W2, b2, hidden_size, config, mem_after_fhe_setup);
+                real_image, W1, b1, W2, b2, hidden_size, config, pre_scale, mem_after_fhe_setup);
 
             ++total;
             if (r.fhe_pred == label) ++correct;
@@ -531,9 +552,9 @@ int run_folder_mode(
 
             std::printf(
                 "[%4d] %-30s -> pred=%d truth=%d %s\n"
-                "  tempo: layer 1 %.2f  -  activation + bootstrap %.2f | layer 2 %.2f   [s]\n"
-                "  rss:   layer 1 %+ld  -  activation + bootstrap %+ld | layer 2 %+ld   [MB]\n"
-                "  peak:  layer 1 %+ld  -  activation + bootstrap %+ld | layer 2 %+ld   [MB]\n",
+                "  TIME -> layer 1: %.2f  |  activation + bootstrap: %.2f  |  layer 2: %.2f [s]\n"
+                "  RSS  -> layer 1: %+ld  |  activation + bootstrap: %+ld  |  layer 2: %+ld [MB]\n"
+                "  PEAK -> layer 1: %+ld  |  activation + bootstrap: %+ld  |  layer 2: %+ld [MB]\n",
                 total, path.filename().c_str(),
                 r.fhe_pred, label,
                 r.fhe_pred == label ? "OK" : "MISS",
@@ -647,7 +668,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Loading weights..." << std::endl;
 
-    const std::string tag       = "heaviside" + std::to_string(hidden_size);
+    const std::string tag       = "relu" + std::to_string(hidden_size);
     const std::string W1_path   = "../" + tag + "_W1.csv";
     const std::string b1_path   = "../" + tag + "_b1.csv";
     const std::string W2_path   = "../" + tag + "_W2.csv";
@@ -658,6 +679,10 @@ int main(int argc, char* argv[]) {
 
     auto W2 = load_csv_2d(W2_path, hidden_size, 10);
     auto b2 = load_csv_1d(b2_path);
+
+    const double cheb_pre_scale = compute_pre_scale(W1, b1);
+    std::cout << "Auto-tuned Chebyshev pre-scale = " << cheb_pre_scale
+              << "  (1 / " << (1.0 / cheb_pre_scale) << ")" << std::endl;
 
     FHEConfig config = setup_fhe_environment();
 
@@ -671,10 +696,10 @@ int main(int argc, char* argv[]) {
     if (folder_mode) {
         return run_folder_mode(
             input_path, hidden_size, W1, b1, W2, b2,
-            config, mem_after_fhe_setup, fhe_base_memory);
+            config, cheb_pre_scale, mem_after_fhe_setup, fhe_base_memory);
     } else {
         return run_single_image_mode(
             input_path, hidden_size, W1, b1, W2, b2,
-            config, mem_after_fhe_setup, fhe_base_memory);
+            config, cheb_pre_scale, mem_after_fhe_setup, fhe_base_memory);
     }
 }
