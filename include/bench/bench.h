@@ -19,17 +19,43 @@ void ReportRSS(const char* tag);
 
 // Scoped timer. Logs "[BENCH] <tag>: <ms> ms" on destruction.
 // When BENCH_MEMORY is enabled, also reports peak RSS at exit of scope.
+//
+// On destruction the timer ALSO feeds the per-tag aggregator below; this lets
+// us print a single `[BENCH SUMMARY]` table at the end of a batch with avg /
+// min / max time and the worst peak RSS observed at that scope.
 class ScopedTimer {
 public:
     explicit ScopedTimer(const char* tag);
+    // Variant that owns its tag string. Use BENCH_LAYER_SCOPE_S when the tag
+    // is computed at runtime (e.g. "Layer 1", "Layer 2") so it stays alive
+    // for the timer's lifetime without lifetime juggling at the call site.
+    explicit ScopedTimer(std::string tag);
     ~ScopedTimer();
     ScopedTimer(const ScopedTimer&)            = delete;
     ScopedTimer& operator=(const ScopedTimer&) = delete;
 
 private:
+    std::string                                    ownedTag_;   // empty when using const-char ctor
     const char*                                    tag_;
     std::chrono::steady_clock::time_point          start_;
 };
+
+// ── Aggregator ──────────────────────────────────────────────────────────────
+//
+// `ScopedTimer::~ScopedTimer` records every (tag, elapsed-ms, peak-RSS) triple
+// here. Call `PrintSummary` once at the end of a batch to get the four-row
+// table (Layer 1 / Bootstrap + Activation / Layer 2 / Inference (Run)).
+//
+// peak-RSS is only recorded when BENCH_MEMORY is enabled at compile time;
+// otherwise the column shows "—" in the summary.
+
+void RecordSample(const char* tag, double ms, std::size_t peak_rss_bytes);
+
+// Prints the four-row summary. `title` is just decorative ("Batch", "Single",
+// …). Safe to call multiple times — does not reset state.
+void PrintSummary(const char* title = nullptr);
+
+void ResetStats();
 
 }  // namespace bench
 
@@ -61,9 +87,14 @@ private:
 #endif
 
 #ifdef BENCH_LAYERS
-#define BENCH_LAYER_SCOPE(tag) ::bench::ScopedTimer BENCH_VAR(_bl_)(tag)
+#define BENCH_LAYER_SCOPE(tag)    ::bench::ScopedTimer BENCH_VAR(_bl_)(tag)
+// String-tag variant: takes anything convertible to std::string and lets the
+// timer own the storage. Brace-init avoids the most-vexing-parse when the
+// argument expression itself looks like a declarator.
+#define BENCH_LAYER_SCOPE_S(tag)  ::bench::ScopedTimer BENCH_VAR(_bl_){std::string(tag)}
 #else
-#define BENCH_LAYER_SCOPE(tag) ((void)0)
+#define BENCH_LAYER_SCOPE(tag)    ((void)0)
+#define BENCH_LAYER_SCOPE_S(tag)  ((void)0)
 #endif
 
 #ifdef BENCH_MEMORY

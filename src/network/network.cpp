@@ -306,7 +306,22 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
     }
     BENCH_MEM("after-input-encode");
 
+    // Per-layer instrumentation lives here (not inside each layer's Apply)
+    // so the tag can include the layer's position. Linear layers get
+    // "Layer 1", "Layer 2", … in the order they're applied; activation
+    // layers get "Bootstrap + Activation" since the block IS the bootstrap.
+    int linearN = 1;
     for (auto& layer : layers_) {
+        const std::string& nm = layer->Name();
+        std::string tag;
+        if (nm.rfind("Activation", 0) == 0) {
+            tag = "Bootstrap + Activation";
+        } else if (nm == "Linear") {
+            tag = "Layer " + std::to_string(linearN++);
+        } else {
+            tag = nm;
+        }
+        BENCH_LAYER_SCOPE_S(tag);
         ct = layer->Apply(*ctx_, state, ct);
     }
     BENCH_MEM("after-layers");

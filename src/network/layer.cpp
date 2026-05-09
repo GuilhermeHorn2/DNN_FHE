@@ -55,7 +55,9 @@ LinearLayer::LinearLayer(std::vector<std::vector<double>> W,
 Ciphertext<DCRTPoly> LinearLayer::Apply(FHEContext&                          ctx,
                                         ForwardState&                        state,
                                         const Ciphertext<DCRTPoly>&          in) {
-    BENCH_LAYER_SCOPE("Linear");
+    // No timer here: per-layer scoping lives in Network::Run, which can label
+    // each call with its position ("Layer 1", "Layer 2") rather than a generic
+    // "Linear" tag that collides for every fully-connected layer in the net.
 
     auto&             cc           = ctx.cc();
     const std::uint32_t numSlotsCKKS = ctx.numSlotsCKKS();
@@ -115,8 +117,8 @@ void ActivationLayer::EnsureCoeffs(const FHEContext& ctx) {
 Ciphertext<DCRTPoly> ActivationLayer::Apply(FHEContext&                          ctx,
                                             ForwardState&                        state,
                                             const Ciphertext<DCRTPoly>&          in) {
-    BENCH_LAYER_SCOPE("Activation");
-    BENCH_BOOTSTRAP_SCOPE("Bootstrap (refresh+MVB)");
+    // No timer here: scope owned by Network::Run with the friendly
+    // "Bootstrap + Activation" tag so per-call print and summary line up.
 
     EnsureCoeffs(ctx);
 

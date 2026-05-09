@@ -1,5 +1,7 @@
 #include "io/accuracy.h"
 
+#include "bench/bench.h"
+
 #include <algorithm>
 #include <cstdio>
 #include <filesystem>
@@ -96,6 +98,10 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
             std::fflush(stdout);
         }
     }
+
+    // Final aggregated table for the four reported stages. No-op when no
+    // BENCH_* timer flag was on (no samples recorded).
+    bench::PrintSummary("Batch");
 
     return r;
 }

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstdio>
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -16,9 +17,10 @@
 
 namespace fs = std::filesystem;
 
-// MNIST-like DiNN100 dimensions (784 -> 100 -> 10), ReLU variant.
+// MNIST-like DiNN dimensions: 784 -> HID_DIM -> 10, ReLU variant. The
+// hidden width is a runtime parameter so the same driver can load DiNN30,
+// DiNN100, or any other size whose weight files exist next to this binary.
 static constexpr int IN_DIM  = 784;
-static constexpr int HID_DIM = 100;
 static constexpr int OUT_DIM = 10;
 
 int main(int argc, char* argv[]) {
@@ -26,24 +28,62 @@ int main(int argc, char* argv[]) {
     BENCH_MEM("startup");
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <image.png | test_root>\n"
-                  << "  Single-image:  pass an image path -> runs one inference + diagnostics + plaintext reference\n"
-                  << "  Batch:         pass a directory of <label>/*.{png,jpg,jpeg} -> accuracy + confusion matrix\n"
-                  << "  Weights expected at ../relu100_W{1,2}.csv and ../relu100_b{1,2}.csv\n";
+        std::cerr << "Usage:\n";
+        std::cerr << "  " << argv[0] << " <image_or_folder_path> [hidden_size]\n\n";
+        std::cerr << "  <image_or_folder_path>:\n";
+        std::cerr << "      - a regular file -> single-image mode (verbose output + diagnostics)\n";
+        std::cerr << "      - a directory    -> folder mode, expects layout\n";
+        std::cerr << "                          <root>/0/*.{png,jpg,jpeg}\n";
+        std::cerr << "                          ...\n";
+        std::cerr << "                          <root>/9/*.{png,jpg,jpeg}\n\n";
+        std::cerr << "  hidden_size: number of neurons in the hidden layer (default: 30).\n";
+        std::cerr << "               Supported values: 30, 100.\n";
+        std::cerr << "               Selects ../relu<HID>_W{1,2}.csv and ../relu<HID>_b{1,2}.csv\n\n";
+        std::cerr << "Examples:\n";
+        std::cerr << "  " << argv[0] << " ../img_1.jpg\n";
+        std::cerr << "  " << argv[0] << " ../img_1.jpg 100\n";
+        std::cerr << "  " << argv[0] << " /path/to/test_root\n";
+        std::cerr << "  " << argv[0] << " /path/to/test_root 100\n";
         return 1;
     }
 
-    std::cout << "Loading weights...\n";
-    auto W1 = io::LoadCsv2D("../relu100_W1.csv", IN_DIM,  HID_DIM);
-    auto b1 = io::LoadCsv1D("../relu100_b1.csv");
-    auto W2 = io::LoadCsv2D("../relu100_W2.csv", HID_DIM, OUT_DIM);
-    auto b2 = io::LoadCsv1D("../relu100_b2.csv");
+    const std::string inputPath = argv[1];
+
+    int HID_DIM = 30;
+    if (argc >= 3) {
+        try {
+            HID_DIM = std::stoi(argv[2]);
+        } catch (const std::exception&) {
+            std::cerr << "Error: hidden_size must be an integer (got '"
+                      << argv[2] << "').\n";
+            return 1;
+        }
+    }
+
+    if (HID_DIM != 30 && HID_DIM != 100) {
+        std::cerr << "Error: unsupported hidden_size " << HID_DIM
+                  << ". Supported values: 30, 100.\n";
+        return 1;
+    }
+
+    const std::string prefix = "../relu" + std::to_string(HID_DIM);
+    const std::string W1Path = prefix + "_W1.csv";
+    const std::string b1Path = prefix + "_b1.csv";
+    const std::string W2Path = prefix + "_W2.csv";
+    const std::string b2Path = prefix + "_b2.csv";
+
+    std::cout << "Loading weights for hidden size " << HID_DIM
+              << " from " << prefix << "_*.csv ...\n";
+    auto W1 = io::LoadCsv2D(W1Path.c_str(), IN_DIM,  HID_DIM);
+    auto b1 = io::LoadCsv1D(b1Path.c_str());
+    auto W2 = io::LoadCsv2D(W2Path.c_str(), HID_DIM, OUT_DIM);
+    auto b2 = io::LoadCsv1D(b2Path.c_str());
     if (W1.empty() || b1.empty() || W2.empty() || b2.empty()) {
-        std::cerr << "Failed to load weights.\n";
+        std::cerr << "Failed to load weights from " << prefix << "_*.csv\n";
         return 1;
     }
 
-    const bool batchMode = fs::is_directory(argv[1]);
+    const bool batchMode = fs::is_directory(inputPath);
 
     // Single-image mode loads the image up-front so the per-image plain-side
     // diagnostics (which need pixels) can run before we mutate W1/b1 with the
@@ -51,10 +91,10 @@ int main(int argc, char* argv[]) {
     // PixelLoader callback inside the harness instead.
     std::vector<std::int64_t> pixels;
     if (!batchMode) {
-        std::cout << "Loading image: " << argv[1] << "\n";
+        std::cout << "Loading image: " << inputPath << "\n";
         // ReLU networks here are trained on binary {0, 1} pixels, not bipolar
         // {-1, +1}, so use the dedicated {0, 1} loader.
-        pixels = io::LoadImageBinary(argv[1], IN_DIM);
+        pixels = io::LoadImageBinary(inputPath.c_str(), IN_DIM);
         if (pixels.empty()) return 1;
 
         // ── Plain-side magnitude diagnostics (raw, unscaled weights) ─────
@@ -152,7 +192,7 @@ int main(int argc, char* argv[]) {
         auto loadPixels = [](const std::string& p) {
             return io::LoadImageBinary(p.c_str(), IN_DIM);
         };
-        auto result = io::RunAccuracyLoop(net, argv[1], loadPixels, OUT_DIM);
+        auto result = io::RunAccuracyLoop(net, inputPath, loadPixels, OUT_DIM);
         io::PrintAccuracySummary(result);
         BENCH_MEM("end");
         return 0;
