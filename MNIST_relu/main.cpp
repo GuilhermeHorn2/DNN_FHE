@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <cmath>
 #include <cstdio>
 #include <exception>
 #include <filesystem>
@@ -31,7 +32,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Usage:\n";
         std::cerr << "  " << argv[0] << " <image_or_folder_path> [hidden_size]\n\n";
         std::cerr << "  <image_or_folder_path>:\n";
-        std::cerr << "      - a regular file -> single-image mode (verbose output + diagnostics)\n";
+        std::cerr << "      - a regular file -> single-image mode (verbose output)\n";
         std::cerr << "      - a directory    -> folder mode, expects layout\n";
         std::cerr << "                          <root>/0/*.{png,jpg,jpeg}\n";
         std::cerr << "                          ...\n";
@@ -83,119 +84,71 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    const bool batchMode = fs::is_directory(inputPath);
-
-    // Single-image mode loads the image up-front so the per-image plain-side
-    // diagnostics (which need pixels) can run before we mutate W1/b1 with the
-    // scaling step. Batch mode skips this — each image goes through the
-    // PixelLoader callback inside the harness instead.
-    std::vector<std::int64_t> pixels;
-    if (!batchMode) {
-        std::cout << "Loading image: " << inputPath << "\n";
-        // ReLU networks here are trained on binary {0, 1} pixels, not bipolar
-        // {-1, +1}, so use the dedicated {0, 1} loader.
-        pixels = io::LoadImageBinary(inputPath.c_str(), IN_DIM);
-        if (pixels.empty()) return 1;
-
-        // ── Plain-side magnitude diagnostics (raw, unscaled weights) ─────
-        // Quick sanity check that explains why FHE results may be wrong:
-        // the final decryption is mod pOutput = 1024, interpreted as a
-        // signed window (-512, +512). Any class score outside that window
-        // will wrap and destroy the argmax.
-        std::vector<double> hiddenDiag(HID_DIM, 0.0);
-        double preActMin = 1e18, preActMax = -1e18;
-        double hidMin    = 1e18, hidMax    = -1e18;
-        for (int j = 0; j < HID_DIM; ++j) {
-            double acc = b1[j];
-            for (int i = 0; i < IN_DIM; ++i) acc += W1[j][i] * static_cast<double>(pixels[i]);
-            preActMin = std::min(preActMin, acc);
-            preActMax = std::max(preActMax, acc);
-            hiddenDiag[j] = (acc > 0.0) ? acc : 0.0;
-            hidMin = std::min(hidMin, hiddenDiag[j]);
-            hidMax = std::max(hidMax, hiddenDiag[j]);
-        }
-        double scoreMin = 1e18, scoreMax = -1e18;
-        for (int j = 0; j < OUT_DIM; ++j) {
-            double s = b2[j];
-            for (int i = 0; i < HID_DIM; ++i) s += W2[j][i] * hiddenDiag[i];
-            scoreMin = std::min(scoreMin, s);
-            scoreMax = std::max(scoreMax, s);
-        }
-        std::printf("[Diag] pre-activation y range : [%8.1f, %8.1f]   (LUT safe range is [-256, +768))\n",
-                    preActMin, preActMax);
-        std::printf("[Diag] hidden ReLU(y) range  : [%8.1f, %8.1f]\n", hidMin, hidMax);
-        std::printf("[Diag] raw refScores range   : [%8.1f, %8.1f]   (decoder safe range is (-512, +512))\n",
-                    scoreMin, scoreMax);
-    }
-
-    // ── Down-scale weights so internal magnitudes fit the FHE pipeline.
-    //    Two independent scales:
-    //      HIDDEN_SCALE_K -> shrinks pre-activations into [-256, +768) so the
-    //                        ReLU LUT does not wrap (period = pInput = 1024).
-    //      OUTPUT_SCALE_K -> shrinks final class scores into (-512, +512) so
-    //                        DecryptCoeff (mod pOutput = 1024) does not wrap.
-    //    argmax is invariant under any positive scalar. Required regardless
-    //    of single-image or batch mode — the FHE side will not produce a
-    //    valid argmax without it.
-    constexpr double HIDDEN_SCALE_K = 4.0;
-    constexpr double OUTPUT_SCALE_K = 64.0;
-    for (auto& row : W1) for (auto& w : row) w /= HIDDEN_SCALE_K;
-    for (auto& v : b1)                       v /= HIDDEN_SCALE_K;
-    for (auto& row : W2) for (auto& w : row) w /= OUTPUT_SCALE_K;
-    for (auto& v : b2)                       v /= OUTPUT_SCALE_K;
-    std::printf("[Diag] scaled W1/b1 by 1/%.1f, W2/b2 by 1/%.1f (argmax invariant)\n",
-                HIDDEN_SCALE_K, OUTPUT_SCALE_K);
-
-    if (!batchMode) {
-        // Re-print magnitudes after scaling so we can confirm the choice
-        // fits both the LUT and the decoder windows.
-        std::vector<double> hiddenDiag(HID_DIM, 0.0);
-        double preActMin = 1e18, preActMax = -1e18;
-        double hidMin    = 1e18, hidMax    = -1e18;
-        for (int j = 0; j < HID_DIM; ++j) {
-            double acc = b1[j];
-            for (int i = 0; i < IN_DIM; ++i) acc += W1[j][i] * static_cast<double>(pixels[i]);
-            preActMin = std::min(preActMin, acc);
-            preActMax = std::max(preActMax, acc);
-            hiddenDiag[j] = (acc > 0.0) ? acc : 0.0;
-            hidMin = std::min(hidMin, hiddenDiag[j]);
-            hidMax = std::max(hidMax, hiddenDiag[j]);
-        }
-        double scoreMin = 1e18, scoreMax = -1e18;
-        for (int j = 0; j < OUT_DIM; ++j) {
-            double s = b2[j];
-            for (int i = 0; i < HID_DIM; ++i) s += W2[j][i] * hiddenDiag[i];
-            scoreMin = std::min(scoreMin, s);
-            scoreMax = std::max(scoreMax, s);
-        }
-        std::printf("[Diag] scaled pre-act y'    : [%8.1f, %8.1f]   (need (-256, +768))\n",
-                    preActMin, preActMax);
-        std::printf("[Diag] scaled hidden h'     : [%8.1f, %8.1f]\n", hidMin, hidMax);
-        std::printf("[Diag] scaled refScores     : [%8.1f, %8.1f]   (need (-512, +512))\n",
-                    scoreMin, scoreMax);
-    }
-
     using namespace fhednn;
 
-    FHEContext ctx;
+    FHEParams params;
+    params.BIGQ    = lbcrypto::BigInteger(1) << 55;
+    params.Q       = lbcrypto::BigInteger(1) << 55;
+    FHEContext ctx{params};
+
+    // ── Plaintext-side pre-scaling (argmax invariant) ─────────────────────
+    //
+    // HIDDEN_SCALE_K — keeps the hidden pre-activations y[j] = W1·x + b1
+    //   inside the ReLU LUT's safe range [-preShift, pInput - preShift).
+    //   With preShift = 512 and pInput = 1024 the safe range is [-512, +512)
+    //   (centered on 0). Empirical max|y| ≈ 993 across the 50-image batch,
+    //   so K1 ≥ 993/512 ≈ 1.94. We use 4 (next pow2 above 2) for headroom
+    //   and to push y/K1 deeper into the cleanest interior of the LUT, away
+    //   from the period boundaries where Gibbs ringing is largest.
+    //   preShift = 512 also minimizes the LUT amplitude (pInput - preShift
+    //   = 512), which is the dominant scale factor for the order-N
+    //   Hermite-trig fit error per slot.
+    //
+    // OUTPUT_SCALE_K — keeps the final scores inside the decoder's signed
+    //   window (-pOutput/2, +pOutput/2) = (-512, +512). With raw weights
+    //   max|score| ≈ 57k; after dividing by HIDDEN_SCALE_K · OUTPUT_SCALE_K
+    //   the constraint is 57000 / (4·K2) < 512, i.e. K2 > 27.8 → 64 for
+    //   power-of-two safety margin. Without this scaling the FHE scores wrap
+    //   modulo pOutput and the argmax becomes meaningless.
+    //
+    // The original W1/b1/W2/b2 are kept untouched so the plaintext oracle
+    // computes scores at full integer magnitude. We multiply the FHE scores
+    // by HIDDEN_SCALE_K · OUTPUT_SCALE_K before printing so plain[k] and
+    // fhe[k] live on the same scale.
+    constexpr double HIDDEN_SCALE_K = 4.0;
+    constexpr double OUTPUT_SCALE_K = 64.0;
+    auto W1_scaled = W1;
+    auto b1_scaled = b1;
+    auto W2_scaled = W2;
+    auto b2_scaled = b2;
+    for (auto& row : W1_scaled) for (auto& w : row) w /= HIDDEN_SCALE_K;
+    for (auto& v   : b1_scaled)                     v /= HIDDEN_SCALE_K;
+    for (auto& row : W2_scaled) for (auto& w : row) w /= OUTPUT_SCALE_K;
+    for (auto& v   : b2_scaled)                     v /= OUTPUT_SCALE_K;
+    std::printf("[Scale] HIDDEN_SCALE_K = %.2f  OUTPUT_SCALE_K = %.2f  "
+                "(pOutput = %llu, BIGQ = 2^%u)\n",
+                HIDDEN_SCALE_K, OUTPUT_SCALE_K,
+                static_cast<unsigned long long>(
+                    ctx.params().pOutput.ConvertToInt<std::uint64_t>()),
+                ctx.params().BIGQ.GetMSB() - 1);
+
     Network    net;
-    // No input shift needed: pixels are already in [0, pInput).
-    net.Linear(W1, b1)
-       .Activate(activations::ReLU(/*preShift=*/256, ctx.params().pInput))
-       .Linear(W2, b2);
+    net.Linear(W1_scaled, b1_scaled)
+       .Activate(activations::ReLU(/*preShift=*/512, ctx.params().pInput))
+       .Linear(W2_scaled, b2_scaled);
 
     net.Compile(ctx);
     BENCH_MEM("after-compile");
 
-    // ── Batch mode: dispatch into the shared accuracy harness ─────────────
-    // Plain-side reference uses the *scaled* W1/b1/W2/b2 that the FHE side
-    // also sees — argmax is invariant under positive scaling, so this still
-    // gives a faithful FHE-vs-plain agreement signal.
-    if (batchMode) {
+    // ── Batch mode: inputPath is a directory of <label>/*.{png,jpg,jpeg} ──
+    if (fs::is_directory(inputPath)) {
         auto loadPixels = [](const std::string& p) {
             return io::LoadImageBinary(p.c_str(), IN_DIM);
         };
 
+        // Plain-side reference: same topology as the FHE network (Linear ->
+        // ReLU -> Linear). Captures W1/b1/W2/b2 by reference; they are not
+        // mutated after Compile() in this driver, so this is safe.
         auto plainScore = [&, HID_DIM](const std::vector<std::int64_t>& px) {
             std::vector<double> hidden(HID_DIM, 0.0);
             for (int j = 0; j < HID_DIM; ++j) {
@@ -220,7 +173,22 @@ int main(int argc, char* argv[]) {
     }
 
     // ── Single-image mode (existing behavior) ─────────────────────────────
+    std::cout << "Loading image: " << inputPath << "\n";
+    // ReLU networks here are trained on binary {0, 1} pixels, not bipolar
+    // {-1, +1}, so use the dedicated {0, 1} loader.
+    auto pixels = io::LoadImageBinary(inputPath.c_str(), IN_DIM);
+    if (pixels.empty()) return 1;
+
     auto scores = net.Run(pixels);
+
+    // The FHE pipeline saw W1/b1 divided by HIDDEN_SCALE_K and W2/b2 divided
+    // by OUTPUT_SCALE_K, so each returned integer score is approximately
+    // score_true / (HIDDEN_SCALE_K · OUTPUT_SCALE_K). Lift back to the
+    // full-integer scale so the printed numbers are directly comparable to
+    // the plaintext oracle below.
+    constexpr double SCORE_LIFT = HIDDEN_SCALE_K * OUTPUT_SCALE_K;
+    for (auto& v : scores)
+        v = static_cast<std::int64_t>(std::llround(static_cast<double>(v) * SCORE_LIFT));
 
     std::cout << "\n--- Final Class Scores ---\n";
     int           predicted = 0;
@@ -247,6 +215,10 @@ int main(int argc, char* argv[]) {
     }
     const int refPred = static_cast<int>(
         std::max_element(refScores.begin(), refScores.end()) - refScores.begin());
+
+
+    for (int j=0; j<OUT_DIM; ++j) std::printf(" plain[%d] = %.0f fhe[%d] = %lld\n", j, refScores[j], j, (long long)scores[j]);
+
 
     std::cout << "\n================================\n";
     std::printf(" PREDICTED DIGIT  : %d\n", predicted);
