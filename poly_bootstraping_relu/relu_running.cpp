@@ -351,15 +351,16 @@ InferenceResult run_fhe_inference(
         BENCH_LAYER_SCOPE("InputEncoder");
         Plaintext pt_image = config.cc->MakeCKKSPackedPlaintext(real_image);
         ct_image           = config.cc->Encrypt(config.keyPair.publicKey, pt_image);
-        BENCH_MEM("after-encrypt");
+        BENCH_MEM_REC("after-encrypt");
     }
-    BENCH_MEM("after-input-encode");
+    BENCH_MEM_REC("after-input-encode");
 
     Ciphertext<DCRTPoly> ct_hidden_pre_act;
     {
         BENCH_LAYER_SCOPE("Layer 1");
         ct_hidden_pre_act = compute_linear_layer(ct_image, W1, b1, config, hidden_size);
     }
+    BENCH_MEM_REC("after-Layer 1");
 
     Ciphertext<DCRTPoly> ct_bootstrapped;
     {
@@ -367,13 +368,15 @@ InferenceResult run_fhe_inference(
         auto ct_hidden_post_act = apply_approx_activation(ct_hidden_pre_act, config, pre_scale);
         ct_bootstrapped         = config.cc->EvalBootstrap(ct_hidden_post_act);
     }
+    BENCH_MEM_REC("after-Bootstrap + Activation");
 
     Ciphertext<DCRTPoly> ct_scores;
     {
         BENCH_LAYER_SCOPE("Layer 2");
         ct_scores = compute_linear_layer(ct_bootstrapped, W2, b2, config, 10);
     }
-    BENCH_MEM("after-layers");
+    BENCH_MEM_REC("after-Layer 2");
+    BENCH_MEM_REC("after-layers");
 
     {
         BENCH_LAYER_SCOPE("OutputDecoder");
@@ -383,7 +386,7 @@ InferenceResult run_fhe_inference(
         auto computed = pt_result->GetRealPackedValue();
         r.scores.assign(computed.begin(), computed.begin() + 10);
     }
-    BENCH_MEM("after-output-decode");
+    BENCH_MEM_REC("after-output-decode");
 
     int    fhe_pred  = 0;
     double max_score = r.scores[0];
