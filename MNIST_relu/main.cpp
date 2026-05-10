@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
 
     Network    net;
     net.Linear(W1_scaled, b1_scaled)
-       .Activate(activations::ReLU(/*preShift=*/512, ctx.params().pInput))
+       .Activate(activations::ReLU(/*preShift=*/256, ctx.params().pInput))
        .Linear(W2_scaled, b2_scaled);
 
     net.Compile(ctx);
