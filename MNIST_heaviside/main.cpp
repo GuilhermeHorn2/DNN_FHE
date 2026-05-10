@@ -85,9 +85,12 @@ int main(int argc, char* argv[]) {
 
     using namespace fhednn;
 
-    FHEContext ctx;
+    FHEParams params;
+    params.BIGQ = lbcrypto::BigInteger(1) << 55;
+    params.Q    = lbcrypto::BigInteger(1) << 55;
+    FHEContext ctx{params};
+
     Network    net;
-    // No input shift needed: pixels are already in [0, pInput).
     net.Linear(W1, b1)
        .Activate(activations::Heaviside(/*preShift=*/256, ctx.params().pInput))
        .Linear(W2, b2);
@@ -165,6 +168,10 @@ int main(int argc, char* argv[]) {
     }
     const int refPred = static_cast<int>(
         std::max_element(refScores.begin(), refScores.end()) - refScores.begin());
+
+
+    for (int j=0; j<OUT_DIM; ++j) std::printf(" plain[%d] = %.0f fhe[%d] = %lld\n", j, refScores[j], j, (long long)scores[j]);
+
 
     std::cout << "\n================================\n";
     std::printf(" PREDICTED DIGIT  : %d\n", predicted);

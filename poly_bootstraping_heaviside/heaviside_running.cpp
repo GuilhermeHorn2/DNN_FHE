@@ -1,14 +1,16 @@
 #include "openfhe.h"
+#include "bench/bench.h"
+
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <chrono> 
+#include <chrono>
 #include <sys/resource.h>
-#include <filesystem> 
+#include <filesystem>
 #include <string>
-#include <algorithm> 
+#include <algorithm>
 #include <unistd.h>
 #include <cstdio>
 
@@ -19,6 +21,9 @@ using namespace lbcrypto;
 namespace fs = std::filesystem;
 
 // --- Funções de Memória ---
+// Kept around because main() reports the legacy "-> FHE Base Memory" line and
+// we want the binary to still print something useful when BENCH_MEMORY is OFF.
+// When BENCH_MEMORY is ON, the [BENCH][MEM] markers cover everything these do.
 long get_current_memory_kb() {
     std::ifstream stat_stream("/proc/self/status", std::ios_base::in);
     std::string line;
@@ -54,7 +59,7 @@ std::vector<std::vector<int64_t>> load_csv_2d(const std::string& filename, int e
     std::vector<std::vector<int64_t>> raw_data;
     std::ifstream file(filename);
     std::string line;
-    
+
     while (std::getline(file, line)) {
         std::vector<int64_t> row;
         std::stringstream ss(line);
@@ -67,9 +72,9 @@ std::vector<std::vector<int64_t>> load_csv_2d(const std::string& filename, int e
 
     int read_rows = raw_data.size();
     int read_cols = raw_data[0].size();
-    
+
     std::vector<std::vector<int64_t>> formatted_W(expected_out, std::vector<int64_t>(expected_in));
-    
+
     if (read_rows == expected_out && read_cols == expected_in) {
         formatted_W = raw_data;
     } else if (read_rows == expected_in && read_cols == expected_out) {
@@ -79,7 +84,7 @@ std::vector<std::vector<int64_t>> load_csv_2d(const std::string& filename, int e
             }
         }
     } else {
-        std::cerr << "CRITICAL ERROR: CSV shape " << read_rows << "x" << read_cols 
+        std::cerr << "CRITICAL ERROR: CSV shape " << read_rows << "x" << read_cols
                   << " does not match expected " << expected_in << "x" << expected_out << std::endl;
     }
     return formatted_W;
@@ -88,12 +93,12 @@ std::vector<std::vector<int64_t>> load_csv_2d(const std::string& filename, int e
 struct FHEConfig {
     CryptoContext<DCRTPoly> cc;
     KeyPair<DCRTPoly> keyPair;
-    uint32_t numSlotsCKKS; 
+    uint32_t numSlotsCKKS;
 };
 
 // --- Setup com Bootstrapping Habilitado e Sem Segurança ---
 FHEConfig setup_fhe_environment() {
-    std::cout << "Setting up FHE Environment (Security: HEStd_128_classic, Bootstrap)..." << std::endl;
+    std::cout << "Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)..." << std::endl;
     FHEConfig config;
 
     CCParams<CryptoContextCKKSRNS> parameters;
@@ -104,8 +109,8 @@ FHEConfig setup_fhe_environment() {
     SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
     parameters.SetSecretKeyDist(secretKeyDist);
 
-    parameters.SetSecurityLevel(HEStd_128_classic);
-    parameters.SetRingDim(1 << 17);
+    parameters.SetSecurityLevel(HEStd_NotSet);
+    parameters.SetRingDim(1 << 16);
 
     // Scaling parameters recommended by the OpenFHE 1.5.1 bootstrap example
     ScalingTechnique rescaleTech = FLEXIBLEAUTO;
@@ -163,34 +168,34 @@ FHEConfig setup_fhe_environment() {
 }
 
 Ciphertext<DCRTPoly> compute_linear_layer(
-    Ciphertext<DCRTPoly> ct_input, 
-    const std::vector<std::vector<int64_t>>& W, 
-    const std::vector<int64_t>& b,              
+    Ciphertext<DCRTPoly> ct_input,
+    const std::vector<std::vector<int64_t>>& W,
+    const std::vector<int64_t>& b,
     FHEConfig& config,
-    int num_neurons) 
+    int num_neurons)
 {
     Ciphertext<DCRTPoly> ct_layer_out;
     for (int i = 0; i < num_neurons; ++i) {
         std::vector<double> w_double(W[i].begin(), W[i].end());
-        w_double.resize(config.numSlotsCKKS, 0.0); 
+        w_double.resize(config.numSlotsCKKS, 0.0);
         Plaintext pt_weights = config.cc->MakeCKKSPackedPlaintext(w_double);
-        
+
         auto ct_mult = config.cc->EvalMult(ct_input, pt_weights);
-        auto ct_sum = config.cc->EvalSum(ct_mult, config.numSlotsCKKS); 
+        auto ct_sum = config.cc->EvalSum(ct_mult, config.numSlotsCKKS);
         auto ct_rescaled = config.cc->Rescale(ct_sum);
-        
+
         std::vector<double> mask(config.numSlotsCKKS, 0.0);
-        mask[i] = 1.0; 
+        mask[i] = 1.0;
         Plaintext pt_mask = config.cc->MakeCKKSPackedPlaintext(mask, 1, ct_rescaled->GetLevel());
-        
+
         auto ct_masked = config.cc->EvalMult(ct_rescaled, pt_mask);
         auto ct_neuron = config.cc->Rescale(ct_masked);
-        
+
         std::vector<double> b_vec(config.numSlotsCKKS, 0.0);
         b_vec[i] = static_cast<double>(b[i]);
         Plaintext pt_bias = config.cc->MakeCKKSPackedPlaintext(b_vec, 1, ct_neuron->GetLevel());
         ct_neuron = config.cc->EvalAdd(ct_neuron, pt_bias);
-        
+
         if (i == 0) {
             ct_layer_out = ct_neuron;
         } else {
@@ -264,29 +269,14 @@ int plaintext_inference(
 
 // --- Per-image inference helpers (shared by single-image and folder modes) ---
 
+// Phase timing/memory used to live here as struct fields. They were only used
+// for printf, which moved to the bench:: infrastructure (BENCH_LAYER_SCOPE,
+// BENCH_MEM, BENCH_INFERENCE_SCOPE). The struct now only carries the
+// information the caller actually consumes: the predicted class and the
+// raw decrypted scores.
 struct InferenceResult {
     int                 fhe_pred;
     std::vector<double> scores;          // 10
-
-    // Per-phase timings (seconds)
-    double layer1_seconds;               // compute_linear_layer (784 -> H)
-    double act_bs_seconds;               // apply_approx_activation + EvalBootstrap
-    double layer2_seconds;               // compute_linear_layer (H -> 10)
-    double eval_seconds;                 // sum of the three (kept for compat)
-    double total_seconds;                // start_inference -> end_inference (incl. encrypt/decrypt)
-
-    // Per-phase memory deltas (KB), measured at phase boundaries.
-    // RSS deltas show transient working set; peak deltas show worst-case
-    // footprint. Peak deltas after image #1 in folder mode are typically 0
-    // because ru_maxrss is process-wide monotonic.
-    long layer1_rss_delta_kb;
-    long layer1_peak_delta_kb;
-    long act_bs_rss_delta_kb;
-    long act_bs_peak_delta_kb;
-    long layer2_rss_delta_kb;
-    long layer2_peak_delta_kb;
-
-    long inference_kb;                   // peak RSS minus mem_after_fhe_setup (kept for compat)
 };
 
 // Loads `path` as 28x28 grayscale (784 pixels) and binarizes to {0, +1}
@@ -308,82 +298,58 @@ std::vector<double> load_image_to_input(const std::string& path) {
 }
 
 // Encrypt -> linear1 -> activation -> bootstrap -> linear2 -> decrypt for one
-// image. Captures per-phase timings (Linear 1 / Activation+Bootstrap /
-// Linear 2) and per-phase RSS + peak memory deltas at the four boundaries.
-// The encrypt/decrypt steps stay outside the per-phase windows; their cost
-// shows up in `total_seconds - eval_seconds`.
+// image. All instrumentation goes through bench:: macros so the per-image
+// `[BENCH] <tag> ms (peak RSS …)` lines and `[BENCH][MEM] <tag> …` markers
+// match the layout produced by MNIST_signal/main.cpp.
 InferenceResult run_fhe_inference(
     const std::vector<double>& real_image,
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
     const std::vector<std::vector<int64_t>>& W2, const std::vector<int64_t>& b2,
     int hidden_size,
-    FHEConfig& config,
-    long mem_after_fhe_setup)
+    FHEConfig& config)
 {
+    BENCH_INFERENCE_SCOPE("Inference (Run)");
+
     InferenceResult r;
 
-    auto start_inference = std::chrono::high_resolution_clock::now();
+    Ciphertext<DCRTPoly> ct_image;
+    {
+        BENCH_LAYER_SCOPE("InputEncoder");
+        Plaintext pt_image = config.cc->MakeCKKSPackedPlaintext(real_image);
+        ct_image           = config.cc->Encrypt(config.keyPair.publicKey, pt_image);
+        BENCH_MEM("after-encrypt");
+    }
+    BENCH_MEM("after-input-encode");
 
-    Plaintext pt_image = config.cc->MakeCKKSPackedPlaintext(real_image);
-    auto ct_image      = config.cc->Encrypt(config.keyPair.publicKey, pt_image);
+    Ciphertext<DCRTPoly> ct_hidden_pre_act;
+    {
+        BENCH_LAYER_SCOPE("Layer 1");
+        ct_hidden_pre_act = compute_linear_layer(ct_image, W1, b1, config, hidden_size);
+    }
 
-    // --- Linear 1 ---
-    auto t0 = std::chrono::high_resolution_clock::now();
-    long rss0  = get_current_memory_kb();
-    long peak0 = get_peak_memory_kb();
+    Ciphertext<DCRTPoly> ct_bootstrapped;
+    {
+        BENCH_LAYER_SCOPE("Bootstrap + Activation");
+        auto ct_hidden_post_act = apply_approx_activation(ct_hidden_pre_act, config);
+        ct_bootstrapped         = config.cc->EvalBootstrap(ct_hidden_post_act);
+    }
 
-    auto ct_hidden_pre_act = compute_linear_layer(ct_image, W1, b1, config, hidden_size);
+    Ciphertext<DCRTPoly> ct_scores;
+    {
+        BENCH_LAYER_SCOPE("Layer 2");
+        ct_scores = compute_linear_layer(ct_bootstrapped, W2, b2, config, 10);
+    }
+    BENCH_MEM("after-layers");
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    long rss1  = get_current_memory_kb();
-    long peak1 = get_peak_memory_kb();
-
-    // --- Activation + Bootstrap ---
-    auto ct_hidden_post_act = apply_approx_activation(ct_hidden_pre_act, config);
-    auto ct_bootstrapped    = config.cc->EvalBootstrap(ct_hidden_post_act);
-
-    auto t2 = std::chrono::high_resolution_clock::now();
-    long rss2  = get_current_memory_kb();
-    long peak2 = get_peak_memory_kb();
-
-    // --- Linear 2 ---
-    auto ct_scores = compute_linear_layer(ct_bootstrapped, W2, b2, config, 10);
-
-    auto t3 = std::chrono::high_resolution_clock::now();
-    long rss3  = get_current_memory_kb();
-    long peak3 = get_peak_memory_kb();
-
-    long active_inference_cost = peak3 - mem_after_fhe_setup;
-
-    Plaintext pt_result;
-    config.cc->Decrypt(config.keyPair.secretKey, ct_scores, &pt_result);
-    pt_result->SetLength(10);
-    auto computed = pt_result->GetRealPackedValue();
-
-    auto end_inference = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double> layer1_duration = t1 - t0;
-    std::chrono::duration<double> act_bs_duration = t2 - t1;
-    std::chrono::duration<double> layer2_duration = t3 - t2;
-    std::chrono::duration<double> eval_duration   = t3 - t0;
-    std::chrono::duration<double> total_duration  = end_inference - start_inference;
-
-    r.scores.assign(computed.begin(), computed.begin() + 10);
-
-    r.layer1_seconds = layer1_duration.count();
-    r.act_bs_seconds = act_bs_duration.count();
-    r.layer2_seconds = layer2_duration.count();
-    r.eval_seconds   = eval_duration.count();
-    r.total_seconds  = total_duration.count();
-
-    r.layer1_rss_delta_kb  = rss1 - rss0;
-    r.layer1_peak_delta_kb = peak1 - peak0;
-    r.act_bs_rss_delta_kb  = rss2 - rss1;
-    r.act_bs_peak_delta_kb = peak2 - peak1;
-    r.layer2_rss_delta_kb  = rss3 - rss2;
-    r.layer2_peak_delta_kb = peak3 - peak2;
-
-    r.inference_kb = active_inference_cost;
+    {
+        BENCH_LAYER_SCOPE("OutputDecoder");
+        Plaintext pt_result;
+        config.cc->Decrypt(config.keyPair.secretKey, ct_scores, &pt_result);
+        pt_result->SetLength(10);
+        auto computed = pt_result->GetRealPackedValue();
+        r.scores.assign(computed.begin(), computed.begin() + 10);
+    }
+    BENCH_MEM("after-output-decode");
 
     int    fhe_pred  = 0;
     double max_score = r.scores[0];
@@ -400,16 +366,16 @@ InferenceResult run_fhe_inference(
 
 // --- Mode runners ---
 
-// Single-image mode: full per-image diagnostics
-// (scores list, MATCH/DIVERGENCE vs plaintext reference, timings, memory).
+// Single-image mode: per-image diagnostics. The scope timers in
+// run_fhe_inference already produce '[BENCH] InputEncoder/Layer 1/...'
+// lines on stdout (when BENCH_*=ON), so this runner only adds the
+// human-readable score listing and the FHE-vs-plaintext sanity check.
 int run_single_image_mode(
     const std::string& image_path,
     int hidden_size,
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
     const std::vector<std::vector<int64_t>>& W2, const std::vector<int64_t>& b2,
-    FHEConfig& config,
-    long mem_after_fhe_setup,
-    long fhe_base_memory)
+    FHEConfig& config)
 {
     std::cout << "Loading image: " << image_path << std::endl;
 
@@ -424,7 +390,7 @@ int run_single_image_mode(
         real_image, W1, b1, W2, b2, hidden_size, pt_time);
 
     auto r = run_fhe_inference(
-        real_image, W1, b1, W2, b2, hidden_size, config, mem_after_fhe_setup);
+        real_image, W1, b1, W2, b2, hidden_size, config);
 
     std::cout << "\n--- Scores ---\n";
     for (int d = 0; d < 10; ++d) {
@@ -432,70 +398,36 @@ int run_single_image_mode(
     }
 
     std::cout << "\n=========================================\n";
-
-    if (r.fhe_pred == plaintext_pred) {
-        std::cout << "MATCH!\n";
-    } else {
-        std::cout << "DIVERGENCE!\n";
-    }
-
+    std::cout << (r.fhe_pred == plaintext_pred ? "MATCH!\n" : "DIVERGENCE!\n");
     std::cout << "Plaintext Prediction: " << plaintext_pred << std::endl;
-    std::cout << "FHE Prediction: "       << r.fhe_pred     << std::endl;
-
-    std::cout << "\n--- Timing ---\n";
-    std::cout << "Plaintext Time:         " << pt_time          << " s\n";
-    std::cout << "Linear Layer 1:         " << r.layer1_seconds << " s\n";
-    std::cout << "Activation + Bootstrap: " << r.act_bs_seconds << " s\n";
-    std::cout << "Linear Layer 2:         " << r.layer2_seconds << " s\n";
-    std::cout << "FHE Eval Time:          " << r.eval_seconds   << " s          (sum of the three above)\n";
-    std::cout << "Total FHE Time:         " << r.total_seconds  << " s          (incl. encrypt + decrypt)\n";
-
-    std::cout << "\n--- Memory ---\n";
-    std::cout << "FHE Base Memory:           ~" << fhe_base_memory / 1024 << " MB\n";
-    std::printf("Linear Layer 1:            RSS %+ld MB  Peak %+ld MB\n",
-                r.layer1_rss_delta_kb / 1024, r.layer1_peak_delta_kb / 1024);
-    std::printf("Activation + Bootstrap:    RSS %+ld MB  Peak %+ld MB\n",
-                r.act_bs_rss_delta_kb / 1024, r.act_bs_peak_delta_kb / 1024);
-    std::printf("Linear Layer 2:            RSS %+ld MB  Peak %+ld MB\n",
-                r.layer2_rss_delta_kb / 1024, r.layer2_peak_delta_kb / 1024);
-    std::cout << "Inference Memory:          ~" << r.inference_kb / 1024      << " MB\n";
-    std::cout << "Global Peak Memory:        "  << get_peak_memory_kb() / 1024 << " MB\n";
+    std::cout << "FHE Prediction:       " << r.fhe_pred     << std::endl;
+    std::cout << "Plaintext Time:       " << pt_time        << " s\n";
     std::cout << "=========================================\n";
 
+    bench::PrintSummary("Single");
     return 0;
 }
 
 // Folder mode: iterate <root>/<label>/*.{png,jpg,jpeg}, run FHE inference per
-// image, then print accuracy summary + confusion matrix + aggregate bench info.
-// Per-image output: '[idx] filename -> pred=X truth=Y OK/MISS' (accuracy.cpp).
+// image, then print the [BENCH SUMMARY Batch] table + accuracy summary +
+// confusion matrix. Output layout mirrors io::PrintAccuracySummary / the
+// example in Untitled-2 so all driver outputs in this repo line up.
 int run_folder_mode(
     const std::string& test_root,
     int hidden_size,
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
     const std::vector<std::vector<int64_t>>& W2, const std::vector<int64_t>& b2,
-    FHEConfig& config,
-    long mem_after_fhe_setup,
-    long fhe_base_memory)
+    FHEConfig& config)
 {
     constexpr int OUT_DIM = 10;
 
     std::cout << "Iterating over " << test_root << ":" << std::endl;
 
-    int total   = 0;
-    int correct = 0;
+    int total           = 0;
+    int correct         = 0;
+    int correctPlain    = 0;
+    int fheMatchesPlain = 0;
     std::vector<std::vector<int>> confusion(OUT_DIM, std::vector<int>(OUT_DIM, 0));
-
-    // Per-phase accumulators for aggregate means at the end.
-    double sum_l1     = 0.0;
-    double sum_act_bs = 0.0;
-    double sum_l2     = 0.0;
-    double sum_eval   = 0.0;
-
-    long sum_rss_l1     = 0, sum_peak_l1     = 0;
-    long sum_rss_act_bs = 0, sum_peak_act_bs = 0;
-    long sum_rss_l2     = 0, sum_peak_l2     = 0;
-
-    auto folder_start = std::chrono::high_resolution_clock::now();
 
     for (int label = 0; label < OUT_DIM; ++label) {
         const fs::path classDir = fs::path(test_root) / std::to_string(label);
@@ -510,46 +442,41 @@ int run_folder_mode(
             auto real_image = load_image_to_input(path.string());
             if (real_image.empty()) continue;
 
+            double pt_time = 0.0;
+            int plainPred = plaintext_inference(
+                real_image, W1, b1, W2, b2, hidden_size, pt_time);
+
             auto r = run_fhe_inference(
-                real_image, W1, b1, W2, b2, hidden_size, config, mem_after_fhe_setup);
+                real_image, W1, b1, W2, b2, hidden_size, config);
 
             ++total;
-            if (r.fhe_pred == label) ++correct;
+            if (r.fhe_pred == label)     ++correct;
+            if (plainPred == label)      ++correctPlain;
+            if (r.fhe_pred == plainPred) ++fheMatchesPlain;
             confusion[label][r.fhe_pred] += 1;
 
-            sum_l1     += r.layer1_seconds;
-            sum_act_bs += r.act_bs_seconds;
-            sum_l2     += r.layer2_seconds;
-            sum_eval   += r.eval_seconds;
-
-            sum_rss_l1     += r.layer1_rss_delta_kb;
-            sum_peak_l1    += r.layer1_peak_delta_kb;
-            sum_rss_act_bs += r.act_bs_rss_delta_kb;
-            sum_peak_act_bs+= r.act_bs_peak_delta_kb;
-            sum_rss_l2     += r.layer2_rss_delta_kb;
-            sum_peak_l2    += r.layer2_peak_delta_kb;
-
-            std::printf(
-                "[%4d] %-30s -> pred=%d truth=%d %s\n"
-                "  TIME -> layer 1: %.2f  |  activation + bootstrap: %.2f  |  layer 2: %.2f [s]\n"
-                "  RSS  -> layer 1: %+ld  |  activation + bootstrap: %+ld  |  layer 2: %+ld [MB]\n"
-                "  PEAK -> layer 1: %+ld  |  activation + bootstrap: %+ld  |  layer 2: %+ld [MB]\n",
-                total, path.filename().c_str(),
-                r.fhe_pred, label,
-                r.fhe_pred == label ? "OK" : "MISS",
-                r.layer1_seconds, r.act_bs_seconds, r.layer2_seconds,
-                r.layer1_rss_delta_kb / 1024, r.act_bs_rss_delta_kb / 1024, r.layer2_rss_delta_kb / 1024,
-                r.layer1_peak_delta_kb / 1024, r.act_bs_peak_delta_kb / 1024, r.layer2_peak_delta_kb / 1024);
+            std::printf("[%4d] %s -> pred=%d  plain=%d  truth=%d  %s\n",
+                        total, path.filename().c_str(),
+                        r.fhe_pred, plainPred, label,
+                        r.fhe_pred == label ? "OK" : "MISS");
             std::fflush(stdout);
         }
     }
 
-    auto folder_end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> folder_duration = folder_end - folder_start;
+    bench::PrintSummary("Batch");
+
+    auto pct = [&](int n) {
+        return total > 0 ? 100.0 * n / total : 0.0;
+    };
+
+    std::printf("\n=== FHE vs PlainText ===\n");
+    std::printf("Hit: %d / %d  (%.2f%%)\n", fheMatchesPlain, total, pct(fheMatchesPlain));
+
+    std::printf("\n=== PlainText Acc ===\n");
+    std::printf("Correct: %d / %d  (%.2f%%)\n", correctPlain, total, pct(correctPlain));
 
     std::printf("\n=== Accuracy ===\n");
-    std::printf("Correct: %d / %d  (%.2f%%)\n",
-                correct, total, total > 0 ? 100.0 * correct / total : 0.0);
+    std::printf("Correct: %d / %d  (%.2f%%)\n", correct, total, pct(correct));
 
     std::printf("\nConfusion matrix (row=truth, col=pred):\n     ");
     for (int j = 0; j < OUT_DIM; ++j) std::printf(" %4d", j);
@@ -560,32 +487,12 @@ int run_folder_mode(
         std::printf("\n");
     }
 
-    std::cout << "\n--- Aggregate Timing ---\n";
-    std::cout << "Total Folder Time:         " << folder_duration.count() << " s\n";
-    if (total > 0) {
-        std::cout << "Mean Linear Layer 1:       " << (sum_l1     / total) << " s\n";
-        std::cout << "Mean Activation+Bootstrap: " << (sum_act_bs / total) << " s\n";
-        std::cout << "Mean Linear Layer 2:       " << (sum_l2     / total) << " s\n";
-        std::cout << "Mean FHE Eval per image:   " << (sum_eval   / total) << " s\n";
-    }
-
-    std::cout << "\n--- Aggregate Memory (mean per-image deltas) ---\n";
-    std::cout << "FHE Base Memory:           ~" << fhe_base_memory / 1024 << " MB\n";
-    if (total > 0) {
-        const double inv = 1.0 / (1024.0 * total);
-        std::printf("Linear Layer 1:            RSS %+.2f MB  Peak %+.2f MB\n",
-                    sum_rss_l1 * inv,     sum_peak_l1 * inv);
-        std::printf("Activation + Bootstrap:    RSS %+.2f MB  Peak %+.2f MB\n",
-                    sum_rss_act_bs * inv, sum_peak_act_bs * inv);
-        std::printf("Linear Layer 2:            RSS %+.2f MB  Peak %+.2f MB\n",
-                    sum_rss_l2 * inv,     sum_peak_l2 * inv);
-    }
-    std::cout << "Global Peak Memory:        " << get_peak_memory_kb() / 1024 << " MB\n";
-
     return 0;
 }
 
 int main(int argc, char* argv[]) {
+    BENCH_TOTAL_SCOPE("Total program");
+    BENCH_MEM("startup");
 
     if (argc < 2) {
         std::cerr << "Usage:\n";
@@ -660,6 +567,7 @@ int main(int argc, char* argv[]) {
     auto b2 = load_csv_1d(b2_path);
 
     FHEConfig config = setup_fhe_environment();
+    BENCH_MEM("after-compile");
 
     long mem_after_fhe_setup = get_current_memory_kb();
     long fhe_base_memory = mem_after_fhe_setup - mem_before_fhe;
@@ -668,13 +576,10 @@ int main(int argc, char* argv[]) {
               << fhe_base_memory / 1024
               << " MB\n" << std::endl;
 
-    if (folder_mode) {
-        return run_folder_mode(
-            input_path, hidden_size, W1, b1, W2, b2,
-            config, mem_after_fhe_setup, fhe_base_memory);
-    } else {
-        return run_single_image_mode(
-            input_path, hidden_size, W1, b1, W2, b2,
-            config, mem_after_fhe_setup, fhe_base_memory);
-    }
+    int rc = folder_mode
+           ? run_folder_mode(input_path, hidden_size, W1, b1, W2, b2, config)
+           : run_single_image_mode(input_path, hidden_size, W1, b1, W2, b2, config);
+
+    BENCH_MEM("end");
+    return rc;
 }
