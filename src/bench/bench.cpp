@@ -55,6 +55,17 @@ void ReportRSS(const char* tag) {
     std::fflush(stdout);
 }
 
+void ReportRSSAndRecord(const char* tag) {
+    const std::size_t cur  = CurrentRSSBytes();
+    const std::size_t peak = PeakRSSBytes();
+    std::printf("[BENCH][MEM] %-32s  RSS=%.2f MB   peak=%.2f MB\n",
+                tag,
+                cur  / (1024.0 * 1024.0),
+                peak / (1024.0 * 1024.0));
+    std::fflush(stdout);
+    RecordLiveRSS(tag, cur, peak);
+}
+
 // ── Aggregator (singleton, mutex-protected) ────────────────────────────────
 
 namespace {
@@ -66,8 +77,20 @@ struct TagStats {
     std::size_t         peak_rss_max_bytes = 0;
 };
 
+// Memory-checkpoint aggregator (separate from the timer aggregator above).
+// One entry per tag passed to RecordLiveRSS / ReportRSSAndRecord. Insertion
+// order is preserved so PrintSummary can list checkpoints chronologically
+// (e.g. after-input-encode → after-Layer 1 → after-Bootstrap+Activation → …).
+struct MemTagStats {
+    std::vector<std::size_t> live_rss_samples;   // VmRSS at each call
+    std::vector<std::size_t> peak_rss_samples;   // VmHWM at each call
+};
+
 std::mutex&                       Mu()    { static std::mutex m;                            return m; }
 std::map<std::string, TagStats>&  Bag()   { static std::map<std::string, TagStats> b;        return b; }
+
+std::map<std::string, MemTagStats>&  MemBag()   { static std::map<std::string, MemTagStats> b;     return b; }
+std::vector<std::string>&            MemOrder() { static std::vector<std::string>           v;     return v; }
 
 }  // namespace
 
@@ -81,9 +104,25 @@ void RecordSample(const char* tag, double ms, std::size_t peak_rss_bytes) {
     }
 }
 
+void RecordLiveRSS(const char* tag, std::size_t live_rss_bytes,
+                   std::size_t peak_rss_bytes) {
+    if (!tag) return;
+    std::lock_guard<std::mutex> lk(Mu());
+    auto& bag = MemBag();
+    auto  it  = bag.find(tag);
+    if (it == bag.end()) {
+        MemOrder().emplace_back(tag);
+        it = bag.emplace(tag, MemTagStats{}).first;
+    }
+    it->second.live_rss_samples.push_back(live_rss_bytes);
+    it->second.peak_rss_samples.push_back(peak_rss_bytes);
+}
+
 void ResetStats() {
     std::lock_guard<std::mutex> lk(Mu());
     Bag().clear();
+    MemBag().clear();
+    MemOrder().clear();
 }
 
 // Fixed display order. The summary is intentionally narrow: it reports only
@@ -149,6 +188,95 @@ void PrintSummary(const char* title) {
         }
     }
     std::printf("\n");
+
+    // ── Memory checkpoints sub-table ───────────────────────────────────────
+    //
+    // One row per marker tag fed through ReportRSSAndRecord / RecordLiveRSS,
+    // listed in registration (chronological) order. Reads as: at this marker
+    // the process had on average `avg RSS` resident, with `max RSS` being
+    // the worst observed sample, and `max peak` the highest VmHWM seen.
+    //
+    // The `avg ΔRSS (MB)` column is the difference between this row's
+    // `avg RSS` and the previous row's `avg RSS` — i.e. the average net
+    // memory delta attributable to the work between the two markers
+    // (positive = allocation, negative = release). The first row has no
+    // previous marker so its delta is "—".
+    if (!MemOrder().empty()) {
+        // Pick max sample count across all markers (they should all match,
+        // but be defensive in case a marker was added mid-run).
+        std::size_t n_mem = 0;
+        for (const auto& tag : MemOrder()) {
+            auto it = MemBag().find(tag);
+            if (it != MemBag().end()) {
+                n_mem = std::max(n_mem, it->second.live_rss_samples.size());
+            }
+        }
+        if (n_mem > 0) {
+            if (title && title[0]) {
+                std::printf("[BENCH MEMORY CHECKPOINTS %s]  n=%zu\n\n",
+                            title, n_mem);
+            } else {
+                std::printf("[BENCH MEMORY CHECKPOINTS]  n=%zu\n\n", n_mem);
+            }
+
+            std::printf("  %-32s   %15s    %15s    %15s    %15s\n",
+                        "Marker",
+                        "avg RSS (MB)", "avg ΔRSS (MB)",
+                        "max RSS (MB)", "max peak (MB)");
+            std::printf("  %-32s   %15s    %15s    %15s    %15s\n",
+                        "--------------------------------",
+                        "---------------",
+                        "---------------",
+                        "---------------",
+                        "---------------");
+
+            bool   have_prev    = false;
+            double prev_avg_mb  = 0.0;
+            for (const auto& tag : MemOrder()) {
+                auto it = MemBag().find(tag);
+                if (it == MemBag().end() ||
+                    it->second.live_rss_samples.empty()) continue;
+                const auto& live = it->second.live_rss_samples;
+                const auto& peak = it->second.peak_rss_samples;
+                const double sum_live =
+                    std::accumulate(live.begin(), live.end(),
+                                    static_cast<std::size_t>(0));
+                const double avg_live_mb =
+                    (sum_live / static_cast<double>(live.size()))
+                    / (1024.0 * 1024.0);
+                const double max_live_mb =
+                    static_cast<double>(*std::max_element(live.begin(),
+                                                          live.end()))
+                    / (1024.0 * 1024.0);
+                const double max_peak_mb =
+                    peak.empty()
+                        ? 0.0
+                        : static_cast<double>(*std::max_element(peak.begin(),
+                                                                peak.end()))
+                          / (1024.0 * 1024.0);
+                if (have_prev) {
+                    const double delta_mb = avg_live_mb - prev_avg_mb;
+                    // Sign-prefixed delta (+ / -) so direction is obvious.
+                    char delta_buf[32];
+                    std::snprintf(delta_buf, sizeof(delta_buf),
+                                  "%+.2f", delta_mb);
+                    std::printf("  %-32s   %15.2f    %15s    %15.2f    %15.2f\n",
+                                tag.c_str(),
+                                avg_live_mb, delta_buf,
+                                max_live_mb, max_peak_mb);
+                } else {
+                    std::printf("  %-32s   %15.2f    %15s    %15.2f    %15.2f\n",
+                                tag.c_str(),
+                                avg_live_mb, "—",
+                                max_live_mb, max_peak_mb);
+                }
+                prev_avg_mb = avg_live_mb;
+                have_prev   = true;
+            }
+            std::printf("\n");
+        }
+    }
+
     std::fflush(stdout);
 }
 

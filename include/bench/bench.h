@@ -17,6 +17,12 @@ std::size_t CurrentRSSBytes();
 // One-line report at an instrumentation point.
 void ReportRSS(const char* tag);
 
+// Like ReportRSS, but ALSO feeds a per-tag aggregator (see RecordLiveRSS)
+// so PrintSummary can include a "memory checkpoints" table with the avg /
+// max live RSS observed at each tag across a batch. Use this for markers
+// you want to appear in the summary; use ReportRSS for one-shot points.
+void ReportRSSAndRecord(const char* tag);
+
 // Scoped timer. Logs "[BENCH] <tag>: <ms> ms" on destruction.
 // When BENCH_MEMORY is enabled, also reports peak RSS at exit of scope.
 //
@@ -50,6 +56,16 @@ private:
 // otherwise the column shows "—" in the summary.
 
 void RecordSample(const char* tag, double ms, std::size_t peak_rss_bytes);
+
+// Records a (live RSS, peak RSS) sample under `tag` into a separate, marker-
+// keyed aggregator. PrintSummary appends a second table that reports
+// avg / max live RSS and max peak RSS per tag, in registration order.
+//
+// Like RecordSample, peak_rss_bytes is the global VmHWM at the moment of the
+// reading; live_rss_bytes is VmRSS (current). Both come from /proc/self/status
+// on Linux; they're forwarded as-is and only converted to MB at print time.
+void RecordLiveRSS(const char* tag, std::size_t live_rss_bytes,
+                   std::size_t peak_rss_bytes);
 
 // Prints the four-row summary. `title` is just decorative ("Batch", "Single",
 // …). Safe to call multiple times — does not reset state.
@@ -98,9 +114,13 @@ void ResetStats();
 #endif
 
 #ifdef BENCH_MEMORY
-#define BENCH_MEM(tag) ::bench::ReportRSS(tag)
+#define BENCH_MEM(tag)     ::bench::ReportRSS(tag)
+// Marker variant: prints the per-image [BENCH][MEM] line AND feeds the
+// memory-checkpoint aggregator so PrintSummary's second table averages it.
+#define BENCH_MEM_REC(tag) ::bench::ReportRSSAndRecord(tag)
 #else
-#define BENCH_MEM(tag) ((void)0)
+#define BENCH_MEM(tag)     ((void)0)
+#define BENCH_MEM_REC(tag) ((void)0)
 #endif
 
 #endif  // MVB_BENCH_H

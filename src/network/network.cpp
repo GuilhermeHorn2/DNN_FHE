@@ -177,7 +177,7 @@ Ciphertext<DCRTPoly> Network::EncodeInput(const std::vector<std::int64_t>& rawIn
         ctx_->keyPair().secretKey, ctx_->elementParams(), ctx_->flagBR());
     SchemeletRLWEMP::ModSwitch(ctxtBFV, params.Q, params.qBFVInit);
 
-    BENCH_MEM("after-encrypt");
+    BENCH_MEM_REC("after-encrypt");
 
     // ── RLWE -> CKKS ──────────────────────────────────────────────────────
     const std::uint32_t firstLvl =
@@ -241,7 +241,7 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
 
     ForwardState         state;
     Ciphertext<DCRTPoly> ct = EncodeInput(rawInput);
-    BENCH_MEM("after-input-encode");
+    BENCH_MEM_REC("after-input-encode");
 
     // Per-layer instrumentation lives here (not inside each layer's Apply)
     // so the tag can include the layer's position. Linear layers get
@@ -258,15 +258,25 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
         } else {
             tag = nm;
         }
-        BENCH_LAYER_SCOPE_S(tag);
-        ct = layer->Apply(*ctx_, state, ct);
+        // Inner scope ensures the timer's destructor (which prints the
+        // [BENCH] line and records peak RSS) fires BEFORE the BENCH_MEM
+        // reading below, so the live-RSS sample reflects state after the
+        // layer has fully released its transient allocations.
+        {
+            BENCH_LAYER_SCOPE_S(tag);
+            ct = layer->Apply(*ctx_, state, ct);
+        }
+#ifdef BENCH_MEMORY
+        const std::string memTag = "after-" + tag;
+        BENCH_MEM_REC(memTag.c_str());
+#endif
     }
-    BENCH_MEM("after-layers");
+    BENCH_MEM_REC("after-layers");
 
     const int outLen = trailingOutDim_ > 0 ? trailingOutDim_
                                             : static_cast<int>(rawInput.size());
     auto result = DecodeOutput(ct, outLen);
-    BENCH_MEM("after-output-decode");
+    BENCH_MEM_REC("after-output-decode");
 
     if (static_cast<int>(result.size()) > outLen) result.resize(outLen);
     return result;
