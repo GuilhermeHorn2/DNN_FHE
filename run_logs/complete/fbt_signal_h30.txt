@@ -1,0 +1,691 @@
+[BENCH][MEM] startup                           RSS=6.42 MB   peak=6.48 MB
+Loading weights for hidden size 30 from ../signal30_*.csv ...
+[Network] 2 slot-space block(s); costs=[2,2]; levelsComputation = 2
+[FHEContext] deepest activation = Identity  fbtDepth = 26  levelsComputation = 2  total depth = 28
+[FHEContext] ringDim = 65536  numSlotsCKKS = 1024  securityLevel = HEStd_NotSet (NO SECURITY GUARANTEE)  secretKeyDist = SPARSE_TERNARY
+[BENCH][MEM] after-compile                     RSS=11180.59 MB   peak=11180.59 MB
+[BENCH][MEM] after-compile                     RSS=11180.59 MB   peak=11180.59 MB
+[BENCH][MEM] after-encrypt                     RSS=11180.96 MB   peak=11180.96 MB
+[BENCH] InputEncoder                       52654.496 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12284.11 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            15290.274 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             65593.822 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2600.788 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11484.52 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1989.554 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10830.73 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   138131.494 ms   (peak RSS 15079.16 MB)
+[   1] mnist_06841.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=10831.18 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       51553.136 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12096.14 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            14218.314 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             52462.226 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2761.733 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11151.26 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1792.052 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10800.27 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   122788.403 ms   (peak RSS 15079.16 MB)
+[   2] mnist_03140.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=10800.27 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       52340.103 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11624.82 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            15686.254 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             57206.028 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2635.006 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11567.17 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1664.998 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10731.39 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   129533.568 ms   (peak RSS 15079.16 MB)
+[   3] mnist_07868.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=10731.39 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       53573.330 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12348.49 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            15402.195 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             52378.243 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2650.269 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11372.92 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1702.680 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10695.78 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   125707.571 ms   (peak RSS 15079.16 MB)
+[   4] mnist_00311.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=10695.78 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       53943.160 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11838.12 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            14869.153 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             53058.683 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2497.977 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11669.41 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1420.841 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11309.78 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   125806.106 ms   (peak RSS 15079.16 MB)
+[   5] mnist_01390.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=11059.37 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       50871.105 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12646.85 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            14600.358 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             51129.831 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2595.708 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11389.38 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1651.760 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11044.62 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   120889.903 ms   (peak RSS 15079.16 MB)
+[   6] mnist_09845.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=11044.62 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       49142.113 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12203.32 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13055.365 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             50061.072 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2596.120 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=12291.45 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1509.503 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11641.18 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   116364.895 ms   (peak RSS 15079.16 MB)
+[   7] mnist_01820.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=11641.18 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47744.563 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=13277.03 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13957.171 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             49210.753 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2336.735 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=13088.10 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1419.293 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=12010.18 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   114694.302 ms   (peak RSS 15079.16 MB)
+[   8] mnist_04337.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=11576.67 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47589.050 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12596.61 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13111.106 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             49153.406 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2374.374 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11906.78 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1260.693 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11521.79 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113502.757 ms   (peak RSS 15079.16 MB)
+[   9] mnist_02444.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=11301.78 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47575.547 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12747.61 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            14049.895 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             52305.319 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2530.987 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11372.39 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1522.010 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10984.26 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   117984.720 ms   (peak RSS 15079.16 MB)
+[  10] mnist_04032.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=10984.26 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47580.591 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11903.56 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12646.703 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             49071.324 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2593.870 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11385.51 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1582.640 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10973.88 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113475.916 ms   (peak RSS 15079.16 MB)
+[  11] mnist_08310.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=10973.88 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       48271.327 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12286.86 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12678.303 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             49893.458 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2335.094 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11850.20 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1640.816 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11194.69 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   114819.912 ms   (peak RSS 15079.16 MB)
+[  12] mnist_00612.png -> pred=2  plain=4  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=11194.69 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       48050.524 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12527.64 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13412.760 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48880.041 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2534.507 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11970.11 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1573.018 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11206.83 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   114451.575 ms   (peak RSS 15079.16 MB)
+[  13] mnist_01696.png -> pred=1  plain=2  truth=2  MISS
+[BENCH][MEM] after-encrypt                     RSS=11206.83 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       48061.104 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12973.11 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12488.172 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48738.270 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2481.455 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=12409.86 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1394.583 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11506.89 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113189.076 ms   (peak RSS 15079.16 MB)
+[  14] mnist_01574.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=11072.88 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47155.563 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12273.94 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12678.295 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48820.024 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2637.110 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11816.39 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1535.460 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10968.38 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112827.497 ms   (peak RSS 15079.16 MB)
+[  15] mnist_00547.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=10968.38 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47611.330 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12689.00 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12456.130 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48684.351 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2545.977 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11714.19 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1548.563 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10934.38 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112847.153 ms   (peak RSS 15079.16 MB)
+[  16] mnist_06184.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10934.38 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47544.481 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12648.14 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12704.699 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48740.015 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2620.788 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11644.13 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1493.445 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10923.36 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113104.270 ms   (peak RSS 15079.16 MB)
+[  17] mnist_02128.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10923.36 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       48476.953 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12626.30 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12531.033 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47131.824 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2637.421 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11244.28 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1596.005 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10587.65 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112374.045 ms   (peak RSS 15079.16 MB)
+[  18] mnist_00323.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10587.65 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47702.531 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12504.84 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12552.714 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48675.522 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2636.640 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=12102.90 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1531.529 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10928.25 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113099.742 ms   (peak RSS 15079.16 MB)
+[  19] mnist_05185.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10928.25 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47529.765 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12724.43 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12579.259 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47965.527 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2358.603 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11308.17 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1356.144 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10657.52 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111795.868 ms   (peak RSS 15079.16 MB)
+[  20] mnist_02305.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10575.51 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47776.147 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12318.50 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13928.226 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47811.167 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2468.250 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11362.79 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1460.768 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11023.42 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113445.357 ms   (peak RSS 15079.16 MB)
+[  21] mnist_05725.png -> pred=4  plain=4  truth=4  OK
+[BENCH][MEM] after-encrypt                     RSS=11023.42 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46698.910 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12576.38 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12455.348 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             46930.467 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2661.265 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11297.54 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1531.206 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10962.11 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   110278.017 ms   (peak RSS 15079.16 MB)
+[  22] mnist_07186.png -> pred=4  plain=4  truth=4  OK
+[BENCH][MEM] after-encrypt                     RSS=10962.11 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47266.169 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11988.18 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13676.944 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48158.605 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2540.639 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11701.00 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1569.408 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10585.58 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113212.567 ms   (peak RSS 15079.16 MB)
+[  23] mnist_06699.png -> pred=4  plain=4  truth=4  OK
+[BENCH][MEM] after-encrypt                     RSS=10585.58 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46979.294 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12472.16 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12472.117 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47198.104 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2559.315 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11548.00 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1543.814 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10586.04 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   110753.462 ms   (peak RSS 15079.16 MB)
+[  24] mnist_01864.png -> pred=4  plain=4  truth=4  OK
+[BENCH][MEM] after-encrypt                     RSS=10586.04 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47238.937 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12523.21 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12516.678 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             46121.362 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2412.852 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11208.29 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1528.212 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10558.27 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   109818.908 ms   (peak RSS 15079.16 MB)
+[  25] mnist_07366.png -> pred=4  plain=4  truth=4  OK
+[BENCH][MEM] after-encrypt                     RSS=10558.27 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47251.497 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11832.48 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13939.912 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48083.781 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2641.179 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11679.42 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1575.045 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10886.21 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113492.200 ms   (peak RSS 15079.16 MB)
+[  26] mnist_06142.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10886.21 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47139.184 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12354.32 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            14085.315 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48521.400 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2249.706 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11526.02 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1684.513 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10621.69 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113680.944 ms   (peak RSS 15079.16 MB)
+[  27] mnist_04637.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10621.69 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47080.917 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12476.30 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12499.955 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48822.172 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2365.964 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11293.20 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1320.585 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10945.57 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112106.341 ms   (peak RSS 15079.16 MB)
+[  28] mnist_02540.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10690.07 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47173.828 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12059.77 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12428.939 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47055.069 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2389.149 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11642.10 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1443.355 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10976.96 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   110491.346 ms   (peak RSS 15079.16 MB)
+[  29] mnist_06611.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10974.96 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47069.256 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11651.70 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13341.506 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48095.610 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2356.645 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11762.90 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1449.631 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10980.81 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112313.624 ms   (peak RSS 15079.16 MB)
+[  30] mnist_05083.png -> pred=5  plain=8  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10980.81 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46795.881 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12820.07 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12415.825 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47645.058 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2402.233 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11145.23 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1558.511 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10478.46 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   110818.327 ms   (peak RSS 15079.16 MB)
+[  31] mnist_03121.png -> pred=6  plain=6  truth=6  OK
+[BENCH][MEM] after-encrypt                     RSS=10478.46 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47000.655 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11993.61 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12540.859 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47981.188 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2406.237 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=10833.95 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1469.136 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10478.46 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111398.867 ms   (peak RSS 15079.16 MB)
+[  32] mnist_08739.png -> pred=6  plain=6  truth=6  OK
+[BENCH][MEM] after-encrypt                     RSS=10478.46 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47113.043 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11791.30 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13280.448 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48124.819 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2497.285 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11425.37 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1533.930 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10838.61 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112550.334 ms   (peak RSS 15079.16 MB)
+[  33] mnist_09317.png -> pred=6  plain=6  truth=6  OK
+[BENCH][MEM] after-encrypt                     RSS=10838.61 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47092.280 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12234.18 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12330.676 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47920.280 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2447.698 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11589.53 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1474.385 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10473.52 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111266.113 ms   (peak RSS 15079.16 MB)
+[  34] mnist_08197.png -> pred=6  plain=6  truth=6  OK
+[BENCH][MEM] after-encrypt                     RSS=10473.52 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47002.163 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12201.69 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12585.011 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48920.757 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2375.897 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=10755.72 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1550.769 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10420.11 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112435.424 ms   (peak RSS 15079.16 MB)
+[  35] mnist_00081.png -> pred=6  plain=6  truth=6  OK
+[BENCH][MEM] after-encrypt                     RSS=10420.11 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47037.055 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12166.66 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13424.373 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47880.440 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2380.620 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=10971.82 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1433.699 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10466.47 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112157.003 ms   (peak RSS 15079.16 MB)
+[  36] mnist_03162.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10466.47 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46919.946 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11784.04 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12369.804 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             45746.046 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2624.419 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11149.49 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1574.647 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10473.46 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   109235.711 ms   (peak RSS 15079.16 MB)
+[  37] mnist_05560.png -> pred=0  plain=7  truth=7  MISS
+[BENCH][MEM] after-encrypt                     RSS=10473.46 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46644.763 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11930.18 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13800.641 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48175.770 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2298.218 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11469.13 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1318.683 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10841.62 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112254.350 ms   (peak RSS 15079.16 MB)
+[  38] mnist_08519.png -> pred=3  plain=3  truth=7  MISS
+[BENCH][MEM] after-encrypt                     RSS=10587.61 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46988.296 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12341.41 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13944.408 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47895.504 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2542.071 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11658.14 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1555.639 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10631.85 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112926.717 ms   (peak RSS 15079.16 MB)
+[  39] mnist_06837.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10631.85 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46820.700 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12171.02 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13483.866 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             47786.253 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2290.348 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11447.20 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1470.061 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10737.98 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111852.066 ms   (peak RSS 15079.16 MB)
+[  40] mnist_03103.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10737.98 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47845.569 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=13246.71 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12498.618 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48386.040 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2354.915 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11377.69 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1566.962 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10430.68 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112652.902 ms   (peak RSS 15079.16 MB)
+[  41] mnist_03627.png -> pred=8  plain=8  truth=8  OK
+[BENCH][MEM] after-encrypt                     RSS=10430.68 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47170.177 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12361.40 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12398.882 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48455.684 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2513.891 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11430.57 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1584.707 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10794.05 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112124.265 ms   (peak RSS 15079.16 MB)
+[  42] mnist_01052.png -> pred=8  plain=8  truth=8  OK
+[BENCH][MEM] after-encrypt                     RSS=10794.05 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47274.634 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12228.40 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13864.590 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48463.542 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2604.863 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11719.22 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1440.146 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11116.08 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113648.671 ms   (peak RSS 15079.16 MB)
+[  43] mnist_07951.png -> pred=8  plain=8  truth=8  OK
+[BENCH][MEM] after-encrypt                     RSS=11116.08 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46673.256 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12572.79 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12173.330 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48358.518 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2299.846 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=10778.22 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1520.083 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10440.60 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111025.870 ms   (peak RSS 15079.16 MB)
+[  44] mnist_01170.png -> pred=8  plain=8  truth=8  OK
+[BENCH][MEM] after-encrypt                     RSS=10440.60 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46749.002 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11844.55 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12539.022 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48155.522 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2383.307 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11315.83 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1460.596 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10640.06 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111288.254 ms   (peak RSS 15079.16 MB)
+[  45] mnist_02233.png -> pred=8  plain=8  truth=8  OK
+[BENCH][MEM] after-encrypt                     RSS=10640.06 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47034.081 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12065.64 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12439.907 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48261.088 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2373.869 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=10844.30 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1592.561 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10438.09 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   111702.352 ms   (peak RSS 15079.16 MB)
+[  46] mnist_01058.png -> pred=9  plain=9  truth=9  OK
+[BENCH][MEM] after-encrypt                     RSS=10438.09 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47046.967 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12181.91 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13838.551 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48057.243 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2403.069 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=12106.84 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1310.655 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11108.38 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112672.746 ms   (peak RSS 15079.16 MB)
+[  47] mnist_03723.png -> pred=6  plain=9  truth=9  MISS
+[BENCH][MEM] after-encrypt                     RSS=10854.37 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       46967.063 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=11827.07 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13836.366 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48343.358 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2335.939 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11017.12 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1632.732 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10440.61 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113116.277 ms   (peak RSS 15079.16 MB)
+[  48] mnist_08503.png -> pred=9  plain=9  truth=9  OK
+[BENCH][MEM] after-encrypt                     RSS=10440.61 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47111.901 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12771.38 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            13818.783 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48252.927 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2441.332 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11518.40 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1539.446 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=11158.91 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   113165.186 ms   (peak RSS 15079.16 MB)
+[  49] mnist_03859.png -> pred=9  plain=9  truth=9  OK
+[BENCH][MEM] after-encrypt                     RSS=11158.91 MB   peak=15079.16 MB
+[BENCH] InputEncoder                       47068.249 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-input-encode                RSS=12298.25 MB   peak=15079.16 MB
+  [Linear 0] neuron 1/30  [Linear 0] neuron 2/30  [Linear 0] neuron 3/30  [Linear 0] neuron 4/30  [Linear 0] neuron 5/30  [Linear 0] neuron 6/30  [Linear 0] neuron 7/30  [Linear 0] neuron 8/30  [Linear 0] neuron 9/30  [Linear 0] neuron 10/30  [Linear 0] neuron 11/30  [Linear 0] neuron 12/30  [Linear 0] neuron 13/30  [Linear 0] neuron 14/30  [Linear 0] neuron 15/30  [Linear 0] neuron 16/30  [Linear 0] neuron 17/30  [Linear 0] neuron 18/30  [Linear 0] neuron 19/30  [Linear 0] neuron 20/30  [Linear 0] neuron 21/30  [Linear 0] neuron 22/30  [Linear 0] neuron 23/30  [Linear 0] neuron 24/30  [Linear 0] neuron 25/30  [Linear 0] neuron 26/30  [Linear 0] neuron 27/30  [Linear 0] neuron 28/30  [Linear 0] neuron 29/30  [Linear 0] neuron 30/30
+[BENCH] Layer 1                            12448.580 ms   (peak RSS 15079.16 MB)
+[BENCH] Bootstrap + Activation             48297.470 ms   (peak RSS 15079.16 MB)
+  [Linear 1] neuron 1/10  [Linear 1] neuron 2/10  [Linear 1] neuron 3/10  [Linear 1] neuron 4/10  [Linear 1] neuron 5/10  [Linear 1] neuron 6/10  [Linear 1] neuron 7/10  [Linear 1] neuron 8/10  [Linear 1] neuron 9/10  [Linear 1] neuron 10/10
+[BENCH] Layer 2                             2659.230 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-layers                      RSS=11213.69 MB   peak=15079.16 MB
+[BENCH] OutputDecoder                       1599.205 ms   (peak RSS 15079.16 MB)
+[BENCH][MEM] after-output-decode               RSS=10495.39 MB   peak=15079.16 MB
+[BENCH] Inference (Run)                   112073.569 ms   (peak RSS 15079.16 MB)
+[  50] mnist_03992.png -> pred=9  plain=9  truth=9  OK
+
+[BENCH SUMMARY Batch]  n=50
+
+  Stage                          avg (ms)      min (ms)      max (ms)      peak RSS (MB)
+  ------------------------     ----------    ----------    ----------    ---------------
+  Layer 1                        13246.91      12173.33      15686.25           15079.16
+  Bootstrap + Activation         49141.30      45746.05      65593.82           15079.16
+  Layer 2                         2484.83       2249.71       2761.73           15079.16
+  Inference (Run)               114346.93     109235.71     138131.49           15079.16
+
+
+=== FHE vs PlainText ===
+Hit: 45 / 50  (90.00%)
+
+=== PlainText Acc ===
+Correct: 47 / 50  (94.00%)
+
+=== Accuracy ===
+Correct: 46 / 50  (92.00%)
+
+Confusion matrix (row=truth, col=pred):
+         0    1    2    3    4    5    6    7    8    9
+  0 :    5    0    0    0    0    0    0    0    0    0
+  1 :    0    5    0    0    0    0    0    0    0    0
+  2 :    0    1    4    0    0    0    0    0    0    0
+  3 :    0    0    0    5    0    0    0    0    0    0
+  4 :    0    0    0    0    5    0    0    0    0    0
+  5 :    0    0    0    0    0    5    0    0    0    0
+  6 :    0    0    0    0    0    0    5    0    0    0
+  7 :    1    0    0    1    0    0    0    3    0    0
+  8 :    0    0    0    0    0    0    0    0    5    0
+  9 :    0    0    0    0    0    0    1    0    0    4
+[BENCH][MEM] end                               RSS=10495.39 MB   peak=15079.16 MB
+[BENCH] Total program                     5728510.425 ms   (peak RSS 15079.16 MB)
