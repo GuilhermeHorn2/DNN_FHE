@@ -20,7 +20,7 @@
 using namespace lbcrypto;
 namespace fs = std::filesystem;
 
-// --- Funções de Memória ---
+// Memory helpers
 long get_current_memory_kb() {
     std::ifstream stat_stream("/proc/self/status", std::ios_base::in);
     std::string line;
@@ -41,7 +41,7 @@ long get_peak_memory_kb() {
     return usage.ru_maxrss;
 }
 
-// --- Funções de Leitura de CSV ---
+// CSV loading
 std::vector<int64_t> load_csv_1d(const std::string& filename) {
     std::vector<int64_t> result;
     std::ifstream file(filename);
@@ -93,16 +93,14 @@ struct FHEConfig {
     uint32_t numSlotsCKKS;
 };
 
-// --- Setup com Bootstrapping Habilitado e Sem Segurança ---
+// FHE setup (bootstrapping enabled, HEStd_NotSet)
 FHEConfig setup_fhe_environment() {
     std::cout << "Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)..." << std::endl;
     FHEConfig config;
 
     CCParams<CryptoContextCKKSRNS> parameters;
 
-    // CKKS bootstrap REQUIRES a ternary secret key distribution.
-    // Without this line, OpenFHE defaults to GAUSSIAN and EvalBootstrapKeyGen
-    // produces heap corruption ("munmap_chunk(): invalid pointer").
+    // CKKS bootstrap requires UNIFORM_TERNARY. The GAUSSIAN default makes EvalBootstrapKeyGen corrupt the heap (munmap_chunk: invalid pointer).
     SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
     parameters.SetSecretKeyDist(secretKeyDist);
 
@@ -117,12 +115,7 @@ FHEConfig setup_fhe_environment() {
     parameters.SetFirstModSize(firstMod);
     parameters.SetScalingTechnique(rescaleTech);
 
-    // Compute the required multiplicative depth.
-    // Bootstrap with levelBudget={4,4} consumes ~14 levels by itself.
-    // We need:
-    //   - Pre-bootstrap: linear (2) + scale (1) + Chebyshev deg 7 (~4) = ~7
-    //   - Post-bootstrap: linear (2)
-    // levelsAvailableAfterBootstrap >= max(pre, post) with margin.
+    // levelBudget {4,4} costs ~14 levels; pre-bootstrap needs ~7 (linear 2 + scale 1 + Chebyshev 4), post-bootstrap 2.
     std::vector<uint32_t> levelBudget = {4, 4};
     uint32_t levelsAvailableAfterBootstrap = 10;
     uint32_t depth = levelsAvailableAfterBootstrap +
@@ -202,22 +195,11 @@ Ciphertext<DCRTPoly> compute_linear_layer(
     return ct_layer_out;
 }
 
-// Auto-tunes the Chebyshev pre-scale from a *distributional* bound on the
-// layer-1 pre-activation y[j] = b1[j] + sum_i W1[j][i] * x[i], assuming the
-// inputs are i.i.d. binary (x_i in {0, 1}) with pixel-on rate p. Then
-//   E[y[j]]   = b1[j] + p * sum_i W1[j][i]
-//   Var[y[j]] = p (1 - p) * sum_i W1[j][i]^2
-// and |y[j]| concentrates inside |E| + k * sqrt(Var) (Chebyshev's inequality
-// covers >99.99% with k = 4, regardless of distribution shape).
-//
-// This replaces the previous worst-case L1 bound (which assumed every pixel
-// aligns sign-wise with W1[j][i] -- a regime that never occurs on real
-// MNIST). The L1 bound was driving pre_scale ~6.6e-4 which collapsed the
-// Chebyshev ReLU into its kink-error regime; the distributional bound is
-// typically 8x-30x looser and recovers a usable polynomial fit.
-//
-// `p` is the prior on pixel-on rate (~0.13 for binarized MNIST). `k` is the
-// tail-coverage factor (4 = >99.99% Chebyshev, 3 = ~3-sigma Gaussian).
+// Pre-scale for the Chebyshev fit, from a distributional bound on
+// y[j] = b1[j] + sum_i W1[j][i]*x[i] with x_i ~ Bernoulli(p):
+//   |y[j]| <= |b1[j] + p*sum W| + k*sqrt(p(1-p)*sum W^2)
+// p = 0.13 (binarized MNIST on-rate), k = 4 (>99.99% by Chebyshev).
+// Returns 4/max_bound, leaving headroom against Chebyshev edge effects.
 double compute_pre_scale_distributional(
     const std::vector<std::vector<int64_t>>& W1,
     const std::vector<int64_t>&              b1,
@@ -236,7 +218,6 @@ double compute_pre_scale_distributional(
         const double bound = std::fabs(mu) + k * std::sqrt(var);
         if (bound > max_abs) max_abs = bound;
     }
-    // 4.0 (not 8.0) leaves headroom so Chebyshev edge effects don't dominate.
     return 4.0 / max_abs;
 }
 
@@ -249,8 +230,7 @@ Ciphertext<DCRTPoly> apply_approx_activation(Ciphertext<DCRTPoly> ct_input,
     auto ct_scaled = config.cc->EvalMult(ct_input, pt_scale);
     ct_scaled = config.cc->Rescale(ct_scaled);
 
-    // ReLU has a kink at 0; degree 7 is visibly noisy there, degree 13 fits the
-    // remaining depth budget (linear 2 + scale 1 + cheb 5 = 8 of 10 levels).
+    // ReLU has a kink at 0; degree 7 is visibly noisy there, degree 13 fits the remaining depth budget (linear 2 + scale 1 + cheb 5 = 8 of 10 levels).
     double lowerBound = -8.0;
     double upperBound = 8.0;
     uint32_t degree = 13;
@@ -304,16 +284,14 @@ int plaintext_inference(
     return predicted_class;
 }
 
-// --- Per-image inference helpers (shared by single-image and folder modes) ---
+// Per-image inference helpers
 
 struct InferenceResult {
     int                 fhe_pred;
     std::vector<double> scores;          // 10
 };
 
-// Loads `path` as 28x28 grayscale (784 pixels) and binarizes to {0, +1}
-// (ReLU-trained network expects non-negative inputs).
-// Returns an empty vector on failure so callers can `continue` in folder mode.
+// 28x28 grayscale -> 784 pixels binarized to {0,+1}; empty on failure.
 std::vector<double> load_image_to_input(const std::string& path) {
     int width, height, channels;
     unsigned char* img_data = stbi_load(path.c_str(), &width, &height, &channels, 1);
@@ -329,11 +307,8 @@ std::vector<double> load_image_to_input(const std::string& path) {
     return real_image;
 }
 
-// Encrypt -> linear1 -> activation -> bootstrap -> linear2 -> decrypt for one
-// image. All instrumentation goes through bench:: macros so the per-image
-// `[BENCH] <tag> ms (peak RSS …)` lines and `[BENCH][MEM] <tag> …` markers
-// match the layout produced by MNIST_signal/main.cpp. `pre_scale` is forwarded
-// to the ReLU Chebyshev approximation.
+// Encrypt -> linear1 -> activation -> bootstrap -> linear2 -> decrypt.
+// `pre_scale` feeds the ReLU Chebyshev approximation.
 InferenceResult run_fhe_inference(
     const std::vector<double>& real_image,
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
@@ -401,12 +376,9 @@ InferenceResult run_fhe_inference(
     return r;
 }
 
-// --- Mode runners ---
+// Mode runners
 
-// Single-image mode: per-image diagnostics. The scope timers in
-// run_fhe_inference already produce '[BENCH] InputEncoder/Layer 1/...'
-// lines on stdout (when BENCH_*=ON), so this runner only adds the
-// human-readable score listing and the FHE-vs-plaintext sanity check.
+// Single-image mode: per-image diagnostics.
 int run_single_image_mode(
     const std::string& image_path,
     int hidden_size,
@@ -430,7 +402,7 @@ int run_single_image_mode(
     auto r = run_fhe_inference(
         real_image, W1, b1, W2, b2, hidden_size, config, pre_scale);
 
-    std::cout << "\n--- Scores ---\n";
+    std::cout << "\n--- Scores\n";
     for (int d = 0; d < 10; ++d) {
         std::cout << "Digit " << d << ": " << r.scores[d] << std::endl;
     }
@@ -446,10 +418,7 @@ int run_single_image_mode(
     return 0;
 }
 
-// Folder mode: iterate <root>/<label>/*.{png,jpg,jpeg}, run FHE inference per
-// image, then print the [BENCH SUMMARY Batch] table + accuracy summary +
-// confusion matrix. Output layout mirrors io::PrintAccuracySummary / the
-// example in Untitled-2 so all driver outputs in this repo line up.
+// Folder mode: iterate <root>/<label>/*.{png,jpg,jpeg}.
 int run_folder_mode(
     const std::string& test_root,
     int hidden_size,
@@ -586,7 +555,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "--- DiNN OpenFHE Inference ("
               << (folder_mode ? "Folder Mode" : "Single Image Mode")
-              << ") ---" << std::endl;
+              << ")" << std::endl;
     std::cout << "Hidden layer size: " << hidden_size << std::endl;
 
     long mem_before_fhe = get_current_memory_kb();

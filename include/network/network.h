@@ -13,30 +13,15 @@
 
 namespace fhednn {
 
-// Sequential FHE network builder.
-//
-// Usage:
-//
-//   FHEContext ctx;
-//   Network    net;
-//   net.SetInputShift(1)
-//      .Linear(W1, b1)
-//      .Activate(activations::Sign(256, ctx.params().pInput))
-//      .Linear(W2, b2);
-//   net.Compile(ctx);
-//   auto scores = net.Run(load_image_bipolar("img.png"));
-//
-// Compile() walks the layer list, partitions it into "slot-space blocks"
-// delimited by ActivationLayers, computes the per-block rescaling cost, takes
-// the maximum to size the global `levelsComputation`, and inserts DummyMult
-// layers in shorter blocks so that every block is exactly that deep. It then
-// hands the deepest activations and the chosen levelsComputation to
-// FHEContext::Build to size the CKKS context.
+// Sequential FHE network builder: chain Linear/Activate calls, then Compile()
+// and Run(). Compile() partitions the layers into slot-space blocks split by
+// ActivationLayers, pads each block to the deepest one's rescaling cost with
+// DummyMultLayers, and sizes the CKKS context via FHEContext::Build.
 class Network {
 public:
     Network() = default;
 
-    // ── Builder API (chainable) ───────────────────────────────────────────
+    // Builder API (chainable)
 
     // Pre-shift applied to the raw input before encryption. The InputEncoder
     // adds `inputShift` to every entry of the raw input, then subtracts the
@@ -53,7 +38,7 @@ public:
     // Append an arbitrary Layer. Useful for custom layers.
     Network& Add(std::unique_ptr<Layer> layer);
 
-    // ── Compile / Run ─────────────────────────────────────────────────────
+    // Compile / Run
 
     // Computes levelsComputation, inserts DummyMult padding, and builds the
     // FHE context. Must be called exactly once before Run().
@@ -65,7 +50,7 @@ public:
     // or rawInput.size() if no Linear is present).
     std::vector<std::int64_t> Run(const std::vector<std::int64_t>& rawInput);
 
-    // ── Introspection ─────────────────────────────────────────────────────
+    // Introspection
     std::size_t NumLayers() const { return layers_.size(); }
     std::uint32_t LevelsComputation() const { return levelsComputation_; }
 

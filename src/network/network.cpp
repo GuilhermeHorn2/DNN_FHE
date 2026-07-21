@@ -27,7 +27,7 @@ int NextPowerOfTwo(int n) {
 
 }  // namespace
 
-// ── Builder ─────────────────────────────────────────────────────────────────
+// Builder
 
 Network& Network::SetInputShift(std::int64_t k) {
     inputShift_ = k;
@@ -53,7 +53,7 @@ Network& Network::Add(std::unique_ptr<Layer> layer) {
     return *this;
 }
 
-// ── Compile ─────────────────────────────────────────────────────────────────
+// Compile
 
 void Network::Compile(FHEContext& ctx) {
     if (compiled_) {
@@ -63,8 +63,8 @@ void Network::Compile(FHEContext& ctx) {
         throw std::runtime_error("Network::Compile: no layers added.");
     }
 
-    // ── 1. Partition into slot-space blocks (Linear+ separated by Activation).
-    //       Compute cost per block, find the deepest.
+    // 1. Partition into slot-space blocks (split by Activation), find the
+    //    deepest per-block cost.
     std::vector<std::uint32_t>                  blockCosts;
     std::vector<std::pair<std::size_t, std::size_t>> blockRanges;  // [begin, end)
     std::size_t                                 blockBegin = 0;
@@ -97,9 +97,8 @@ void Network::Compile(FHEContext& ctx) {
     }
     std::cout << "]; levelsComputation = " << levelsComputation_ << "\n";
 
-    // ── 2. Pad shorter blocks with DummyMultLayer.
-    //       We rebuild the layer list in a new vector to avoid invalidating
-    //       indices during insertion.
+    // 2. Pad shorter blocks with DummyMultLayer, rebuilding into a new
+    //    vector to avoid invalidating indices during insertion.
     std::vector<std::unique_ptr<Layer>> newLayers;
     newLayers.reserve(layers_.size() + blockCosts.size());
 
@@ -119,7 +118,7 @@ void Network::Compile(FHEContext& ctx) {
     }
     layers_ = std::move(newLayers);
 
-    // ── 3. Identify trailing/initial dimensions.
+    // 3. Identify trailing/initial dimensions.
     for (auto it = layers_.begin(); it != layers_.end(); ++it) {
         if (auto* lin = dynamic_cast<LinearLayer*>(it->get())) {
             initialInDim_ = lin->InDim();
@@ -133,8 +132,8 @@ void Network::Compile(FHEContext& ctx) {
         }
     }
 
-    // ── 4. Collect activations for FBT depth sizing.
-    //       The InputEncoder also uses an Identity activation; include it.
+    // 4. Collect activations for FBT depth sizing, including the
+    //    InputEncoder's Identity activation.
     std::vector<Activation> acts;
     acts.push_back(activations::Identity(ctx.params().pInput, ctx.params().pOutput,
                                           ctx.params().hermiteOrder));
@@ -144,7 +143,7 @@ void Network::Compile(FHEContext& ctx) {
         }
     }
 
-    // ── 5. Build the FHE context.
+    // 5. Build the FHE context.
     ctx.Build(acts, levelsComputation_);
     ctx_      = &ctx;
     compiled_ = true;
@@ -152,7 +151,7 @@ void Network::Compile(FHEContext& ctx) {
     BENCH_MEM("after-compile");
 }
 
-// ── Run ─────────────────────────────────────────────────────────────────────
+// Run
 
 Ciphertext<DCRTPoly> Network::EncodeInput(const std::vector<std::int64_t>& rawInput) {
     BENCH_LAYER_SCOPE("InputEncoder");
@@ -164,14 +163,13 @@ Ciphertext<DCRTPoly> Network::EncodeInput(const std::vector<std::int64_t>& rawIn
     const auto    numSlots     = params.numSlots;
     const double  scaleTHI     = static_cast<double>(params.scaleTHI);
 
-    // ── Pre-shift to [0, pInput) ─────────────────────────────────────────
+    // Shift into [0, pInput) before encrypting.
     std::vector<std::int64_t> x_shifted(numSlots, 0);
     const std::size_t        limit = std::min<std::size_t>(rawInput.size(), numSlots);
     for (std::size_t i = 0; i < limit; ++i) {
         x_shifted[i] = rawInput[i] + inputShift_;
     }
 
-    // ── Encrypt RLWE / mod-switch ─────────────────────────────────────────
     auto ctxtBFV = SchemeletRLWEMP::EncryptCoeff(
         x_shifted, params.qBFVInit, params.pInput,
         ctx_->keyPair().secretKey, ctx_->elementParams(), ctx_->flagBR());
@@ -179,14 +177,13 @@ Ciphertext<DCRTPoly> Network::EncodeInput(const std::vector<std::int64_t>& rawIn
 
     BENCH_MEM_REC("after-encrypt");
 
-    // ── RLWE -> CKKS ──────────────────────────────────────────────────────
     const std::uint32_t firstLvl =
         ctx_->totalDepth() - (params.levelsAvailableBeforeBootstrap > 0);
     auto ctxt = SchemeletRLWEMP::ConvertRLWEToCKKS(
         *cc, ctxtBFV, ctx_->keyPair().publicKey,
         params.BIGQ, numSlotsCKKS, firstLvl);
 
-    // ── Identity EvalMVBNoDecoding (enter slot space) ─────────────────────
+    // Identity EvalMVBNoDecoding to enter slot space.
     auto identity = activations::Identity(
         params.pInput, params.pOutput, params.hermiteOrder);
     auto coeffIdentity = GetHermiteTrigCoefficients(
@@ -198,7 +195,7 @@ Ciphertext<DCRTPoly> Network::EncodeInput(const std::vector<std::int64_t>& rawIn
     auto ctxtSlots = cc->EvalMVBNoDecoding(
         powers, coeffIdentity, params.pInput.GetMSB() - 1, identity.order);
 
-    // ── Undo input shift in slot space ────────────────────────────────────
+    // Undo the input shift now that we're in slot space.
     if (inputShift_ != 0) {
         const std::uint32_t plaintextLvl = ctx_->totalDepth()
                                          - params.lvlb[1]
@@ -243,10 +240,9 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
     Ciphertext<DCRTPoly> ct = EncodeInput(rawInput);
     BENCH_MEM_REC("after-input-encode");
 
-    // Per-layer instrumentation lives here (not inside each layer's Apply)
-    // so the tag can include the layer's position. Linear layers get
-    // "Layer 1", "Layer 2", … in the order they're applied; activation
-    // layers get "Bootstrap + Activation" since the block IS the bootstrap.
+    // Tagging happens here, not in each layer's Apply, so it can include
+    // position: "Layer 1", "Layer 2", … for Linear, "Bootstrap + Activation"
+    // for the activation block.
     int linearN = 1;
     for (auto& layer : layers_) {
         const std::string& nm = layer->Name();
@@ -258,10 +254,8 @@ std::vector<std::int64_t> Network::Run(const std::vector<std::int64_t>& rawInput
         } else {
             tag = nm;
         }
-        // Inner scope ensures the timer's destructor (which prints the
-        // [BENCH] line and records peak RSS) fires BEFORE the BENCH_MEM
-        // reading below, so the live-RSS sample reflects state after the
-        // layer has fully released its transient allocations.
+        // Inner scope so the timer destructs (and releases transient
+        // allocations) before the BENCH_MEM reading below.
         {
             BENCH_LAYER_SCOPE_S(tag);
             ct = layer->Apply(*ctx_, state, ct);

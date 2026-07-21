@@ -52,7 +52,6 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
             auto pixels = loadPixels(path.string());
             if (pixels.empty()) continue;
 
-            // FHE side
             auto fheScores = net.Run(pixels);
             const int predicted = ArgMax(fheScores, outDim);
 
@@ -60,7 +59,7 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
             if (predicted == label) ++r.correct;
             r.confusion[label][predicted] += 1;
 
-            // Plain side (only if the project supplied a scorer).
+            // Only when the project supplied a plaintext scorer.
             if (r.hasPlain) {
                 auto plainScores = plainScorer(pixels);
                 const int plainPred = ArgMax(plainScores, outDim);
@@ -81,8 +80,7 @@ AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
         }
     }
 
-    // Final aggregated table for the four reported stages. No-op when no
-    // BENCH_* timer flag was on (no samples recorded).
+    // No-op unless a BENCH_* timer flag was enabled at build time.
     bench::PrintSummary("Batch");
 
     return r;

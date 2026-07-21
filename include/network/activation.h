@@ -13,14 +13,9 @@ namespace fhednn {
 // A parameterized activation function realized as a Hermite-trigonometric LUT
 // over the domain [0, pInput).
 //
-// Convention (matches the original code):
-//   * Before HomDecoding, the network adds `preShift / scaleTHI` to the slot
-//     ciphertext. This guarantees the input to `f` is non-negative.
-//   * `f` therefore receives values shifted by `preShift`, and must compare
-//     against the shifted zero (e.g. sign(x) becomes "x >= preShift ? +1 : -1").
-//   * `pInput` defines the LUT period and must be a power of two.
-//   * `order` is the Hermite trigonometric order (1 by default, matching the
-//     original code).
+// `f` receives values pre-shifted by `preShift` (added before HomDecoding to
+// keep the input non-negative), so it must compare against shifted zero, e.g.
+// sign(x) becomes "x >= preShift ? +1 : -1". `pInput` must be a power of two.
 struct Activation {
     std::string                              name;
     std::function<std::int64_t(std::int64_t)> f;
@@ -32,22 +27,16 @@ struct Activation {
 namespace activations {
 
 // f(x) = sign(x - preShift), returning {-1, +1}.
-// Default preShift = pInput/2 maps a slot-space value of 0 to the threshold.
 Activation Sign(std::int64_t        preShift,
                 lbcrypto::BigInteger pInput,
                 std::size_t          order = 1);
 
 // f(x) = H(x - preShift), the Heaviside step, returning {0, 1}.
-// Like Sign() but with output range {0, 1} instead of {-1, +1}.
 Activation Heaviside(std::int64_t        preShift,
                      lbcrypto::BigInteger pInput,
                      std::size_t          order = 1);
 
-// f(x) = max(0, x - preShift), the rectified linear unit.
-// `preShift` plays the same role as in Sign/Heaviside: it is the post-shift
-// threshold that maps a slot-space value of 0 to the ReLU "knee", so the
-// LUT receives values shifted by `preShift` and must subtract it back when
-// the input is positive. Output range: [0, pInput - preShift).
+// f(x) = max(0, x - preShift). Output range: [0, pInput - preShift).
 Activation ReLU(std::int64_t        preShift,
                 lbcrypto::BigInteger pInput,
                 std::size_t          order = 1);

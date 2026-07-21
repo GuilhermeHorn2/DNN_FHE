@@ -18,9 +18,7 @@
 
 namespace fs = std::filesystem;
 
-// MNIST-like DiNN dimensions: 784 -> HID_DIM -> 10, ReLU variant. The
-// hidden width is a runtime parameter so the same driver can load DiNN30,
-// DiNN100, or any other size whose weight files exist next to this binary.
+// MNIST DiNN: 784 -> HID_DIM -> 10, ReLU variant.
 static constexpr int IN_DIM  = 784;
 static constexpr int OUT_DIM = 10;
 
@@ -91,30 +89,11 @@ int main(int argc, char* argv[]) {
     params.Q       = lbcrypto::BigInteger(1) << 55;
     FHEContext ctx{params};
 
-    // ── Plaintext-side pre-scaling (argmax invariant) ─────────────────────
-    //
-    // HIDDEN_SCALE_K — keeps the hidden pre-activations y[j] = W1·x + b1
-    //   inside the ReLU LUT's safe range [-preShift, pInput - preShift).
-    //   With preShift = 512 and pInput = 1024 the safe range is [-512, +512)
-    //   (centered on 0). Empirical max|y| ≈ 993 across the 50-image batch,
-    //   so K1 ≥ 993/512 ≈ 1.94. We use 4 (next pow2 above 2) for headroom
-    //   and to push y/K1 deeper into the cleanest interior of the LUT, away
-    //   from the period boundaries where Gibbs ringing is largest.
-    //   preShift = 512 also minimizes the LUT amplitude (pInput - preShift
-    //   = 512), which is the dominant scale factor for the order-N
-    //   Hermite-trig fit error per slot.
-    //
-    // OUTPUT_SCALE_K — keeps the final scores inside the decoder's signed
-    //   window (-pOutput/2, +pOutput/2) = (-512, +512). With raw weights
-    //   max|score| ≈ 57k; after dividing by HIDDEN_SCALE_K · OUTPUT_SCALE_K
-    //   the constraint is 57000 / (4·K2) < 512, i.e. K2 > 27.8 → 64 for
-    //   power-of-two safety margin. Without this scaling the FHE scores wrap
-    //   modulo pOutput and the argmax becomes meaningless.
-    //
-    // The original W1/b1/W2/b2 are kept untouched so the plaintext oracle
-    // computes scores at full integer magnitude. We multiply the FHE scores
-    // by HIDDEN_SCALE_K · OUTPUT_SCALE_K before printing so plain[k] and
-    // fhe[k] live on the same scale.
+    // Pre-scale so both stages stay in range; weights are divided, originals
+    // kept for the plaintext oracle.
+    //   K1: max|W1*x+b1| ~ 993 must fit the ReLU LUT window +-512  -> K1 = 4
+    //   K2: max|score| ~ 57k must fit the decoder window +-512     -> K2 = 64
+    // Without K2 the FHE scores wrap mod pOutput and argmax is meaningless.
     constexpr double HIDDEN_SCALE_K = 4.0;
     constexpr double OUTPUT_SCALE_K = 64.0;
     auto W1_scaled = W1;
@@ -140,15 +119,13 @@ int main(int argc, char* argv[]) {
     net.Compile(ctx);
     BENCH_MEM("after-compile");
 
-    // ── Batch mode: inputPath is a directory of <label>/*.{png,jpg,jpeg} ──
+    // Batch mode: inputPath is a directory of <label>/*.{png,jpg,jpeg}.
     if (fs::is_directory(inputPath)) {
         auto loadPixels = [](const std::string& p) {
             return io::LoadImageBinary(p.c_str(), IN_DIM);
         };
 
-        // Plain-side reference: same topology as the FHE network (Linear ->
-        // ReLU -> Linear). Captures W1/b1/W2/b2 by reference; they are not
-        // mutated after Compile() in this driver, so this is safe.
+        // Plain reference: Linear -> ReLU -> Linear.
         auto plainScore = [&, HID_DIM](const std::vector<std::int64_t>& px) {
             std::vector<double> hidden(HID_DIM, 0.0);
             for (int j = 0; j < HID_DIM; ++j) {
@@ -172,20 +149,15 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    // ── Single-image mode (existing behavior) ─────────────────────────────
+    // Single-image mode.
     std::cout << "Loading image: " << inputPath << "\n";
-    // ReLU networks here are trained on binary {0, 1} pixels, not bipolar
-    // {-1, +1}, so use the dedicated {0, 1} loader.
+    // Trained on {0,1} pixels, not bipolar.
     auto pixels = io::LoadImageBinary(inputPath.c_str(), IN_DIM);
     if (pixels.empty()) return 1;
 
     auto scores = net.Run(pixels);
 
-    // The FHE pipeline saw W1/b1 divided by HIDDEN_SCALE_K and W2/b2 divided
-    // by OUTPUT_SCALE_K, so each returned integer score is approximately
-    // score_true / (HIDDEN_SCALE_K · OUTPUT_SCALE_K). Lift back to the
-    // full-integer scale so the printed numbers are directly comparable to
-    // the plaintext oracle below.
+    // Lift FHE scores back to full integer scale for comparison with plain.
     constexpr double SCORE_LIFT = HIDDEN_SCALE_K * OUTPUT_SCALE_K;
     for (auto& v : scores)
         v = static_cast<std::int64_t>(std::llround(static_cast<double>(v) * SCORE_LIFT));
@@ -201,7 +173,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ── Plaintext reference (same {0,1} inputs the FHE side received) ────
+    // Plaintext reference.
     std::vector<double> hidden(HID_DIM, 0.0);
     for (int j = 0; j < HID_DIM; ++j) {
         double acc = b1[j];

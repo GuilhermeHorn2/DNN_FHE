@@ -16,16 +16,10 @@ namespace io {
 using PixelLoader =
     std::function<std::vector<std::int64_t>(const std::string& imagePath)>;
 
-// Optional per-project plaintext scorer. When supplied, the harness calls
-// it with the same pixel vector that went into `Network::Run` and uses
-// the returned class scores to derive a plain-side argmax. The harness
-// then reports two extra numbers alongside FHE accuracy: plaintext
-// accuracy (plain vs truth) and FHE-vs-plain agreement (a pure FHE
-// correctness signal, isolated from model error).
-//
-// Length of the returned vector must match `outDim`. The function is
-// project-specific: it has to know the layer topology, activation, and
-// any weight pre-scaling that `main.cpp` applied before Compile().
+// Optional per-project plaintext scorer, called with the same pixels that
+// went into `Network::Run` to derive a plain-side argmax. When supplied,
+// the harness also reports plaintext accuracy and FHE-vs-plain agreement.
+// Returned vector length must match `outDim`.
 using PlainScorer =
     std::function<std::vector<double>(const std::vector<std::int64_t>& pixels)>;
 
@@ -35,29 +29,22 @@ struct AccuracyResult {
     int correctPlain    = 0;   // plain argmax vs truth (only when plainScorer is set)
     int fheMatchesPlain = 0;   // FHE argmax vs plain argmax (idem)
     bool hasPlain       = false;
-    // confusion[truth][pred]; size outDim × outDim. Always indexes the FHE
-    // prediction so the matrix is comparable across runs with/without
-    // plainScorer.
+    // confusion[truth][pred], always indexed by the FHE prediction.
     std::vector<std::vector<int>> confusion;
 };
 
 // Iterates `<testRoot>/<label>/*.{png,jpg,jpeg}` for label in [0, outDim),
 // scores each image via `net.Run(loadPixels(path))`, and tallies a
-// confusion matrix. Prints per-image OK/MISS lines as it goes — when
-// `plainScorer` is supplied each line also includes `plain=<pred>`.
-//
-// `net` must already be Compile()d. `loadPixels` is invoked once per image.
-// Skips silently on unknown extensions, missing class folders, or empty
-// pixel vectors (e.g. an unreadable file).
+// confusion matrix. `net` must already be Compile()d. Skips silently on
+// unknown extensions, missing class folders, or empty pixel vectors.
 AccuracyResult RunAccuracyLoop(fhednn::Network&   net,
                                const std::string& testRoot,
                                const PixelLoader& loadPixels,
                                int                outDim,
                                const PlainScorer& plainScorer = {});
 
-// Pretty-prints accuracy + confusion matrix. When `r.hasPlain` is set,
-// also prints the "FHE vs PlainText" agreement and "PlainText Acc"
-// blocks above the FHE-vs-truth one.
+// Pretty-prints accuracy + confusion matrix, plus the plaintext comparison
+// blocks when `r.hasPlain` is set.
 void PrintAccuracySummary(const AccuracyResult& r);
 
 }  // namespace io

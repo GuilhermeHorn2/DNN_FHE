@@ -20,10 +20,7 @@
 using namespace lbcrypto;
 namespace fs = std::filesystem;
 
-// --- Funções de Memória ---
-// Kept around because main() reports the legacy "-> FHE Base Memory" line and
-// we want the binary to still print something useful when BENCH_MEMORY is OFF.
-// When BENCH_MEMORY is ON, the [BENCH][MEM] markers cover everything these do.
+// Memory helpers
 long get_current_memory_kb() {
     std::ifstream stat_stream("/proc/self/status", std::ios_base::in);
     std::string line;
@@ -44,7 +41,7 @@ long get_peak_memory_kb() {
     return usage.ru_maxrss;
 }
 
-// --- Funções de Leitura de CSV ---
+// CSV loading
 std::vector<int64_t> load_csv_1d(const std::string& filename) {
     std::vector<int64_t> result;
     std::ifstream file(filename);
@@ -96,16 +93,15 @@ struct FHEConfig {
     uint32_t numSlotsCKKS;
 };
 
-// --- Setup com Bootstrapping Habilitado e Sem Segurança ---
+// FHE setup (bootstrapping enabled, HEStd_NotSet)
 FHEConfig setup_fhe_environment() {
     std::cout << "Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)..." << std::endl;
     FHEConfig config;
 
     CCParams<CryptoContextCKKSRNS> parameters;
 
-    // CKKS bootstrap REQUIRES a ternary secret key distribution.
-    // Without this line, OpenFHE defaults to GAUSSIAN and EvalBootstrapKeyGen
-    // produces heap corruption ("munmap_chunk(): invalid pointer").
+    // CKKS bootstrap requires UNIFORM_TERNARY. The GAUSSIAN default makes
+    // EvalBootstrapKeyGen corrupt the heap (munmap_chunk: invalid pointer).
     SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
     parameters.SetSecretKeyDist(secretKeyDist);
 
@@ -256,21 +252,14 @@ int plaintext_inference(
     return predicted_class;
 }
 
-// --- Per-image inference helpers (shared by single-image and folder modes) ---
+// Per-image inference helpers
 
-// Phase timing/memory used to live here as struct fields. They were only used
-// for printf, which moved to the bench:: infrastructure (BENCH_LAYER_SCOPE,
-// BENCH_MEM, BENCH_INFERENCE_SCOPE). The struct now only carries the
-// information the caller actually consumes: the predicted class and the
-// raw decrypted scores.
 struct InferenceResult {
     int                 fhe_pred;
     std::vector<double> scores;          // 10
 };
 
-// Loads `path` as 28x28 grayscale (784 pixels) and binarizes to {-1, +1}
-// (Sign-trained network expects bipolar inputs).
-// Returns an empty vector on failure so callers can `continue` in folder mode.
+// 28x28 grayscale -> 784 pixels binarized to {-1,+1}; empty on failure.
 std::vector<double> load_image_to_input(const std::string& path) {
     int width, height, channels;
     unsigned char* img_data = stbi_load(path.c_str(), &width, &height, &channels, 1);
@@ -286,10 +275,7 @@ std::vector<double> load_image_to_input(const std::string& path) {
     return real_image;
 }
 
-// Encrypt -> linear1 -> activation -> bootstrap -> linear2 -> decrypt for one
-// image. All instrumentation goes through bench:: macros so the per-image
-// `[BENCH] <tag> ms (peak RSS …)` lines and `[BENCH][MEM] <tag> …` markers
-// match the layout produced by MNIST_signal/main.cpp.
+// Encrypt -> linear1 -> activation -> bootstrap -> linear2 -> decrypt.
 InferenceResult run_fhe_inference(
     const std::vector<double>& real_image,
     const std::vector<std::vector<int64_t>>& W1, const std::vector<int64_t>& b1,
@@ -356,12 +342,9 @@ InferenceResult run_fhe_inference(
     return r;
 }
 
-// --- Mode runners ---
+// Mode runners
 
-// Single-image mode: per-image diagnostics. The scope timers in
-// run_fhe_inference already produce '[BENCH] InputEncoder/Layer 1/...'
-// lines on stdout (when BENCH_*=ON), so this runner only adds the
-// human-readable score listing and the FHE-vs-plaintext sanity check.
+// Single-image mode: per-image diagnostics.
 int run_single_image_mode(
     const std::string& image_path,
     int hidden_size,
@@ -384,7 +367,7 @@ int run_single_image_mode(
     auto r = run_fhe_inference(
         real_image, W1, b1, W2, b2, hidden_size, config);
 
-    std::cout << "\n--- Scores ---\n";
+    std::cout << "\n--- Scores\n";
     for (int d = 0; d < 10; ++d) {
         std::cout << "Digit " << d << ": " << r.scores[d] << std::endl;
     }
@@ -400,10 +383,7 @@ int run_single_image_mode(
     return 0;
 }
 
-// Folder mode: iterate <root>/<label>/*.{png,jpg,jpeg}, run FHE inference per
-// image, then print the [BENCH SUMMARY Batch] table + accuracy summary +
-// confusion matrix. Output layout mirrors io::PrintAccuracySummary / the
-// example in Untitled-2 so all driver outputs in this repo line up.
+// Folder mode: iterate <root>/<label>/*.{png,jpg,jpeg}.
 int run_folder_mode(
     const std::string& test_root,
     int hidden_size,
@@ -539,7 +519,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "--- DiNN OpenFHE Inference ("
               << (folder_mode ? "Folder Mode" : "Single Image Mode")
-              << ") ---" << std::endl;
+              << ")" << std::endl;
     std::cout << "Hidden layer size: " << hidden_size << std::endl;
 
     long mem_before_fhe = get_current_memory_kb();

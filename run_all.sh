@@ -1,38 +1,21 @@
 #!/usr/bin/env bash
-# run_all_variants_h30.sh — sweep DiNN FHE inference across
-#   {MNIST_signal, MNIST_heaviside, MNIST_relu}
-#   x {hidden_size 30}
-#
-# Each run is sequential (each instance needs ~10 GB RAM for bootstrap keys).
-# Per-run output is captured to its own log file under run_logs/<timestamp>/.
-#
-# Usage:
-#   ./run_all_variants_h30.sh                       # uses ./test_data
-#   ./run_all_variants_h30.sh /path/to/mnist        # custom data dir
-#
-# Tip: 3 runs at ~5.6h each is ~17h total. Run under nohup/tmux:
-#   nohup ./run_all_variants_h30.sh &> sweep.out &
-#   tmux new -s fhe ./run_all_variants_h30.sh
-
 set -uo pipefail
 
-# ---------- config ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${1:-${SCRIPT_DIR}/data/mnist}"
 # DATA_DIR="${1:-${SCRIPT_DIR}/test_data}"
 LOG_DIR="${SCRIPT_DIR}/run_logs/$(date +%Y%m%d_%H%M%S)"
 
 VARIANTS=(
-    # MNIST_signal
-    # MNIST_heaviside
-    # MNIST_relu
+    MNIST_signal
+    MNIST_heaviside
+    MNIST_relu
     poly_bootstraping_signal
-    # poly_bootstraping_heaviside
-    # poly_bootstraping_relu
+    poly_bootstraping_heaviside
+    poly_bootstraping_relu
 )
 HIDDEN_SIZES=(30)
 
-# ---------- sanity ----------
 if [[ ! -d "$DATA_DIR" ]]; then
     echo "ERROR: data directory not found: $DATA_DIR" >&2
     exit 1
@@ -46,13 +29,11 @@ echo "Variants   : ${VARIANTS[*]}"
 echo "Sizes      : ${HIDDEN_SIZES[*]}"
 echo
 
-# ---------- helpers ----------
 fmt_hms() {
     local s=$1
     printf "%dh %02dm %02ds" $((s / 3600)) $(((s % 3600) / 60)) $((s % 60))
 }
 
-# ---------- run sweep ----------
 declare -a RESULTS
 TOTAL_START=$SECONDS
 
@@ -67,11 +48,11 @@ for variant in "${VARIANTS[@]}"; do
         continue
     fi
 
-    # Binary must already exist — build is the user's responsibility.
+    # Binary must already exist
     if [[ ! -x "$BIN" ]]; then
-        echo "[SKIP] $variant — binary not found at $BIN"
+        echo "[SKIP] $variant - binary not found at $BIN"
         echo "       build it with: cmake -B $BUILD_DIR -S $VARIANT_DIR && cmake --build $BUILD_DIR -j4"
-        RESULTS+=("$variant (any): SKIPPED — not built")
+        RESULTS+=("$variant (any): SKIPPED - not built")
         continue
     fi
 
@@ -92,13 +73,12 @@ for variant in "${VARIANTS[@]}"; do
         else
             RC=$?
             ELAPSED=$((SECONDS - START))
-            echo "  FAILED (rc=$RC) after $(fmt_hms $ELAPSED) — see $LOG_FILE"
+            echo "  FAILED (rc=$RC) after $(fmt_hms $ELAPSED) - see $LOG_FILE"
             RESULTS+=("$TAG: FAIL ($(fmt_hms $ELAPSED), rc=$RC)")
         fi
     done
 done
 
-# ---------- summary ----------
 TOTAL=$((SECONDS - TOTAL_START))
 echo
 echo "================ SUMMARY ================"

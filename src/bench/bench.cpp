@@ -14,8 +14,6 @@
 
 namespace bench {
 
-// ── Process RSS helpers ─────────────────────────────────────────────────────
-
 static std::size_t ReadProcStatusKB(const char* key) {
 #ifdef __linux__
     std::ifstream f("/proc/self/status");
@@ -66,21 +64,18 @@ void ReportRSSAndRecord(const char* tag) {
     RecordLiveRSS(tag, cur, peak);
 }
 
-// ── Aggregator (singleton, mutex-protected) ────────────────────────────────
+// Aggregator (singleton, mutex-protected)
 
 namespace {
 
 struct TagStats {
     std::vector<double> samples_ms;
-    // Worst peak RSS observed at scope exit of this tag. Stays 0 when the
-    // build was made without BENCH_MEMORY (no peak captured).
+    // Worst peak RSS observed at scope exit; 0 without BENCH_MEMORY.
     std::size_t         peak_rss_max_bytes = 0;
 };
 
-// Memory-checkpoint aggregator (separate from the timer aggregator above).
-// One entry per tag passed to RecordLiveRSS / ReportRSSAndRecord. Insertion
-// order is preserved so PrintSummary can list checkpoints chronologically
-// (e.g. after-input-encode → after-Layer 1 → after-Bootstrap+Activation → …).
+// One entry per tag passed to RecordLiveRSS / ReportRSSAndRecord, in
+// insertion order so PrintSummary can list checkpoints chronologically.
 struct MemTagStats {
     std::vector<std::size_t> live_rss_samples;   // VmRSS at each call
     std::vector<std::size_t> peak_rss_samples;   // VmHWM at each call
@@ -125,10 +120,8 @@ void ResetStats() {
     MemOrder().clear();
 }
 
-// Fixed display order. The summary is intentionally narrow: it reports only
-// the four stages the experiment cares about. Other tags (Total program,
-// InputEncoder, OutputDecoder, …) still get their per-call line via
-// ScopedTimer but are NOT included in the summary table.
+// Fixed display order: only these four stages appear in the summary table.
+// Other tags still print their per-call line via ScopedTimer.
 namespace {
 struct Row { const char* display; const char* tag; };
 constexpr Row kRows[] = {
@@ -189,18 +182,9 @@ void PrintSummary(const char* title) {
     }
     std::printf("\n");
 
-    // ── Memory checkpoints sub-table ───────────────────────────────────────
-    //
-    // One row per marker tag fed through ReportRSSAndRecord / RecordLiveRSS,
-    // listed in registration (chronological) order. Reads as: at this marker
-    // the process had on average `avg RSS` resident, with `max RSS` being
-    // the worst observed sample, and `max peak` the highest VmHWM seen.
-    //
-    // The `avg ΔRSS (MB)` column is the difference between this row's
-    // `avg RSS` and the previous row's `avg RSS` — i.e. the average net
-    // memory delta attributable to the work between the two markers
-    // (positive = allocation, negative = release). The first row has no
-    // previous marker so its delta is "—".
+    // Memory checkpoints sub-table: one row per marker, in registration
+    // order. `avg ΔRSS` is this row's avg RSS minus the previous row's
+    // (positive = allocation, negative = release); the first row has none.
     if (!MemOrder().empty()) {
         // Pick max sample count across all markers (they should all match,
         // but be defensive in case a marker was added mid-run).
@@ -280,7 +264,7 @@ void PrintSummary(const char* title) {
     std::fflush(stdout);
 }
 
-// ── ScopedTimer ────────────────────────────────────────────────────────────
+// ScopedTimer
 
 ScopedTimer::ScopedTimer(const char* tag)
     : ownedTag_(), tag_(tag), start_(std::chrono::steady_clock::now()) {}

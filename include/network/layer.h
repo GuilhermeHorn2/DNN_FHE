@@ -88,9 +88,9 @@ private:
     void EnsureCoeffs(const FHEContext& ctx);
 };
 
-// Pads a slot-space block to the global `levelsComputation` budget by doing
-// `count` fake multiplications by 1.0 + ModReduceInPlace. Inserted by
-// Network::Compile when shorter blocks need to align with the deepest block.
+// Pads a slot-space block to the global `levelsComputation` budget with
+// `count` fake multiplications by 1.0. Inserted by Network::Compile so
+// every block matches the deepest one.
 class DummyMultLayer : public Layer {
 public:
     explicit DummyMultLayer(std::uint32_t count) : count_(count) {}

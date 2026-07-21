@@ -44,13 +44,10 @@ void FHEContext::Build(const std::vector<Activation>& activations,
             "FHEContext::Build requires at least one activation to size the FBT depth.");
     }
 
-    // ── Slot/ring sanity ─────────────────────────────────────────────────
     flagSP_       = (params_.numSlots <= params_.ringDim / 2);
     numSlotsCKKS_ = flagSP_ ? params_.numSlots : params_.numSlots / 2;
 
-    // ── Pick the deepest activation for FBT setup ────────────────────────
-    // We compute Hermite coefficients for each activation and choose the
-    // one with the largest GetFBTDepth.
+    // Pick the activation with the largest GetFBTDepth for FBT setup.
     const std::uint32_t dcrtBits = params_.BIGQ.GetMSB() - 1;
     const std::uint32_t firstMod = params_.BIGQ.GetMSB() - 1;
 
@@ -81,7 +78,6 @@ void FHEContext::Build(const std::vector<Activation>& activations,
               << "  levelsComputation = " << levelsComputation_
               << "  total depth = "      << totalDepth_ << "\n";
 
-    // ── CCParams ─────────────────────────────────────────────────────────
     CCParams<CryptoContextCKKSRNS> p;
     p.SetSecretKeyDist(params_.secretKeyDist);
     p.SetSecurityLevel(params_.securityLevel);

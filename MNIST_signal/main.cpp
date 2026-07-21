@@ -17,9 +17,7 @@
 
 namespace fs = std::filesystem;
 
-// MNIST-like DiNN dimensions: 784 -> HID_DIM -> 10. The hidden width is a
-// runtime parameter so the same driver can load DiNN30, DiNN100, or any
-// other size whose weight files exist next to this binary.
+// MNIST DiNN: 784 -> HID_DIM -> 10, Sign variant.
 static constexpr int IN_DIM  = 784;
 static constexpr int OUT_DIM = 10;
 
@@ -99,19 +97,13 @@ int main(int argc, char* argv[]) {
     net.Compile(ctx);
     BENCH_MEM("after-compile");
 
-    // ── Batch mode: inputPath is a directory of <label>/*.{png,jpg,jpeg} ──
-    // The harness only knows how to walk + score; it asks us how to turn a
-    // single image path into the {-1,+1} pixel vector this Sign network
-    // expects, and (optionally) how to score the same pixels in plaintext
-    // so it can report FHE vs plain agreement.
+    // Batch mode: inputPath is a directory of <label>/*.{png,jpg,jpeg}.
     if (fs::is_directory(inputPath)) {
         auto loadPixels = [](const std::string& p) {
             return io::LoadImageBipolar(p.c_str(), IN_DIM);
         };
 
-        // Plain-side reference: same topology as the FHE network (Linear ->
-        // Sign -> Linear). Captures W1/b1/W2/b2 by reference; they are not
-        // mutated after Compile() in this driver, so this is safe.
+        // Plain reference: Linear -> Sign -> Linear.
         auto plainScore = [&, HID_DIM](const std::vector<std::int64_t>& px) {
             std::vector<double> hidden(HID_DIM, 0.0);
             for (int j = 0; j < HID_DIM; ++j) {
@@ -135,7 +127,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    // ── Single-image mode (existing behavior) ─────────────────────────────
+    // Single-image mode.
     std::cout << "Loading image: " << inputPath << "\n";
     auto pixels = io::LoadImageBipolar(inputPath.c_str(), IN_DIM);
     if (pixels.empty()) return 1;
@@ -153,7 +145,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ── Plaintext reference (uses the originals we kept by value) ─────────
+    // Plaintext reference.
     std::vector<double> hidden(HID_DIM, 0.0);
     for (int j = 0; j < HID_DIM; ++j) {
         double acc = b1[j];

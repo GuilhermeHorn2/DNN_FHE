@@ -4,10 +4,7 @@ project(DiNN_OpenFHE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Shared bench infrastructure lives one level up (../include/bench, ../src/bench).
-# We do NOT pull in network/ or io/ here — the poly bootstraping pipeline is
-# self-contained; we only borrow the bench timer/memory helpers so the per-image
-# output matches the rest of the project (see Untitled-2 reference).
+# Borrows only ../src/bench; the poly pipeline is otherwise self-contained.
 set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 find_package(OpenFHE REQUIRED)
@@ -19,10 +16,8 @@ include_directories(${OpenFHE_INCLUDE}/binfhe)
 include_directories(${OpenFHE_INCLUDE}/schemelet)
 include_directories(${OpenFHE_INCLUDE}/third-party/include)
 
-# ── Bench / build options ────────────────────────────────────────────────────
-# BENCH_ALL is a convenience umbrella: -DBENCH_ALL=ON turns every BENCH_*
-# timer flag below ON in one shot. With every flag OFF the BENCH_* macros
-# collapse to ((void)0) and the binary behaves as before instrumentation.
+# Bench / build options
+# BENCH_ALL=ON forces every BENCH_* flag on and overrides the individual ones.
 option(BENCH_ALL       "Enable every BENCH_* flag at once (timers + memory)" OFF)
 option(BENCH_TOTAL     "Time the entire program (main start to end)"         OFF)
 option(BENCH_INFERENCE "Time the inference path (per-image)"                 OFF)
@@ -45,13 +40,13 @@ foreach(b TOTAL INFERENCE BOOTSTRAP LAYERS MEMORY)
     endif()
 endforeach()
 
-# ── Static bench library (sources at ../src/bench) ───────────────────────────
+# Static bench library (sources at ../src/bench)
 file(GLOB POLYBENCH_SOURCES "${REPO_ROOT}/src/bench/*.cpp")
 add_library(polybench STATIC ${POLYBENCH_SOURCES})
 target_include_directories(polybench PUBLIC "${REPO_ROOT}/include")
 target_compile_definitions(polybench PUBLIC ${BENCH_DEFS})
 
-# ── Executables ─────────────────────────────────────────────────────────────
+# Executables
 add_executable(main relu_running.cpp)
 target_link_libraries(main PRIVATE ${OpenFHE_LIBRARIES} polybench)
 target_compile_definitions(main PRIVATE ${BENCH_DEFS})

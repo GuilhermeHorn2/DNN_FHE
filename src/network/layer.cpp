@@ -35,7 +35,7 @@ std::uint32_t SlotPlaintextLevel(const FHEContext& ctx) {
 
 }  // namespace
 
-// ── LinearLayer ─────────────────────────────────────────────────────────────
+// LinearLayer
 
 LinearLayer::LinearLayer(std::vector<std::vector<double>> W,
                          std::vector<double>              b,
@@ -55,9 +55,8 @@ LinearLayer::LinearLayer(std::vector<std::vector<double>> W,
 Ciphertext<DCRTPoly> LinearLayer::Apply(FHEContext&                          ctx,
                                         ForwardState&                        state,
                                         const Ciphertext<DCRTPoly>&          in) {
-    // No timer here: per-layer scoping lives in Network::Run, which can label
-    // each call with its position ("Layer 1", "Layer 2") rather than a generic
-    // "Linear" tag that collides for every fully-connected layer in the net.
+    // No timer here: Network::Run scopes each call with its position
+    // ("Layer 1", "Layer 2"), not the generic "Linear" tag.
 
     auto&             cc           = ctx.cc();
     const std::uint32_t numSlotsCKKS = ctx.numSlotsCKKS();
@@ -103,7 +102,7 @@ Ciphertext<DCRTPoly> LinearLayer::Apply(FHEContext&                          ctx
     return ct_out;
 }
 
-// ── ActivationLayer ─────────────────────────────────────────────────────────
+// ActivationLayer
 
 ActivationLayer::ActivationLayer(Activation act) : act_(std::move(act)) {}
 
@@ -117,8 +116,8 @@ void ActivationLayer::EnsureCoeffs(const FHEContext& ctx) {
 Ciphertext<DCRTPoly> ActivationLayer::Apply(FHEContext&                          ctx,
                                             ForwardState&                        state,
                                             const Ciphertext<DCRTPoly>&          in) {
-    // No timer here: scope owned by Network::Run with the friendly
-    // "Bootstrap + Activation" tag so per-call print and summary line up.
+    // No timer here: scope owned by Network::Run under the shared
+    // "Bootstrap + Activation" tag.
 
     EnsureCoeffs(ctx);
 
@@ -129,7 +128,7 @@ Ciphertext<DCRTPoly> ActivationLayer::Apply(FHEContext&                         
 
     Ciphertext<DCRTPoly> ct = in;
 
-    // ── Pre-shift to make every value in [0, pInput) ────────────────────
+    // Shift into [0, pInput) before HomDecoding.
     if (act_.preShift != 0) {
         std::vector<double> shift_vec(numSlotsCKKS,
                                       static_cast<double>(act_.preShift) / scaleTHI);
@@ -138,10 +137,9 @@ Ciphertext<DCRTPoly> ActivationLayer::Apply(FHEContext&                         
         cc->EvalAddInPlace(ct, pt_shift);
     }
 
-    // ── Exit slot space ─────────────────────────────────────────────────
     ct = cc->EvalHomDecoding(ct, scaleTHI, 0);
 
-    // ── CKKS -> RLWE -> CKKS refresh ────────────────────────────────────
+    // CKKS -> RLWE -> CKKS refresh (the bootstrap step).
     auto polys = SchemeletRLWEMP::ConvertCKKSToRLWE(ct, ctx.params().Q);
     const std::uint32_t refreshLvl =
         ctx.totalDepth() - (ctx.params().levelsAvailableBeforeBootstrap > 0);
@@ -149,7 +147,7 @@ Ciphertext<DCRTPoly> ActivationLayer::Apply(FHEContext&                         
         *cc, polys, ctx.keyPair().publicKey, ctx.params().BIGQ,
         numSlotsCKKS, refreshLvl);
 
-    // ── Re-enter slot space with the activation's LUT ───────────────────
+    // Re-enter slot space through the activation's LUT.
     auto powers = cc->EvalMVBPrecompute(
         refreshed, coeffs_, act_.pInput.GetMSB() - 1,
         ctx.elementParams()->GetModulus(), act_.order);
@@ -160,7 +158,7 @@ Ciphertext<DCRTPoly> ActivationLayer::Apply(FHEContext&                         
     return out;
 }
 
-// ── DummyMultLayer ──────────────────────────────────────────────────────────
+// DummyMultLayer
 
 Ciphertext<DCRTPoly> DummyMultLayer::Apply(FHEContext&                          ctx,
                                            ForwardState&                        /*state*/,
