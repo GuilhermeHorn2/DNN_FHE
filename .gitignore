@@ -1,9 +1,8 @@
-# ── Build directories ────────────────────────────────────────────────────────
+
 build/
 out/
 cmake-build-*/
 
-# ── CMake generated files ────────────────────────────────────────────────────
 CMakeCache.txt
 CMakeFiles/
 CMakeScripts/
@@ -13,13 +12,8 @@ CTestTestfile.cmake
 Testing/
 compile_commands.json
 CMakeUserPresets.json
-
-# Generated Makefiles (CMake produces these next to CMakeLists.txt).
-# If a project ever ships a hand-written Makefile, force-add it with
-# `git add -f path/Makefile`.
 Makefile
 
-# ── Compiled artifacts ───────────────────────────────────────────────────────
 *.o
 *.obj
 *.a
@@ -30,13 +24,6 @@ Makefile
 *.dll
 *.exe
 
-# Project-specific binaries (built into source dirs by the legacy CMake setup)
-dinn_inference
-/MNIST_30/main
-/MNIST_30/accuracy
-/polynomial/main
-
-# ── Editor / IDE ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
@@ -46,19 +33,18 @@ dinn_inference
 .clangd/
 .ccls-cache/
 
-# ── OS junk ──────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# ── Python (for any helper scripts) ──────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
 venv/
 
-# ── Logs / temp ──────────────────────────────────────────────────────────────
+data/
+
 *.log
 *.tmp
 core

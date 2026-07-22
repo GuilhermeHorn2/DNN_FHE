@@ -23,6 +23,20 @@ std::vector<std::int64_t> LoadImageBipolar(const char* path, int dim, int channe
     return out;
 }
 
+std::vector<std::int64_t> LoadImageBinary(const char* path, int dim, int channels) {
+    int            w = 0, h = 0, ch = 0;
+    unsigned char* data = stbi_load(path, &w, &h, &ch, channels);
+    if (!data) {
+        std::cerr << "[ERROR] Cannot load: " << path << "\n";
+        return {};
+    }
+    std::vector<std::int64_t> out(dim, 0);
+    const int                 limit = std::min(dim, w * h * channels);
+    for (int i = 0; i < limit; ++i) out[i] = (data[i] > 127) ? 1 : 0;
+    stbi_image_free(data);
+    return out;
+}
+
 std::vector<std::int64_t> LoadImageGrayscale(const char* path, int dim, int channels) {
     int            w = 0, h = 0, ch = 0;
     unsigned char* data = stbi_load(path, &w, &h, &ch, channels);

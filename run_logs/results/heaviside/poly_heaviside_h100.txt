@@ -1,0 +1,762 @@
+[BENCH][MEM] startup                           RSS=6.38 MB   peak=6.45 MB
+--- DiNN OpenFHE Inference (Folder Mode) ---
+Hidden layer size: 100
+Loading weights...
+Setting up FHE Environment (Security: HEStd_NotSet, Bootstrap)...
+Ring Dimension (n): 65536
+Configured Slots: 1024
+Multiplicative Depth: 32
+Setting up Bootstrapping (precomputations)...
+Generating keys...
+Generating Bootstrapping Keys...
+Bootstrapping keys generated successfully.
+[BENCH][MEM] after-compile                     RSS=10090.03 MB   peak=10090.03 MB
+-> FHE Base Memory: 10083 MB
+
+Iterating over /home/seldon/DNN_FHE/data/mnist:
+[BENCH][MEM] after-encrypt                     RSS=10112.82 MB   peak=10194.04 MB
+[BENCH] InputEncoder                         421.140 ms   (peak RSS 10194.04 MB)
+[BENCH][MEM] after-input-encode                RSS=10112.82 MB   peak=10194.04 MB
+[BENCH] Layer 1                           306622.198 ms   (peak RSS 10387.11 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10243.85 MB   peak=10387.11 MB
+[BENCH] Bootstrap + Activation             24498.751 ms   (peak RSS 10541.58 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10254.71 MB   peak=10541.58 MB
+[BENCH] Layer 2                            25369.639 ms   (peak RSS 10541.58 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10254.74 MB   peak=10541.58 MB
+[BENCH][MEM] after-layers                      RSS=10254.74 MB   peak=10541.58 MB
+[BENCH] OutputDecoder                        131.341 ms   (peak RSS 10541.58 MB)
+[BENCH][MEM] after-output-decode               RSS=10254.74 MB   peak=10541.58 MB
+[BENCH] Inference (Run)                   357051.566 ms   (peak RSS 10541.58 MB)
+[   1] mnist_06841.png -> pred=2  plain=0  truth=0  MISS
+[BENCH][MEM] after-encrypt                     RSS=10125.73 MB   peak=10541.58 MB
+[BENCH] InputEncoder                         380.417 ms   (peak RSS 10541.58 MB)
+[BENCH][MEM] after-input-encode                RSS=10125.73 MB   peak=10541.58 MB
+[BENCH] Layer 1                           305711.729 ms   (peak RSS 10541.58 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10256.74 MB   peak=10541.58 MB
+[BENCH] Bootstrap + Activation             24923.280 ms   (peak RSS 10545.95 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10545.95 MB
+[BENCH] Layer 2                            25488.349 ms   (peak RSS 10545.95 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10545.95 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10545.95 MB
+[BENCH] OutputDecoder                        138.249 ms   (peak RSS 10545.95 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10545.95 MB
+[BENCH] Inference (Run)                   356650.646 ms   (peak RSS 10545.95 MB)
+[   2] mnist_03140.png -> pred=5  plain=5  truth=0  MISS
+[BENCH][MEM] after-encrypt                     RSS=10177.22 MB   peak=10545.95 MB
+[BENCH] InputEncoder                         365.825 ms   (peak RSS 10545.95 MB)
+[BENCH][MEM] after-input-encode                RSS=10177.22 MB   peak=10545.95 MB
+[BENCH] Layer 1                           306052.767 ms   (peak RSS 10545.95 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10289.72 MB   peak=10545.95 MB
+[BENCH] Bootstrap + Activation             24511.384 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10289.70 MB   peak=10547.31 MB
+[BENCH] Layer 2                            25621.770 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10289.72 MB   peak=10547.31 MB
+[BENCH][MEM] after-layers                      RSS=10289.72 MB   peak=10547.31 MB
+[BENCH] OutputDecoder                        149.248 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-output-decode               RSS=10289.72 MB   peak=10547.31 MB
+[BENCH] Inference (Run)                   356710.375 ms   (peak RSS 10547.31 MB)
+[   3] mnist_07868.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=10142.93 MB   peak=10547.31 MB
+[BENCH] InputEncoder                         366.075 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-input-encode                RSS=10142.93 MB   peak=10547.31 MB
+[BENCH] Layer 1                           306575.708 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10289.43 MB   peak=10547.31 MB
+[BENCH] Bootstrap + Activation             24256.450 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10289.41 MB   peak=10547.31 MB
+[BENCH] Layer 2                            24952.519 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10289.43 MB   peak=10547.31 MB
+[BENCH][MEM] after-layers                      RSS=10289.43 MB   peak=10547.31 MB
+[BENCH] OutputDecoder                        134.147 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-output-decode               RSS=10289.43 MB   peak=10547.31 MB
+[BENCH] Inference (Run)                   356294.181 ms   (peak RSS 10547.31 MB)
+[   4] mnist_00311.png -> pred=0  plain=0  truth=0  OK
+[BENCH][MEM] after-encrypt                     RSS=10143.42 MB   peak=10547.31 MB
+[BENCH] InputEncoder                         362.651 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-input-encode                RSS=10143.42 MB   peak=10547.31 MB
+[BENCH] Layer 1                           306019.040 ms   (peak RSS 10547.31 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10289.93 MB   peak=10547.31 MB
+[BENCH] Bootstrap + Activation             24642.959 ms   (peak RSS 10547.55 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10289.91 MB   peak=10547.55 MB
+[BENCH] Layer 2                            25639.996 ms   (peak RSS 10547.55 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10289.93 MB   peak=10547.55 MB
+[BENCH][MEM] after-layers                      RSS=10289.93 MB   peak=10547.55 MB
+[BENCH] OutputDecoder                        129.796 ms   (peak RSS 10547.55 MB)
+[BENCH][MEM] after-output-decode               RSS=10289.93 MB   peak=10547.55 MB
+[BENCH] Inference (Run)                   356803.884 ms   (peak RSS 10547.55 MB)
+[   5] mnist_01390.png -> pred=5  plain=0  truth=0  MISS
+[BENCH][MEM] after-encrypt                     RSS=10143.28 MB   peak=10547.55 MB
+[BENCH] InputEncoder                         367.336 ms   (peak RSS 10547.55 MB)
+[BENCH][MEM] after-input-encode                RSS=10143.28 MB   peak=10547.55 MB
+[BENCH] Layer 1                           305996.737 ms   (peak RSS 10547.55 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10289.79 MB   peak=10547.55 MB
+[BENCH] Bootstrap + Activation             24366.117 ms   (peak RSS 10548.13 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10289.76 MB   peak=10548.13 MB
+[BENCH] Layer 2                            24841.080 ms   (peak RSS 10548.13 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10289.79 MB   peak=10548.13 MB
+[BENCH][MEM] after-layers                      RSS=10289.79 MB   peak=10548.13 MB
+[BENCH] OutputDecoder                        128.601 ms   (peak RSS 10548.13 MB)
+[BENCH][MEM] after-output-decode               RSS=10289.79 MB   peak=10548.13 MB
+[BENCH] Inference (Run)                   355710.682 ms   (peak RSS 10548.13 MB)
+[   6] mnist_09845.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10548.13 MB
+[BENCH] InputEncoder                         367.892 ms   (peak RSS 10548.13 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10548.13 MB
+[BENCH] Layer 1                           306874.862 ms   (peak RSS 10548.13 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10548.13 MB
+[BENCH] Bootstrap + Activation             24436.469 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25131.365 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        133.784 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   356953.353 ms   (peak RSS 10588.44 MB)
+[   7] mnist_01820.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         374.723 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           305215.088 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24322.724 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10273.20 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25124.021 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10273.22 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10273.22 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        130.062 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10273.22 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   355176.427 ms   (peak RSS 10588.44 MB)
+[   8] mnist_04337.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         369.642 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           308669.677 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24526.904 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25209.929 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        130.278 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   358915.483 ms   (peak RSS 10588.44 MB)
+[   9] mnist_02444.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         367.057 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306296.570 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24413.551 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10275.20 MB   peak=10588.44 MB
+[BENCH] Layer 2                            24968.447 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10288.22 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10288.22 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        133.727 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10288.22 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   356189.990 ms   (peak RSS 10588.44 MB)
+[  10] mnist_04032.png -> pred=1  plain=1  truth=1  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         369.109 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           307221.603 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24487.821 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25045.061 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        128.970 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   357261.654 ms   (peak RSS 10588.44 MB)
+[  11] mnist_08310.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         372.198 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306459.400 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24494.897 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            26025.532 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        130.162 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   357491.268 ms   (peak RSS 10588.44 MB)
+[  12] mnist_00612.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         370.183 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           307244.562 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24650.902 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25312.417 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        130.434 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   357717.526 ms   (peak RSS 10588.44 MB)
+[  13] mnist_01696.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         372.247 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           305611.419 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24461.036 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25104.736 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        131.914 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   355690.458 ms   (peak RSS 10588.44 MB)
+[  14] mnist_01574.png -> pred=2  plain=2  truth=2  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         369.265 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           305982.604 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24400.224 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25033.838 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        128.560 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   355923.437 ms   (peak RSS 10588.44 MB)
+[  15] mnist_00547.png -> pred=5  plain=2  truth=2  MISS
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         369.532 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306275.332 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24331.153 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.70 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25243.968 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        131.136 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   356360.146 ms   (peak RSS 10588.44 MB)
+[  16] mnist_06184.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         369.189 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10126.72 MB   peak=10588.44 MB
+[BENCH] Layer 1                           307462.353 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10257.72 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24609.184 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10275.33 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25312.936 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10289.73 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10289.73 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        139.737 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10289.73 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   357904.140 ms   (peak RSS 10588.44 MB)
+[  17] mnist_02128.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         374.725 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           307081.033 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24606.370 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25238.606 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        127.554 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   357437.377 ms   (peak RSS 10588.44 MB)
+[  18] mnist_00323.png -> pred=3  plain=3  truth=3  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         372.663 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           308420.648 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24488.759 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25450.362 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        134.580 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   358876.077 ms   (peak RSS 10588.44 MB)
+[  19] mnist_05185.png -> pred=5  plain=5  truth=3  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         371.580 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           305489.493 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24591.980 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10263.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25367.147 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        135.235 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   355964.557 ms   (peak RSS 10588.44 MB)
+[  20] mnist_02305.png -> pred=5  plain=3  truth=3  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         375.252 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306336.117 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24485.093 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10262.33 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25223.729 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        133.904 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   356563.019 ms   (peak RSS 10588.44 MB)
+[  21] mnist_05725.png -> pred=7  plain=4  truth=4  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         370.962 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           308059.011 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24817.944 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10261.33 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25330.610 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        130.435 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   358717.971 ms   (peak RSS 10588.44 MB)
+[  22] mnist_07186.png -> pred=5  plain=4  truth=4  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         372.335 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306099.619 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24410.148 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25196.895 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        128.487 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   356216.494 ms   (peak RSS 10588.44 MB)
+[  23] mnist_06699.png -> pred=5  plain=4  truth=4  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         374.048 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306642.654 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.35 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24640.436 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25227.190 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        131.843 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   357025.256 ms   (peak RSS 10588.44 MB)
+[  24] mnist_01864.png -> pred=5  plain=5  truth=4  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         367.775 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           307818.567 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24628.081 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.82 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25484.026 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        133.054 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   358440.658 ms   (peak RSS 10588.44 MB)
+[  25] mnist_07366.png -> pred=5  plain=4  truth=4  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         372.075 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           307145.913 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24389.301 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10277.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            24704.122 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10277.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10277.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        132.633 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10277.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   356754.016 ms   (peak RSS 10588.44 MB)
+[  26] mnist_06142.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         368.751 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           305321.921 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24287.858 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10258.83 MB   peak=10588.44 MB
+[BENCH] Layer 2                            25321.605 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        128.885 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   355438.039 ms   (peak RSS 10588.44 MB)
+[  27] mnist_04637.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         370.878 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10588.44 MB
+[BENCH] Layer 1                           305616.720 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24475.152 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10278.33 MB   peak=10588.44 MB
+[BENCH] Layer 2                            24811.835 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10286.85 MB   peak=10588.44 MB
+[BENCH][MEM] after-layers                      RSS=10286.85 MB   peak=10588.44 MB
+[BENCH] OutputDecoder                        136.499 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-output-decode               RSS=10286.85 MB   peak=10588.44 MB
+[BENCH] Inference (Run)                   355421.637 ms   (peak RSS 10588.44 MB)
+[  28] mnist_02540.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.35 MB   peak=10588.44 MB
+[BENCH] InputEncoder                         372.127 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.35 MB   peak=10588.44 MB
+[BENCH] Layer 1                           306977.006 ms   (peak RSS 10588.44 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10588.44 MB
+[BENCH] Bootstrap + Activation             24385.508 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.33 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25157.142 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        130.347 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   357031.147 ms   (peak RSS 10604.70 MB)
+[  29] mnist_06611.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         369.925 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           307630.928 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24920.382 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            26532.322 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        130.055 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   359592.811 ms   (peak RSS 10604.70 MB)
+[  30] mnist_05083.png -> pred=5  plain=5  truth=5  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         386.865 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           306635.039 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24515.282 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10263.33 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24954.869 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        132.603 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   356634.251 ms   (peak RSS 10604.70 MB)
+[  31] mnist_03121.png -> pred=2  plain=6  truth=6  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         372.719 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           306328.579 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24306.787 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10277.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25171.237 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10282.73 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        130.575 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   356320.829 ms   (peak RSS 10604.70 MB)
+[  32] mnist_08739.png -> pred=2  plain=6  truth=6  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         373.778 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           305492.060 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24662.357 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10258.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25391.136 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        139.188 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   356068.209 ms   (peak RSS 10604.70 MB)
+[  33] mnist_09317.png -> pred=2  plain=6  truth=6  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         371.809 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           307394.755 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24387.614 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25357.423 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        138.002 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   357659.153 ms   (peak RSS 10604.70 MB)
+[  34] mnist_08197.png -> pred=2  plain=6  truth=6  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         372.201 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           303737.992 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24042.984 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25018.806 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        125.491 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   353306.927 ms   (peak RSS 10604.70 MB)
+[  35] mnist_00081.png -> pred=5  plain=5  truth=6  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         364.659 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           300846.292 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             23912.445 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24604.923 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        126.591 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   349864.393 ms   (peak RSS 10604.70 MB)
+[  36] mnist_03162.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         369.173 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           300861.466 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24125.341 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24583.960 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.35 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.35 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        127.601 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.35 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   350077.043 ms   (peak RSS 10604.70 MB)
+[  37] mnist_05560.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.35 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         363.003 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.35 MB   peak=10604.70 MB
+[BENCH] Layer 1                           303946.784 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24212.521 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10276.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24717.537 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10305.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10305.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        130.488 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10305.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   353383.124 ms   (peak RSS 10604.70 MB)
+[  38] mnist_08519.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         372.883 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           301961.734 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24737.943 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24866.963 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        147.123 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   352096.351 ms   (peak RSS 10604.70 MB)
+[  39] mnist_06837.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         376.491 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           300134.407 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             23931.525 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10258.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25267.772 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        127.865 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   349852.336 ms   (peak RSS 10604.70 MB)
+[  40] mnist_03103.png -> pred=7  plain=7  truth=7  OK
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         365.276 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           301663.825 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24921.857 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10277.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25332.869 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10282.73 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        139.014 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10281.35 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   352434.423 ms   (peak RSS 10604.70 MB)
+[  41] mnist_03627.png -> pred=2  plain=2  truth=8  MISS
+[BENCH][MEM] after-encrypt                     RSS=10127.72 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         384.799 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10127.72 MB   peak=10604.70 MB
+[BENCH] Layer 1                           302335.194 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24103.155 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10257.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24744.566 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        126.139 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   351703.530 ms   (peak RSS 10604.70 MB)
+[  42] mnist_01052.png -> pred=5  plain=5  truth=8  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         364.766 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           308742.443 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24724.634 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25688.799 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        144.160 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.85 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   359674.624 ms   (peak RSS 10604.70 MB)
+[  43] mnist_07951.png -> pred=7  plain=7  truth=8  MISS
+[BENCH][MEM] after-encrypt                     RSS=10127.72 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         371.017 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10127.72 MB   peak=10604.70 MB
+[BENCH] Layer 1                           306428.528 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24518.258 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25260.706 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        134.861 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10257.85 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   356723.040 ms   (peak RSS 10604.70 MB)
+[  44] mnist_01170.png -> pred=5  plain=5  truth=8  MISS
+[BENCH][MEM] after-encrypt                     RSS=10127.72 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         372.973 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10127.72 MB   peak=10604.70 MB
+[BENCH] Layer 1                           306105.990 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             25951.908 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10276.33 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25828.651 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10275.73 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10275.73 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        131.646 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10275.73 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   358401.889 ms   (peak RSS 10604.70 MB)
+[  45] mnist_02233.png -> pred=5  plain=5  truth=8  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         372.107 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           309275.028 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24747.405 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10276.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25591.355 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10282.73 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        137.742 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   360135.467 ms   (peak RSS 10604.70 MB)
+[  46] mnist_01058.png -> pred=5  plain=7  truth=9  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         390.140 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           305846.523 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             25097.968 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10258.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25765.121 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        145.087 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   357255.353 ms   (peak RSS 10604.70 MB)
+[  47] mnist_03723.png -> pred=7  plain=7  truth=9  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         397.963 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           306238.026 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24490.314 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10259.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            25337.568 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        139.742 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   356613.636 ms   (peak RSS 10604.70 MB)
+[  48] mnist_08503.png -> pred=5  plain=5  truth=9  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         371.908 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           307407.560 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24138.040 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10264.70 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24872.405 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10259.23 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        128.908 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10259.23 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   356928.549 ms   (peak RSS 10604.70 MB)
+[  49] mnist_03859.png -> pred=2  plain=2  truth=9  MISS
+[BENCH][MEM] after-encrypt                     RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] InputEncoder                         373.885 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-input-encode                RSS=10128.22 MB   peak=10604.70 MB
+[BENCH] Layer 1                           305968.734 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 1                     RSS=10259.73 MB   peak=10604.70 MB
+[BENCH] Bootstrap + Activation             24308.543 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Bootstrap + Activation      RSS=10279.83 MB   peak=10604.70 MB
+[BENCH] Layer 2                            24867.587 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-Layer 2                     RSS=10282.73 MB   peak=10604.70 MB
+[BENCH][MEM] after-layers                      RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] OutputDecoder                        127.930 ms   (peak RSS 10604.70 MB)
+[BENCH][MEM] after-output-decode               RSS=10282.73 MB   peak=10604.70 MB
+[BENCH] Inference (Run)                   355657.777 ms   (peak RSS 10604.70 MB)
+[  50] mnist_03992.png -> pred=7  plain=9  truth=9  MISS
+
+[BENCH SUMMARY Batch]  n=50
+
+  Stage                          avg (ms)      min (ms)      max (ms)      peak RSS (MB)
+  ------------------------     ----------    ----------    ----------    ---------------
+  Layer 1                       305925.64     300134.41     309275.03           10604.70
+  Bootstrap + Activation         24505.95      23912.44      25951.91           10604.70
+  Layer 2                        25233.91      24583.96      26532.32           10604.70
+  Inference (Run)               356181.50     349852.34     360135.47           10604.70
+
+[BENCH MEMORY CHECKPOINTS Batch]  n=50
+
+  Marker                                avg RSS (MB)     avg ΔRSS (MB)       max RSS (MB)      max peak (MB)
+  --------------------------------   ---------------    ---------------    ---------------    ---------------
+  after-encrypt                             10129.39                —           10177.22           10604.70
+  after-input-encode                        10129.39              +0.00           10177.22           10604.70
+  after-Layer 1                             10261.05            +131.66           10289.93           10604.70
+  after-Bootstrap + Activation              10265.67              +4.62           10289.91           10604.70
+  after-Layer 2                             10266.82              +1.15           10305.23           10604.70
+  after-layers                              10266.82              +0.00           10305.23           10604.70
+  after-output-decode                       10266.74              -0.08           10305.23           10604.70
+
+
+=== FHE vs PlainText ===
+Hit: 36 / 50  (72.00%)
+
+=== PlainText Acc ===
+Correct: 37 / 50  (74.00%)
+
+=== Accuracy ===
+Correct: 24 / 50  (48.00%)
+
+Confusion matrix (row=truth, col=pred):
+         0    1    2    3    4    5    6    7    8    9
+  0 :    2    0    1    0    0    2    0    0    0    0
+  1 :    0    5    0    0    0    0    0    0    0    0
+  2 :    0    0    4    0    0    1    0    0    0    0
+  3 :    0    0    0    3    0    2    0    0    0    0
+  4 :    0    0    0    0    0    4    0    1    0    0
+  5 :    0    0    0    0    0    5    0    0    0    0
+  6 :    0    0    4    0    0    1    0    0    0    0
+  7 :    0    0    0    0    0    0    0    5    0    0
+  8 :    0    0    1    0    0    3    0    1    0    0
+  9 :    0    0    1    0    0    2    0    2    0    0
+[BENCH][MEM] end                               RSS=10103.72 MB   peak=10604.70 MB
+[BENCH] Total program                     17817968.666 ms   (peak RSS 10604.70 MB)

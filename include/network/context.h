@@ -21,7 +21,7 @@ struct FHEParams {
     lbcrypto::BigInteger BIGQ     = lbcrypto::BigInteger(1) << 47;
 
     std::uint32_t numSlots                       = 1024;
-    std::uint32_t ringDim                        = 1u << 11;     // 2048
+    std::uint32_t ringDim                        = 1u << 16;     // 2048
     std::uint64_t scaleTHI                       = 32;
     std::size_t   hermiteOrder                   = 1;
     std::uint32_t levelsAvailableAfterBootstrap  = 0;
@@ -30,6 +30,7 @@ struct FHEParams {
 
     std::vector<std::uint32_t>      lvlb           = {3, 3};
     lbcrypto::SecretKeyDist         secretKeyDist  = lbcrypto::SPARSE_TERNARY;
+    lbcrypto::SecurityLevel         securityLevel  = lbcrypto::HEStd_NotSet;
 };
 
 // Owns the OpenFHE crypto context, key pair, and element parameters used by
@@ -38,17 +39,15 @@ class FHEContext {
 public:
     explicit FHEContext(FHEParams params = {});
 
-    // Builds the CCParams, generates keys, runs EvalFBTSetup using the deepest
-    // activation (in terms of FBT depth) found in `activations`, and creates
-    // the schemelet element parameters.
-    //
-    // `levelsComputation` is the global per-block depth budget (see
-    // Network::Compile). It is the maximum number of rescaling operations any
-    // slot-space block performs.
+    // Builds the CCParams, generates keys, and runs EvalFBTSetup using the
+    // activation in `activations` with the deepest FBT depth.
+    // `levelsComputation` is the global per-block depth budget (the max
+    // number of rescaling ops any slot-space block performs); see
+    // Network::Compile.
     void Build(const std::vector<Activation>& activations,
                std::uint32_t                  levelsComputation);
 
-    // ── Accessors (only valid after Build) ────────────────────────────────
+    // Accessors — only valid after Build().
     const FHEParams&                      params() const { return params_; }
     lbcrypto::CryptoContext<lbcrypto::DCRTPoly>& cc() { return cc_; }
     const lbcrypto::KeyPair<lbcrypto::DCRTPoly>& keyPair() const { return keyPair_; }

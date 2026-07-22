@@ -10,6 +10,31 @@ namespace fhednn {
 
 using namespace lbcrypto;
 
+namespace {
+    const char* SecurityLevelName(SecurityLevel s) {
+        switch (s) {
+            case HEStd_NotSet:        return "HEStd_NotSet (NO SECURITY GUARANTEE)";
+            case HEStd_128_classic:   return "HEStd_128_classic";
+            case HEStd_192_classic:   return "HEStd_192_classic";
+            case HEStd_256_classic:   return "HEStd_256_classic";
+            case HEStd_128_quantum:   return "HEStd_128_quantum";
+            case HEStd_192_quantum:   return "HEStd_192_quantum";
+            case HEStd_256_quantum:   return "HEStd_256_quantum";
+            default:                  return "<unknown SecurityLevel>";
+        }
+    }
+
+    const char* SecretKeyDistName(SecretKeyDist d) {
+        switch (d) {
+            case GAUSSIAN:             return "GAUSSIAN";
+            case UNIFORM_TERNARY:      return "UNIFORM_TERNARY";
+            case SPARSE_TERNARY:       return "SPARSE_TERNARY";
+            default:                   return "<unknown SecretKeyDist>";
+        }
+    }
+
+}
+
 FHEContext::FHEContext(FHEParams params) : params_(std::move(params)) {}
 
 void FHEContext::Build(const std::vector<Activation>& activations,
@@ -19,13 +44,10 @@ void FHEContext::Build(const std::vector<Activation>& activations,
             "FHEContext::Build requires at least one activation to size the FBT depth.");
     }
 
-    // ── Slot/ring sanity ─────────────────────────────────────────────────
     flagSP_       = (params_.numSlots <= params_.ringDim / 2);
     numSlotsCKKS_ = flagSP_ ? params_.numSlots : params_.numSlots / 2;
 
-    // ── Pick the deepest activation for FBT setup ────────────────────────
-    // We compute Hermite coefficients for each activation and choose the
-    // one with the largest GetFBTDepth.
+    // Pick the activation with the largest GetFBTDepth for FBT setup.
     const std::uint32_t dcrtBits = params_.BIGQ.GetMSB() - 1;
     const std::uint32_t firstMod = params_.BIGQ.GetMSB() - 1;
 
@@ -56,16 +78,19 @@ void FHEContext::Build(const std::vector<Activation>& activations,
               << "  levelsComputation = " << levelsComputation_
               << "  total depth = "      << totalDepth_ << "\n";
 
-    // ── CCParams ─────────────────────────────────────────────────────────
     CCParams<CryptoContextCKKSRNS> p;
     p.SetSecretKeyDist(params_.secretKeyDist);
-    p.SetSecurityLevel(HEStd_NotSet);
+    p.SetSecurityLevel(params_.securityLevel);
     p.SetScalingModSize(dcrtBits);
     p.SetScalingTechnique(FIXEDMANUAL);
     p.SetFirstModSize(firstMod);
     p.SetNumLargeDigits(params_.dnum);
     p.SetBatchSize(numSlotsCKKS_);
-    p.SetRingDim(params_.ringDim);
+
+    if (params_.securityLevel == HEStd_NotSet || params_.ringDim != 0) {
+        p.SetRingDim(params_.ringDim);
+    }
+
     p.SetMultiplicativeDepth(totalDepth_);
 
     cc_ = GenCryptoContext(p);
@@ -76,7 +101,10 @@ void FHEContext::Build(const std::vector<Activation>& activations,
     cc_->Enable(FHE);
 
     std::cout << "[FHEContext] ringDim = " << cc_->GetRingDimension()
-              << "  numSlotsCKKS = " << numSlotsCKKS_ << "\n";
+              << "  numSlotsCKKS = " << numSlotsCKKS_
+              << "  securityLevel = " << SecurityLevelName(params_.securityLevel)
+              << "  secretKeyDist = " << SecretKeyDistName(params_.secretKeyDist)
+              << "\n";
 
     keyPair_ = cc_->KeyGen();
 
